@@ -193,7 +193,6 @@ namespace Assistant
 				throw new InvalidOperationException( "This Razor installation is corrupted." );
 
 			bool patch = Utility.ToInt32( Config.GetRegString( Microsoft.Win32.Registry.CurrentUser, "PatchEncy" ), 1 ) != 0;
-			bool showWelcome = Utility.ToInt32( Config.GetRegString( Microsoft.Win32.Registry.CurrentUser, "ShowWelcome" ), 1 ) != 0;
 			ClientLaunch launch = ClientLaunch.TwoD;
 			string dataDir;
 
@@ -240,39 +239,20 @@ namespace Assistant
 			
 			string clientPath = "";
 
-			if ( !showWelcome )
-			{
-				int cli = Utility.ToInt32( Config.GetRegString( Microsoft.Win32.Registry.CurrentUser, "DefClient" ), 0 );
-				if ( cli < 0 || cli > 1 )
-				{
-					launch = ClientLaunch.Custom;
-					clientPath = Config.GetRegString( Microsoft.Win32.Registry.CurrentUser, String.Format( "Client{0}", cli - 1 ) );
-					if ( clientPath == null || clientPath == "" )
-						showWelcome = true;
-				}
-				else
-				{
-					launch = (ClientLaunch)cli;
-				}
-			}
+			SplashScreen.End();
 
-			if ( showWelcome )
-			{
-				SplashScreen.End();
+			WelcomeForm welcome = new WelcomeForm();
+			m_ActiveWnd = welcome;
+			if ( welcome.ShowDialog() == DialogResult.Cancel )
+				return;
+			patch = welcome.PatchEncryption;
+			launch = welcome.Client;
+			dataDir = welcome.DataDirectory;
+			if ( launch == ClientLaunch.Custom )
+				clientPath = welcome.ClientPath;
 
-				WelcomeForm welcome = new WelcomeForm();
-				m_ActiveWnd = welcome;
-				if ( welcome.ShowDialog() == DialogResult.Cancel )
-					return;
-				patch = welcome.PatchEncryption;
-				launch = welcome.Client;
-				dataDir = welcome.DataDirectory;
-				if ( launch == ClientLaunch.Custom )
-					clientPath = welcome.ClientPath;
-
-				SplashScreen.Start();
-				m_ActiveWnd = SplashScreen.Instance;
-			}
+			SplashScreen.Start();
+			m_ActiveWnd = SplashScreen.Instance;
 
 			if (dataDir != null && Directory.Exists(dataDir)) {
 				Ultima.Files.SetMulPath(dataDir);

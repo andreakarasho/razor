@@ -37,7 +37,6 @@ namespace Assistant
 		private System.Windows.Forms.Button browse;
 		private System.Windows.Forms.Button makeDef;
 		
-		private System.Windows.Forms.CheckBox showAtStart;
 		private System.Windows.Forms.Label label5;
 		private System.Windows.Forms.ComboBox langSel;
 		private System.Windows.Forms.CheckBox useEnc;
@@ -90,7 +89,6 @@ namespace Assistant
 			this.okay = new System.Windows.Forms.Button();
 			this.quit = new System.Windows.Forms.Button();
 			this.label3 = new System.Windows.Forms.Label();
-			this.showAtStart = new System.Windows.Forms.CheckBox();
 			this.serverList = new System.Windows.Forms.ComboBox();
 			this.label4 = new System.Windows.Forms.Label();
 			this.port = new System.Windows.Forms.TextBox();
@@ -170,15 +168,6 @@ namespace Assistant
 			this.label3.Size = new System.Drawing.Size(44, 16);
 			this.label3.TabIndex = 9;
 			this.label3.Text = "Server:";
-			// 
-			// showAtStart
-			// 
-			this.showAtStart.Location = new System.Drawing.Point(180, 228);
-			this.showAtStart.Name = "showAtStart";
-			this.showAtStart.Size = new System.Drawing.Size(168, 20);
-			this.showAtStart.TabIndex = 10;
-			this.showAtStart.Text = "Show this when Razor starts";
-			this.showAtStart.CheckedChanged += new System.EventHandler(this.showAtStart_CheckedChanged);
 			// 
 			// serverList
 			// 
@@ -315,7 +304,6 @@ namespace Assistant
 			this.Controls.Add(this.label5);
 			this.Controls.Add(this.groupBox2);
 			this.Controls.Add(this.groupBox1);
-			this.Controls.Add(this.showAtStart);
 			this.Controls.Add(this.quit);
 			this.Controls.Add(this.okay);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
@@ -493,8 +481,6 @@ namespace Assistant
 
 			langSel.Items.AddRange( Language.GetPackNames() );
 			langSel.SelectedItem = Language.Current;
-
-			showAtStart.Checked = Utility.ToInt32( Config.GetRegString( Microsoft.Win32.Registry.CurrentUser, "ShowWindow" ), 1 ) == 1;
 
 			clientList.Items.Add( Language.GetString( LocString.Auto2D ) );
 			clientList.Items.Add( Language.GetString( LocString.Auto3D ) );
@@ -783,53 +769,6 @@ namespace Assistant
 
 			for (int i=1;i<dataDir.Items.Count;i++)
 				Config.SetRegString( Microsoft.Win32.Registry.CurrentUser, String.Format( "Dir{0}", num++ ), (string)dataDir.Items[i] );
-		}
-
-		/*private const string RazorLine = "; Razor Generated Entry";
-		private void WriteLoginCFG( string addr, int port )
-		{
-			string fileName = Ultima.Client.GetFilePath( "Login.cfg" );
-			if ( fileName == null || fileName == "" )
-				return;
-			ArrayList lines = new ArrayList();
-
-			if ( File.Exists( fileName ) )
-			{
-				using ( StreamReader cfg = new StreamReader( fileName ) )
-				{
-					string line;
-					while ( (line = cfg.ReadLine()) != null )
-					{
-						line = line.Trim();
-						if ( line == RazorLine )
-						{
-							cfg.ReadLine(); // skip the next line which is the razor server
-							continue;
-						}
-						else if ( line != "" )
-						{
-							lines.Add( line );
-						}
-					}
-				}
-			}
-
-			using ( StreamWriter cfg = new StreamWriter( fileName ) )
-			{
-				foreach ( string line in lines )
-				{
-					if ( line.Length > 0 && line[0] != ';' )
-						cfg.Write( ';' );
-					cfg.WriteLine( line );
-				}
-				cfg.WriteLine( RazorLine );
-				cfg.WriteLine( "LoginServer={0},{1}", addr.Trim(), port );
-			}
-		}*/
-
-		private void showAtStart_CheckedChanged(object sender, System.EventArgs e)
-		{
-			Config.SetRegString( Microsoft.Win32.Registry.CurrentUser, "ShowWelcome", ( showAtStart.Checked ? 1 : 0 ).ToString() );
 		}
 
 		private void langSel_SelectedIndexChanged(object sender, System.EventArgs e)
