@@ -6,7 +6,6 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using System.Net;
 using Microsoft.Win32;
-using Newtonsoft.Json;
 
 namespace Assistant
 {
@@ -542,17 +541,9 @@ namespace Assistant
 			useEnc.Checked = Utility.ToInt32( Config.GetRegString( Microsoft.Win32.Registry.CurrentUser, "ServerEnc" ), 0 ) != 0;
 			
 			LoginCFG_SE lse = new LoginCFG_SE();
-			Custom_SE cse;
-
-			ShardEntry[] entries = null;
-			try { entries = JsonConvert.DeserializeObject<ShardEntry[]>(Engine.ShardList); }
-			catch { }
 
 			serverList.BeginUpdate();
-
-			//serverList.Items.Add( lse=new LoginCFG_SE() );
-			//serverList.SelectedItem = lse;
-
+            
 			for (int i=1; ;i++)
 			{
 				ServerEntry se;
@@ -568,29 +559,8 @@ namespace Assistant
 				Config.DeleteRegValue( Microsoft.Win32.Registry.CurrentUser, sval );
 				Config.DeleteRegValue( Microsoft.Win32.Registry.CurrentUser, pval );
 			}
-
-			if (entries == null)
-			{
-				serverList.Items.Add(cse = new Custom_SE("Zenvera (UOR)", "login.zenvera.com"));
-				if (serverList.SelectedItem == null || lse.RealAddress == cse.RealAddress && lse.Port == 2593)
-					serverList.SelectedItem = cse;
-			}
-			else
-			{
-				foreach(var entry in entries)
-				{
-					if (String.IsNullOrEmpty(entry.name))
-						continue;
-
-					var ename = String.IsNullOrEmpty(entry.type) ? entry.name : String.Format("{0} ({1})", entry.name, entry.type);
-					serverList.Items.Add(cse = new Custom_SE(ename, entry.host, entry.port));
-					if (lse.RealAddress == cse.RealAddress && lse.Port == entry.port)
-						serverList.SelectedItem = cse;
-				}
-			}
-
+            
 			serverList.EndUpdate();
-
 			serverList.Refresh();
 
 			WindowState = FormWindowState.Normal;

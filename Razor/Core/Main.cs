@@ -172,8 +172,6 @@ namespace Assistant
 			}
 		}
 
-		public static string ShardList { get; private set; }
-
 		private static MainForm m_MainWnd;
 		private static Form m_ActiveWnd;
 		//private static Thread m_TimerThread;
@@ -193,9 +191,6 @@ namespace Assistant
 
 			if ( ClientCommunication.InitializeLibrary( Engine.Version ) == 0 )
 				throw new InvalidOperationException( "This Razor installation is corrupted." );
-
-			try { Engine.ShardList = Config.GetRegString(Microsoft.Win32.Registry.CurrentUser, "ShardList"); }
-			catch { }
 
 			bool patch = Utility.ToInt32( Config.GetRegString( Microsoft.Win32.Registry.CurrentUser, "PatchEncy" ), 1 ) != 0;
 			bool showWelcome = Utility.ToInt32( Config.GetRegString( Microsoft.Win32.Registry.CurrentUser, "ShowWelcome" ), 1 ) != 0;
