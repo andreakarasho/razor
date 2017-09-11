@@ -238,15 +238,15 @@ namespace Assistant
 			
 			string clientPath = "";
 
-			WelcomeForm welcome = new WelcomeForm();
-			m_ActiveWnd = welcome;
-			if ( welcome.ShowDialog() == DialogResult.Cancel )
+			Launcher launcher = new Launcher();
+			m_ActiveWnd = launcher;
+			if ( launcher.ShowDialog() == DialogResult.Cancel )
 				return;
-			patch = welcome.PatchEncryption;
-			launch = welcome.Client;
-			dataDir = welcome.DataDirectory;
+			patch = launcher.PatchEncryption;
+			launch = launcher.Client;
+			dataDir = launcher.DataDirectory;
 			if ( launch == ClientLaunch.Custom )
-				clientPath = welcome.ClientPath;
+				clientPath = launcher.ClientPath;
 
 			if (dataDir != null && Directory.Exists(dataDir)) {
 				Ultima.Files.SetMulPath(dataDir);

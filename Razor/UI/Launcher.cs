@@ -16,7 +16,7 @@ namespace Assistant
 		Custom,
 	}
 
-	public class WelcomeForm : System.Windows.Forms.Form
+	public class Launcher : System.Windows.Forms.Form
 	{
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.ComboBox clientList;
@@ -54,7 +54,7 @@ namespace Assistant
 		private ClientLaunch m_Launch = ClientLaunch.Custom;
 		private string m_DataDir = "";
 
-		public WelcomeForm()
+		public Launcher()
 		{
 			InitializeComponent();
 		}
@@ -81,7 +81,7 @@ namespace Assistant
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(WelcomeForm));
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Launcher));
 			this.label1 = new System.Windows.Forms.Label();
 			this.clientList = new System.Windows.Forms.ComboBox();
 			this.browse = new System.Windows.Forms.Button();
@@ -293,7 +293,7 @@ namespace Assistant
 			this.groupBox3.TabStop = false;
 			this.groupBox3.Text = "UO Data Directory";
 			// 
-			// WelcomeForm
+			// Launcher
 			// 
 			this.AcceptButton = this.okay;
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
@@ -310,11 +310,11 @@ namespace Assistant
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
-			this.Name = "WelcomeForm";
+			this.Name = "Launcher";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "Welcome to Razor!";
-			this.Closing += new System.ComponentModel.CancelEventHandler(this.WelcomeForm_Closing);
-			this.Load += new System.EventHandler(this.WelcomeForm_Load);
+			this.Closing += new System.ComponentModel.CancelEventHandler(this.Launcher_Closing);
+			this.Load += new System.EventHandler(this.Launcher_Load);
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox2.ResumeLayout(false);
 			this.groupBox2.PerformLayout();
@@ -473,7 +473,7 @@ namespace Assistant
 			}
 		}
 
-		private void WelcomeForm_Load(object sender, System.EventArgs e)
+		private void Launcher_Load(object sender, System.EventArgs e)
 		{
 			Language.LoadControlNames( this );
 
@@ -833,7 +833,7 @@ namespace Assistant
 		{
 		}
 
-		private void WelcomeForm_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+		private void Launcher_Closing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
 			SaveData();
 		}
