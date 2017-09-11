@@ -1,7 +1,6 @@
 using System;
 using System.Reflection;
 using System.Threading;
-using System.Collections;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
@@ -10,6 +9,7 @@ using System.Security.Principal;
 
 namespace Assistant
 {
+
 	public class Engine
 	{
 		private static void CurrentDomain_UnhandledException( object sender, UnhandledExceptionEventArgs e )
@@ -183,70 +183,30 @@ namespace Assistant
 		{
 			m_Running = true;
             Thread.CurrentThread.Name = "Razor Main Thread";
-            
+
 #if !DEBUG
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler( CurrentDomain_UnhandledException );
 			Directory.SetCurrentDirectory( Config.GetInstallDirectory() );
 #endif
 
-			if ( ClientCommunication.InitializeLibrary( Engine.Version ) == 0 )
+            m_EngineOpts.Load();
+
+            if ( ClientCommunication.InitializeLibrary( Engine.Version ) == 0 )
 				throw new InvalidOperationException( "This Razor installation is corrupted." );
 
-			bool patch = Utility.ToInt32( Config.GetRegString( Microsoft.Win32.Registry.CurrentUser, "PatchEncy" ), 1 ) != 0;
-			ClientLaunch launch = ClientLaunch.TwoD;
-			string dataDir;
-
-			ClientCommunication.ClientEncrypted = false;
-
-			// check if the new ServerEncryption option is in the registry yet
-			dataDir = Config.GetRegString( Microsoft.Win32.Registry.CurrentUser, "ServerEnc" );
-			if ( dataDir == null )
+			if ( !Language.Load(m_EngineOpts.m_Language) )
 			{
-				// if not, add it (copied from UseOSIEnc)
-				dataDir = Config.GetRegString( Microsoft.Win32.Registry.CurrentUser, "UseOSIEnc" );
-				if ( dataDir == "1" )
-				{
-					ClientCommunication.ServerEncrypted = true;
-					Config.SetRegString( Microsoft.Win32.Registry.CurrentUser, "ServerEnc", "1" );
-				}
-				else
-				{
-					Config.SetRegString( Microsoft.Win32.Registry.CurrentUser, "ServerEnc", "0" );
-					ClientCommunication.ServerEncrypted = false;
-				}
-
-				Config.SetRegString( Microsoft.Win32.Registry.CurrentUser, "PatchEncy", "1" ); // reset the patch encryption option to TRUE
-				patch = true;
-
-				Config.DeleteRegValue( Microsoft.Win32.Registry.CurrentUser, "UseOSIEnc" ); // delete the old value
-			}
-			else
-			{
-				ClientCommunication.ServerEncrypted = Utility.ToInt32( dataDir, 0 ) != 0;
-			}
-			dataDir = null;
-
-			if ( !Language.Load( "ENU" ) )
-			{
-				MessageBox.Show( "Fatal Error: Unable to load required file Language/Razor_lang.enu\nRazor cannot continue.", "No Language Pack", MessageBoxButtons.OK, MessageBoxIcon.Stop );
+				MessageBox.Show( String.Format("Fatal Error: Unable to load required file Language/Razor_lang.{0}\nRazor cannot continue.", m_EngineOpts.m_Language), "No Language Pack", MessageBoxButtons.OK, MessageBoxIcon.Stop );
 				return;
 			}
-
-			string defLang = Config.GetRegString( Microsoft.Win32.Registry.CurrentUser, "DefaultLanguage" );
-			if ( defLang != null && !Language.Load( defLang ) )
-				MessageBox.Show( String.Format( "WARNING: Razor was unable to load the file Language/Razor_lang.{0}\nENU will be used instead.", defLang ), "Language Load Error", MessageBoxButtons.OK, MessageBoxIcon.Warning );
-			
-			string clientPath = "";
 
 			Launcher launcher = new Launcher();
 			m_ActiveWnd = launcher;
 			if ( launcher.ShowDialog() == DialogResult.Cancel )
 				return;
-			patch = launcher.PatchEncryption;
-			launch = launcher.Client;
-			dataDir = launcher.DataDirectory;
-			if ( launch == ClientLaunch.Custom )
-				clientPath = launcher.ClientPath;
+            m_EngineOpts.m_ClientEncryption = launcher.PatchEncryption;
+            m_EngineOpts.m_ClientDir = launcher.Client;
+            m_EngineOpts.m_DataDir = launcher.DataDirectory;
 
 			if (dataDir != null && Directory.Exists(dataDir)) {
 				Ultima.Files.SetMulPath(dataDir);
@@ -263,9 +223,9 @@ namespace Assistant
 
 			ClientCommunication.Loader_Error result = ClientCommunication.Loader_Error.UNKNOWN_ERROR;
 
-			if ( launch == ClientLaunch.TwoD )
+			if ( launch == ClientType.Classic )
 				clientPath = Ultima.Files.GetFilePath("client.exe");
-			else if ( launch == ClientLaunch.ThirdDawn )
+			else if ( launch == ClientType.ThirdDawn )
 				clientPath = Ultima.Files.GetFilePath( "uotd.exe" );
 
 			if ( clientPath != null && File.Exists( clientPath ) )

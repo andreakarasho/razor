@@ -1,22 +1,37 @@
 using System;
-using System.Drawing;
-using System.Collections;
+using System.Collections.Generic;
 using System.IO;
-using System.ComponentModel;
 using System.Windows.Forms;
-using System.Net;
+using System.Xml;
 using Microsoft.Win32;
 
 namespace Assistant
 {
-	public enum ClientLaunch
+	public enum ClientType
 	{
-		TwoD,
+		Classic,
 		ThirdDawn,
-		Custom,
-	}
+	};
 
-	public class Launcher : System.Windows.Forms.Form
+    public struct Client
+    {
+        public ClientType type;
+        public string clientDir;
+        public string dataDir;
+        public string language;
+        public string protocolVersion;
+        public bool encrypted;
+    };
+
+    public struct Shard
+    {
+        public string server;
+        public int port;
+        public string protocolVersion;
+        public bool encrypted;
+    };
+
+    public class Launcher : System.Windows.Forms.Form
 	{
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.ComboBox clientList;
@@ -44,27 +59,107 @@ namespace Assistant
 		private System.Windows.Forms.ComboBox dataDir;
 		private System.Windows.Forms.GroupBox groupBox3;
 
-		public string ClientPath{ get{ return m_ClientPath; } }
-		public ClientLaunch Client{ get{ return m_Launch; } } 
-		public bool PatchEncryption{ get{ return m_PatchEncy; } }
-		public string DataDirectory{ get{ if ( m_DataDir == "" || m_DataDir == "(Auto Detect)" ) m_DataDir = null; return m_DataDir; } }
+        List<Client> m_Clients;
+        List<Shard> m_Shards;
 
-		private bool m_PatchEncy = false;
-		private string m_ClientPath = "";
-		private ClientLaunch m_Launch = ClientLaunch.Custom;
-		private string m_DataDir = "";
+        Client m_SelectedClient;
+        Shard m_SelectedShard;
 
-		public Launcher()
+
+        public Launcher()
 		{
 			InitializeComponent();
-		}
+
+            string file = Path.Combine(Config.GetUserDirectory(), "razor.xml");
+            if (!File.Exists(file))
+            {
+                return;
+            }
+
+            try
+            {
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.Load(file);
+
+                XmlNodeList xmlClients = xmlDoc.SelectNodes("//razor/clients/client");
+                foreach (XmlNode xmlClient in xmlClients)
+                {
+                    Client client = new Client();
+                    foreach (XmlNode node in xmlClient.ChildNodes)
+                    {
+                        if (node.Name == "client_type")
+                        {
+                            if (node.InnerText.ToLower() == "classic")
+                            {
+                                client.type = ClientType.Classic;
+                            }
+                            else if (node.InnerText.ToLower() == "third dawn")
+                            {
+                                client.type = ClientType.ThirdDawn;
+                            }
+                        }
+                        else if (node.Name == "client_dir")
+                        {
+                            client.clientDir = node.InnerText;
+                        }
+                        else if (node.Name == "data_dir")
+                        {
+                            client.dataDir = node.InnerText;
+                        }
+                        else if (node.Name == "language")
+                        {
+                            client.language = node.InnerText;
+                        }
+                        else if (node.Name == "protocol_version")
+                        {
+                            client.protocolVersion = node.InnerText;
+                        }
+                        else if (node.Name == "encrypted")
+                        {
+                            client.encrypted = Convert.ToBoolean(node.InnerText);
+                        }
+                    }
+                    m_Clients.Add(client);
+                }
+
+                XmlNodeList xmlShards = xmlDoc.SelectNodes("//razor/shards/shard");
+                foreach (XmlNode xmlShard in xmlShards)
+                {
+                    Shard shard = new Shard();
+                    foreach (XmlNode node in xmlShard.ChildNodes)
+                    {
+                        if (node.Name == "server")
+                        {
+                            shard.server = node.InnerText;
+                        }
+                        else if (node.Name == "port")
+                        {
+                            shard.port = Convert.ToInt32(node.InnerText);
+                        }
+                        else if (node.Name == "protocol_version")
+                        {
+                            shard.protocolVersion = node.InnerText;
+                        }
+                        else if (node.Name == "encrypted")
+                        {
+                            shard.encrypted = Convert.ToBoolean(node.InnerText);
+                        }
+                    }
+                    m_Shards.Add(shard);
+                }
+            }
+            catch
+            {
+                MessageBox.Show(Engine.ActiveWindow, Language.GetString(LocString.CounterFux), "razor.xml Load Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+            }
+        }
 
 		/// <summary>
 		/// Clean up any resources being used.
 		/// </summary>
 		protected override void Dispose( bool disposing )
 		{
-			if( disposing )
+			if( disposing ) 
 			{
 				if(components != null)
 				{
@@ -631,11 +726,11 @@ namespace Assistant
 
 			if ( clientList.SelectedIndex < 2 )
 			{
-				m_Launch = (ClientLaunch)clientList.SelectedIndex;
+				m_Launch = (ClientType)clientList.SelectedIndex;
 			}
 			else
 			{
-				m_Launch = ClientLaunch.Custom;
+				m_Launch = ClientType.Custom;
 				m_ClientPath = ((PathElipsis)clientList.SelectedItem).GetPath();
 			}
 			
