@@ -148,7 +148,7 @@ namespace Assistant
 
 		private static uint m_NextCmdID = WM_USER+401;
 
-		public static int OnUOAMessage( MainForm razor, int Msg, int wParam, int lParam )
+		public static int OnUOAMessage( Razor razor, int Msg, int wParam, int lParam )
 		{
 			switch ( (UOAMessage)Msg )
 			{
@@ -1150,7 +1150,7 @@ namespace Assistant
 		}
 
 		//private static DateTime m_LastActivate;
-		internal static bool OnMessage( MainForm razor, uint wParam, int lParam )
+		internal static bool OnMessage( Razor razor, uint wParam, int lParam )
 		{
 			bool retVal = true;
 			

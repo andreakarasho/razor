@@ -154,7 +154,7 @@ namespace Assistant
 		}
 
 		public static string ExePath{ get{ return Process.GetCurrentProcess().MainModule.FileName; } }
-		public static MainForm MainWindow{ get{ return m_MainWnd; } }
+		public static Razor MainWindow{ get{ return m_MainWnd; } }
 		public static bool Running{ get{ return m_Running; } }
 		public static Form ActiveWindow{ get{ return m_ActiveWnd; } set{ m_ActiveWnd = value; } }
 		
@@ -172,7 +172,7 @@ namespace Assistant
 			}
 		}
 
-		private static MainForm m_MainWnd;
+		private static Razor m_MainWnd;
 		private static Form m_ActiveWnd;
 		//private static Thread m_TimerThread;
 		private static bool m_Running;
@@ -295,7 +295,7 @@ namespace Assistant
 
 			Ultima.Multis.PostHSFormat = UsePostHSChanges;
 
-			m_MainWnd = new MainForm();
+			m_MainWnd = new Razor();
 			Application.Run( m_MainWnd );
 			
 			m_Running = false;

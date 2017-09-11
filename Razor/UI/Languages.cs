@@ -725,8 +725,8 @@ namespace Assistant
 			if ( text != null )
 				form.Text = text;
 
-			if ( form is MainForm )
-				((MainForm)form).UpdateTitle();
+			if ( form is Razor )
+				((Razor)form).UpdateTitle();
 		}
 
 #if LOG_CONTROL_TEXT

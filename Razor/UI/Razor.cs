@@ -12,7 +12,7 @@ using Assistant.Macros;
 
 namespace Assistant
 {
-	public class MainForm : System.Windows.Forms.Form
+	public class Razor : System.Windows.Forms.Form
 	{
 		#region Class Variables
 		private System.Windows.Forms.NotifyIcon m_NotifyIcon;
@@ -243,7 +243,7 @@ namespace Assistant
 
 		public Label WaitDisplay { get{ return waitDisp; } }
 
-		public MainForm()
+		public Razor()
 		{
 			m_ProfileConfirmLoad = true;
 			m_Tip = new ToolTip();
@@ -293,7 +293,7 @@ namespace Assistant
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Razor));
 			this.m_NotifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
 			this.tabs = new System.Windows.Forms.TabControl();
 			this.generalTab = new System.Windows.Forms.TabPage();
@@ -2655,7 +2655,7 @@ namespace Assistant
 			this.statusBox.Size = new System.Drawing.Size(185, 178);
 			this.statusBox.TabIndex = 12;
 			// 
-			// MainForm
+			// Razor
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(420, 230);
@@ -2663,16 +2663,16 @@ namespace Assistant
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MaximizeBox = false;
-			this.Name = "MainForm";
+			this.Name = "Razor";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
 			this.Text = "Razor v{0}";
-			this.Activated += new System.EventHandler(this.MainForm_Activated);
-			this.Closing += new System.ComponentModel.CancelEventHandler(this.MainForm_Closing);
-			this.Deactivate += new System.EventHandler(this.MainForm_Deactivate);
-			this.Load += new System.EventHandler(this.MainForm_Load);
-			this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
-			this.Move += new System.EventHandler(this.MainForm_Move);
-			this.Resize += new System.EventHandler(this.MainForm_Resize);
+			this.Activated += new System.EventHandler(this.Razor_Activated);
+			this.Closing += new System.ComponentModel.CancelEventHandler(this.Razor_Closing);
+			this.Deactivate += new System.EventHandler(this.Razor_Deactivate);
+			this.Load += new System.EventHandler(this.Razor_Load);
+			this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Razor_KeyDown);
+			this.Move += new System.EventHandler(this.Razor_Move);
+			this.Resize += new System.EventHandler(this.Razor_Resize);
 			this.tabs.ResumeLayout(false);
 			this.generalTab.ResumeLayout(false);
 			this.generalTab.PerformLayout();
@@ -2735,7 +2735,7 @@ namespace Assistant
 			m_CanClose = false;
 		}
 
-		private void MainForm_Load(object sender, System.EventArgs e)
+		private void Razor_Load(object sender, System.EventArgs e)
 		{
 			//ClientCommunication.SetCustomNotoHue( 0x2 );
 
@@ -3033,8 +3033,8 @@ namespace Assistant
 
 		private class StatsTimer : Timer
 		{
-			MainForm m_Form;
-			public StatsTimer( MainForm form ) : base( TimeSpan.FromSeconds( 0.5 ), TimeSpan.FromSeconds( 0.5 ) )
+			Razor m_Form;
+			public StatsTimer( Razor form ) : base( TimeSpan.FromSeconds( 0.5 ), TimeSpan.FromSeconds( 0.5 ) )
 			{
 				m_Form = form;
 			}
@@ -3602,7 +3602,7 @@ namespace Assistant
 			}
 		}
 
-		private void MainForm_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+		private void Razor_Closing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
 			if ( !m_CanClose && ClientCommunication.ClientRunning )
 			{
@@ -4232,19 +4232,19 @@ namespace Assistant
 			Agent_Button( 6 );
 		}
 
-		private void MainForm_Activated(object sender, System.EventArgs e)
+		private void Razor_Activated(object sender, System.EventArgs e)
 		{
 			DisableCloseButton();
 			//this.TopMost = true;
 		}
 
-		private void MainForm_Deactivate(object sender, System.EventArgs e)
+		private void Razor_Deactivate(object sender, System.EventArgs e)
 		{
 			if ( this.TopMost )
 				this.TopMost = false;
 		}
 
-		private void MainForm_Resize(object sender, System.EventArgs e)
+		private void Razor_Resize(object sender, System.EventArgs e)
 		{
 			if ( WindowState == FormWindowState.Minimized && !this.ShowInTaskbar )
 				this.Hide();
@@ -4255,7 +4255,7 @@ namespace Assistant
 			return ( a <= b+5 && a >= b-5 );
 		}
 
-		private void MainForm_Move(object sender, System.EventArgs e)
+		private void Razor_Move(object sender, System.EventArgs e)
 		{
 			// atempt to dock to the side of the screen.  Also try not to save the X/Y when we are minimized (which is -32000, -32000)
 			System.Drawing.Point pt = this.Location; 
@@ -5391,7 +5391,7 @@ namespace Assistant
 			HotKey.KeyDown( e.KeyData );
 		}
 
-		private void MainForm_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
+		private void Razor_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
 		{
 			HotKey.KeyDown( e.KeyData );
 		}
@@ -5794,7 +5794,7 @@ namespace Assistant
 					{
 						int y_off = (locked.Size.Height - 16) / 2;
 						int x_off = 0;
-						System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(MainForm));
+						System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(Razor));
 						PictureBox newLockBox = new PictureBox();
 
 						if ( locked is TextBox )
