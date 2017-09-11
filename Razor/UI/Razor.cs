@@ -2756,13 +2756,11 @@ namespace Assistant
 			if ( !ClientCommunication.InstallHooks( this.Handle ) ) // WaitForInputIdle done here
 			{
 				m_CanClose = true;
-				SplashScreen.End();
 				this.Close();
 				System.Diagnostics.Process.GetCurrentProcess().Kill();
 				return;
 			}
 
-			SplashScreen.Message = LocString.Welcome;
             InitConfig();
 
 			this.Show();
@@ -2780,8 +2778,6 @@ namespace Assistant
             
 			m_Tip.Active = true;
             m_Tip.SetToolTip(titleStr, Language.GetString(LocString.TitleBarTip));
-
-            SplashScreen.End();
 		}
 		
 		private bool m_Initializing = false;

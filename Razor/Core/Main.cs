@@ -228,7 +228,6 @@ namespace Assistant
 
 			if ( !Language.Load( "ENU" ) )
 			{
-				SplashScreen.End();
 				MessageBox.Show( "Fatal Error: Unable to load required file Language/Razor_lang.enu\nRazor cannot continue.", "No Language Pack", MessageBoxButtons.OK, MessageBoxIcon.Stop );
 				return;
 			}
@@ -238,8 +237,6 @@ namespace Assistant
 				MessageBox.Show( String.Format( "WARNING: Razor was unable to load the file Language/Razor_lang.{0}\nENU will be used instead.", defLang ), "Language Load Error", MessageBoxButtons.OK, MessageBoxIcon.Warning );
 			
 			string clientPath = "";
-
-			SplashScreen.End();
 
 			WelcomeForm welcome = new WelcomeForm();
 			m_ActiveWnd = welcome;
@@ -251,30 +248,21 @@ namespace Assistant
 			if ( launch == ClientLaunch.Custom )
 				clientPath = welcome.ClientPath;
 
-			SplashScreen.Start();
-			m_ActiveWnd = SplashScreen.Instance;
-
 			if (dataDir != null && Directory.Exists(dataDir)) {
 				Ultima.Files.SetMulPath(dataDir);
 			}
 
 			Language.LoadCliLoc();
 
-			SplashScreen.Message = LocString.Initializing;
-
 			Initialize( typeof( Assistant.Engine ).Assembly ); //Assembly.GetExecutingAssembly()
 
-			SplashScreen.Message = LocString.LoadingLastProfile;
 			Config.LoadCharList();
-			if ( !Config.LoadLastProfile() )
-				MessageBox.Show( SplashScreen.Instance, "The selected profile could not be loaded, using default instead.", "Profile Load Error", MessageBoxButtons.OK, MessageBoxIcon.Warning );
+            Config.LoadLastProfile();
 
             ClientCommunication.SetConnectionInfo(IPAddress.None, -1);
 
 			ClientCommunication.Loader_Error result = ClientCommunication.Loader_Error.UNKNOWN_ERROR;
 
-			SplashScreen.Message = LocString.LoadingClient;
-				
 			if ( launch == ClientLaunch.TwoD )
 				clientPath = Ultima.Files.GetFilePath("client.exe");
 			else if ( launch == ClientLaunch.ThirdDawn )
@@ -286,10 +274,9 @@ namespace Assistant
 			if ( result != ClientCommunication.Loader_Error.SUCCESS )
 			{
 				if ( clientPath == null && File.Exists( clientPath ) )
-					MessageBox.Show( SplashScreen.Instance, String.Format( "Unable to find the client specified.\n{0}: \"{1}\"", launch.ToString(), clientPath != null ? clientPath : "-null-" ), "Could Not Start Client", MessageBoxButtons.OK, MessageBoxIcon.Stop );
+					MessageBox.Show( String.Format( "Unable to find the client specified.\n{0}: \"{1}\"", launch.ToString(), clientPath != null ? clientPath : "-null-" ), "Could Not Start Client", MessageBoxButtons.OK, MessageBoxIcon.Stop );
 				else
-					MessageBox.Show( SplashScreen.Instance, String.Format( "Unable to launch the client specified. (Error: {2})\n{0}: \"{1}\"", launch.ToString(), clientPath != null ? clientPath : "-null-", result ), "Could Not Start Client", MessageBoxButtons.OK, MessageBoxIcon.Stop );
-				SplashScreen.End();
+					MessageBox.Show( String.Format( "Unable to launch the client specified. (Error: {2})\n{0}: \"{1}\"", launch.ToString(), clientPath != null ? clientPath : "-null-", result ), "Could Not Start Client", MessageBoxButtons.OK, MessageBoxIcon.Stop );
 				return;
 			}
 
@@ -300,19 +287,13 @@ namespace Assistant
 			IPAddress ip = Resolve( addr );
 			if ( ip == IPAddress.None || port == 0 )
 			{
-				MessageBox.Show( SplashScreen.Instance, Language.GetString( LocString.BadServerAddr ), "Bad Server Address", MessageBoxButtons.OK, MessageBoxIcon.Stop );
-				SplashScreen.End();
+				MessageBox.Show( Language.GetString( LocString.BadServerAddr ), "Bad Server Address", MessageBoxButtons.OK, MessageBoxIcon.Stop );
 				return;
 			}
 
 			ClientCommunication.SetConnectionInfo( ip, port );
 
 			Ultima.Multis.PostHSFormat = UsePostHSChanges;
-
-			if ( Utility.Random(4) != 0 )
-				SplashScreen.Message = LocString.WaitingForClient;
-			else
-				SplashScreen.Message = LocString.RememberDonate;
 
 			m_MainWnd = new MainForm();
 			Application.Run( m_MainWnd );
