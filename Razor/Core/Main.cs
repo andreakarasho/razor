@@ -195,7 +195,6 @@ namespace Assistant
 			bool patch = Utility.ToInt32( Config.GetRegString( Microsoft.Win32.Registry.CurrentUser, "PatchEncy" ), 1 ) != 0;
 			bool showWelcome = Utility.ToInt32( Config.GetRegString( Microsoft.Win32.Registry.CurrentUser, "ShowWelcome" ), 1 ) != 0;
 			ClientLaunch launch = ClientLaunch.TwoD;
-			int attPID = -1;
 			string dataDir;
 
 			ClientCommunication.ClientEncrypted = false;
@@ -228,75 +227,6 @@ namespace Assistant
 			}
 			dataDir = null;
 
-			bool advCmdLine = false;
-			
-			for (int i=0;i<Args.Length;i++)
-			{
-				string arg = Args[i].ToLower();
-				if ( arg == "--nopatch" )
-				{
-					patch = false;
-				}
-				else if ( arg == "--clientenc" )
-				{
-					ClientCommunication.ClientEncrypted = true;
-					advCmdLine = true;
-					patch = false;
-				}
-				else if ( arg == "--serverenc" )
-				{
-					ClientCommunication.ServerEncrypted = true;
-					advCmdLine = true;
-				}
-				else if ( arg == "--welcome" )
-				{
-					showWelcome = true;
-				}
-				else if ( arg == "--nowelcome" )
-				{
-					showWelcome = false;
-				}
-				else if ( arg == "--pid" && i+1 < Args.Length )
-				{
-					i++;
-					patch = false;
-					attPID = Utility.ToInt32( Args[i], 0 );
-				}
-				else if ( arg.Substring( 0, 5 ) == "--pid" && arg.Length > 5 ) //support for uog 1.8 (damn you fixit)
-				{
-					patch = false;
-					attPID = Utility.ToInt32( arg.Substring(5), 0 );
-				}
-				else if ( arg == "--uodata" && i+1 < Args.Length )
-				{
-					i++;
-					dataDir = Args[i];
-				}
-				else if ( arg == "--server" && i+1 < Args.Length )
-				{
-					i++;
-					string[] split = Args[i].Split( ',', ':', ';', ' ' );
-					if ( split.Length >= 2 )
-					{
-						Config.SetRegString( Microsoft.Win32.Registry.CurrentUser, "LastServer", split[0] );
-						Config.SetRegString( Microsoft.Win32.Registry.CurrentUser, "LastPort", split[1] );
-
-						showWelcome = false;
-					}
-				}
-				else if ( arg == "--debug" )
-				{
-					ScavengerAgent.Debug = true;
-					DragDropManager.Debug = true;
-				}
-			}
-
-			if ( attPID > 0 && !advCmdLine )
-			{
-				ClientCommunication.ServerEncrypted = false;
-				ClientCommunication.ClientEncrypted = false;
-			}
-
 			if ( !Language.Load( "ENU" ) )
 			{
 				SplashScreen.End();
@@ -310,42 +240,38 @@ namespace Assistant
 			
 			string clientPath = "";
 
-			// welcome only needed when not loaded by a launcher (ie uogateway)
-			if ( attPID == -1 )
+			if ( !showWelcome )
 			{
-				if ( !showWelcome )
+				int cli = Utility.ToInt32( Config.GetRegString( Microsoft.Win32.Registry.CurrentUser, "DefClient" ), 0 );
+				if ( cli < 0 || cli > 1 )
 				{
-					int cli = Utility.ToInt32( Config.GetRegString( Microsoft.Win32.Registry.CurrentUser, "DefClient" ), 0 );
-					if ( cli < 0 || cli > 1 )
-					{
-						launch = ClientLaunch.Custom;
-						clientPath = Config.GetRegString( Microsoft.Win32.Registry.CurrentUser, String.Format( "Client{0}", cli - 1 ) );
-						if ( clientPath == null || clientPath == "" )
-							showWelcome = true;
-					}
-					else
-					{
-						launch = (ClientLaunch)cli;
-					}
+					launch = ClientLaunch.Custom;
+					clientPath = Config.GetRegString( Microsoft.Win32.Registry.CurrentUser, String.Format( "Client{0}", cli - 1 ) );
+					if ( clientPath == null || clientPath == "" )
+						showWelcome = true;
 				}
-
-				if ( showWelcome )
+				else
 				{
-					SplashScreen.End();
-
-					WelcomeForm welcome = new WelcomeForm();
-					m_ActiveWnd = welcome;
-					if ( welcome.ShowDialog() == DialogResult.Cancel )
-						return;
-					patch = welcome.PatchEncryption;
-					launch = welcome.Client;
-					dataDir = welcome.DataDirectory;
-					if ( launch == ClientLaunch.Custom )
-						clientPath = welcome.ClientPath;
-
-					SplashScreen.Start();
-					m_ActiveWnd = SplashScreen.Instance;
+					launch = (ClientLaunch)cli;
 				}
+			}
+
+			if ( showWelcome )
+			{
+				SplashScreen.End();
+
+				WelcomeForm welcome = new WelcomeForm();
+				m_ActiveWnd = welcome;
+				if ( welcome.ShowDialog() == DialogResult.Cancel )
+					return;
+				patch = welcome.PatchEncryption;
+				launch = welcome.Client;
+				dataDir = welcome.DataDirectory;
+				if ( launch == ClientLaunch.Custom )
+					clientPath = welcome.ClientPath;
+
+				SplashScreen.Start();
+				m_ActiveWnd = SplashScreen.Instance;
 			}
 
 			if (dataDir != null && Directory.Exists(dataDir)) {
@@ -356,9 +282,6 @@ namespace Assistant
 
 			SplashScreen.Message = LocString.Initializing;
 
-			//m_TimerThread = new Thread( new ThreadStart( Timer.TimerThread.TimerMain ) );
-			//m_TimerThread.Name = "Razor Timers";
-
 			Initialize( typeof( Assistant.Engine ).Assembly ); //Assembly.GetExecutingAssembly()
 
 			SplashScreen.Message = LocString.LoadingLastProfile;
@@ -366,72 +289,43 @@ namespace Assistant
 			if ( !Config.LoadLastProfile() )
 				MessageBox.Show( SplashScreen.Instance, "The selected profile could not be loaded, using default instead.", "Profile Load Error", MessageBoxButtons.OK, MessageBoxIcon.Warning );
 
-			if ( attPID == -1 )
-            {
-                ClientCommunication.SetConnectionInfo(IPAddress.None, -1);
+            ClientCommunication.SetConnectionInfo(IPAddress.None, -1);
 
-				ClientCommunication.Loader_Error result = ClientCommunication.Loader_Error.UNKNOWN_ERROR;
+			ClientCommunication.Loader_Error result = ClientCommunication.Loader_Error.UNKNOWN_ERROR;
 
-				SplashScreen.Message = LocString.LoadingClient;
+			SplashScreen.Message = LocString.LoadingClient;
 				
-				if ( launch == ClientLaunch.TwoD )
-					clientPath = Ultima.Files.GetFilePath("client.exe");
-				else if ( launch == ClientLaunch.ThirdDawn )
-					clientPath = Ultima.Files.GetFilePath( "uotd.exe" );
+			if ( launch == ClientLaunch.TwoD )
+				clientPath = Ultima.Files.GetFilePath("client.exe");
+			else if ( launch == ClientLaunch.ThirdDawn )
+				clientPath = Ultima.Files.GetFilePath( "uotd.exe" );
 
-				if ( !advCmdLine )
-					ClientCommunication.ClientEncrypted = patch;
+			if ( clientPath != null && File.Exists( clientPath ) )
+				result = ClientCommunication.LaunchClient( clientPath );
 
-				if ( clientPath != null && File.Exists( clientPath ) )
-					result = ClientCommunication.LaunchClient( clientPath );
-
-				if ( result != ClientCommunication.Loader_Error.SUCCESS )
-				{
-					if ( clientPath == null && File.Exists( clientPath ) )
-						MessageBox.Show( SplashScreen.Instance, String.Format( "Unable to find the client specified.\n{0}: \"{1}\"", launch.ToString(), clientPath != null ? clientPath : "-null-" ), "Could Not Start Client", MessageBoxButtons.OK, MessageBoxIcon.Stop );
-					else
-						MessageBox.Show( SplashScreen.Instance, String.Format( "Unable to launch the client specified. (Error: {2})\n{0}: \"{1}\"", launch.ToString(), clientPath != null ? clientPath : "-null-", result ), "Could Not Start Client", MessageBoxButtons.OK, MessageBoxIcon.Stop );
-					SplashScreen.End();
-					return;
-				}
-
-				string addr = Config.GetRegString( Microsoft.Win32.Registry.CurrentUser, "LastServer" );
-				int port = Utility.ToInt32( Config.GetRegString( Microsoft.Win32.Registry.CurrentUser, "LastPort" ), 0 );
-
-				// if these are null then the registry entry does not exist (old razor version)
-				IPAddress ip = Resolve( addr );
-				if ( ip == IPAddress.None || port == 0 )
-				{
-					MessageBox.Show( SplashScreen.Instance, Language.GetString( LocString.BadServerAddr ), "Bad Server Address", MessageBoxButtons.OK, MessageBoxIcon.Stop );
-					SplashScreen.End();
-					return;
-				}
-
-				ClientCommunication.SetConnectionInfo( ip, port );
-			}
-			else
+			if ( result != ClientCommunication.Loader_Error.SUCCESS )
 			{
-				string error = "Error attaching to the UO client.";
-				bool result = false;
-				try
-				{
-					result = ClientCommunication.Attach( attPID );
-				}
-				catch ( Exception e )
-				{
-					result = false;
-					error = e.Message;
-				}
-
-				if ( !result )
-				{
-					MessageBox.Show( SplashScreen.Instance, String.Format( "{1}\nThe specified PID '{0}' may be invalid.", attPID, error ), "Attach Error", MessageBoxButtons.OK, MessageBoxIcon.Error );
-					SplashScreen.End();
-					return;
-				}
-
-                ClientCommunication.SetConnectionInfo(IPAddress.Any, 0);
+				if ( clientPath == null && File.Exists( clientPath ) )
+					MessageBox.Show( SplashScreen.Instance, String.Format( "Unable to find the client specified.\n{0}: \"{1}\"", launch.ToString(), clientPath != null ? clientPath : "-null-" ), "Could Not Start Client", MessageBoxButtons.OK, MessageBoxIcon.Stop );
+				else
+					MessageBox.Show( SplashScreen.Instance, String.Format( "Unable to launch the client specified. (Error: {2})\n{0}: \"{1}\"", launch.ToString(), clientPath != null ? clientPath : "-null-", result ), "Could Not Start Client", MessageBoxButtons.OK, MessageBoxIcon.Stop );
+				SplashScreen.End();
+				return;
 			}
+
+			string addr = Config.GetRegString( Microsoft.Win32.Registry.CurrentUser, "LastServer" );
+			int port = Utility.ToInt32( Config.GetRegString( Microsoft.Win32.Registry.CurrentUser, "LastPort" ), 0 );
+
+			// if these are null then the registry entry does not exist (old razor version)
+			IPAddress ip = Resolve( addr );
+			if ( ip == IPAddress.None || port == 0 )
+			{
+				MessageBox.Show( SplashScreen.Instance, Language.GetString( LocString.BadServerAddr ), "Bad Server Address", MessageBoxButtons.OK, MessageBoxIcon.Stop );
+				SplashScreen.End();
+				return;
+			}
+
+			ClientCommunication.SetConnectionInfo( ip, port );
 
 			Ultima.Multis.PostHSFormat = UsePostHSChanges;
 
@@ -453,13 +347,6 @@ namespace Assistant
 			Macros.MacroManager.Save();
 			Config.Save();
 		}
-
-		/*public static string GetDirectory( string relPath )
-		{
-            string path = Path.Combine(ExeDirectory, relPath);
-			EnsureDirectory( path );
-			return path;
-		}*/
 
 		public static void EnsureDirectory( string dir )
 		{
