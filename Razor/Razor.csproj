@@ -135,6 +135,7 @@
     <Compile Include="Core\AVIRec.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Core\MessageInBottleCapture.cs" />
     <Compile Include="Core\OverheadMessages.cs" />
     <Compile Include="Core\SkillTimer.cs" />
     <Compile Include="Core\BandageTimer.cs">

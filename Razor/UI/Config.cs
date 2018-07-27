@@ -158,6 +158,7 @@ namespace Assistant
 
 	        AddProperty("ShowTargetSelfLastClearOverhead", true);
 	        AddProperty("ShowOverheadMessages", false);
+	        AddProperty("CaptureMibs", false);
 
 	        AddProperty("LightLevel", 31);
 	        AddProperty("LogSkillChanges", false);

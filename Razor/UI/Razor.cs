@@ -280,6 +280,7 @@ namespace Assistant
         private Button saveProfile;
         private Label lightLevel;
         private TrackBar lightLevelBar;
+        private CheckBox captureMIBs;
         private TreeView _hotkeyTreeViewCache = new TreeView();
 
 		[DllImport( "User32.dll" )]
@@ -522,6 +523,7 @@ namespace Assistant
             this.delMacro = new System.Windows.Forms.Button();
             this.newMacro = new System.Windows.Forms.Button();
             this.mapTab = new System.Windows.Forms.TabPage();
+            this.captureMIBs = new System.Windows.Forms.CheckBox();
             this.boatControl = new System.Windows.Forms.Button();
             this.btnMap = new System.Windows.Forms.Button();
             this.showPlayerPosition = new System.Windows.Forms.CheckBox();
@@ -1193,7 +1195,7 @@ namespace Assistant
             // 
             this.incomingCorpse.Location = new System.Drawing.Point(245, 215);
             this.incomingCorpse.Name = "incomingCorpse";
-            this.incomingCorpse.Size = new System.Drawing.Size(228, 20);
+            this.incomingCorpse.Size = new System.Drawing.Size(234, 20);
             this.incomingCorpse.TabIndex = 48;
             this.incomingCorpse.Text = "Show Names of New/Incoming Corpses";
             this.incomingCorpse.CheckedChanged += new System.EventHandler(this.incomingCorpse_CheckedChanged);
@@ -2485,6 +2487,7 @@ namespace Assistant
             // mapTab
             // 
             this.mapTab.BackColor = System.Drawing.SystemColors.Control;
+            this.mapTab.Controls.Add(this.captureMIBs);
             this.mapTab.Controls.Add(this.boatControl);
             this.mapTab.Controls.Add(this.btnMap);
             this.mapTab.Controls.Add(this.showPlayerPosition);
@@ -2499,6 +2502,17 @@ namespace Assistant
             this.mapTab.TabIndex = 13;
             this.mapTab.Text = "Map";
             // 
+            // captureMIBs
+            // 
+            this.captureMIBs.AutoSize = true;
+            this.captureMIBs.Location = new System.Drawing.Point(9, 152);
+            this.captureMIBs.Name = "captureMIBs";
+            this.captureMIBs.Size = new System.Drawing.Size(172, 19);
+            this.captureMIBs.TabIndex = 61;
+            this.captureMIBs.Text = "Capture opened MIBs in file";
+            this.captureMIBs.UseVisualStyleBackColor = true;
+            this.captureMIBs.CheckedChanged += new System.EventHandler(this.captureMIBs_CheckedChanged);
+            // 
             // boatControl
             // 
             this.boatControl.Location = new System.Drawing.Point(145, 14);
@@ -2511,17 +2525,17 @@ namespace Assistant
             // 
             // btnMap
             // 
-            this.btnMap.Location = new System.Drawing.Point(20, 199);
+            this.btnMap.Location = new System.Drawing.Point(128, 194);
             this.btnMap.Name = "btnMap";
-            this.btnMap.Size = new System.Drawing.Size(237, 24);
+            this.btnMap.Size = new System.Drawing.Size(145, 35);
             this.btnMap.TabIndex = 59;
-            this.btnMap.Text = "Open UOPS";
+            this.btnMap.Text = "Open Classic UOPS";
             this.btnMap.Click += new System.EventHandler(this.btnMap_Click);
             // 
             // showPlayerPosition
             // 
             this.showPlayerPosition.AutoSize = true;
-            this.showPlayerPosition.Location = new System.Drawing.Point(6, 52);
+            this.showPlayerPosition.Location = new System.Drawing.Point(9, 52);
             this.showPlayerPosition.Name = "showPlayerPosition";
             this.showPlayerPosition.Size = new System.Drawing.Size(172, 19);
             this.showPlayerPosition.TabIndex = 5;
@@ -2532,7 +2546,7 @@ namespace Assistant
             // tiltMap
             // 
             this.tiltMap.AutoSize = true;
-            this.tiltMap.Location = new System.Drawing.Point(6, 127);
+            this.tiltMap.Location = new System.Drawing.Point(9, 127);
             this.tiltMap.Name = "tiltMap";
             this.tiltMap.Size = new System.Drawing.Size(93, 19);
             this.tiltMap.TabIndex = 4;
@@ -2543,7 +2557,7 @@ namespace Assistant
             // showPartyMemberPositions
             // 
             this.showPartyMemberPositions.AutoSize = true;
-            this.showPartyMemberPositions.Location = new System.Drawing.Point(6, 102);
+            this.showPartyMemberPositions.Location = new System.Drawing.Point(9, 102);
             this.showPartyMemberPositions.Name = "showPartyMemberPositions";
             this.showPartyMemberPositions.Size = new System.Drawing.Size(184, 19);
             this.showPartyMemberPositions.TabIndex = 3;
@@ -2603,7 +2617,7 @@ namespace Assistant
             // trackPlayerPosition
             // 
             this.trackPlayerPosition.AutoSize = true;
-            this.trackPlayerPosition.Location = new System.Drawing.Point(6, 77);
+            this.trackPlayerPosition.Location = new System.Drawing.Point(9, 77);
             this.trackPlayerPosition.Name = "trackPlayerPosition";
             this.trackPlayerPosition.Size = new System.Drawing.Size(220, 19);
             this.trackPlayerPosition.TabIndex = 0;
@@ -3234,7 +3248,7 @@ namespace Assistant
             // MainForm
             // 
             this.AutoScaleBaseSize = new System.Drawing.Size(6, 16);
-            this.ClientSize = new System.Drawing.Size(541, 486);
+            this.ClientSize = new System.Drawing.Size(541, 439);
             this.Controls.Add(this.tabs);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -3550,9 +3564,13 @@ namespace Assistant
             tiltMap.Checked = Config.GetBool("TiltMap");
 
 		    showTargetMessagesOverChar.Checked = Config.GetBool("ShowTargetSelfLastClearOverhead");
-		    showOverheadMessages.Checked = Config.GetBool("ShowOverheadMessages");
 
-		    logSkillChanges.Checked = Config.GetBool("LogSkillChanges");
+		    showOverheadMessages.Checked = Config.GetBool("ShowOverheadMessages");
+            overHeadMessages.Enabled = Config.GetBool("ShowOverheadMessages");
+
+            logSkillChanges.Checked = Config.GetBool("LogSkillChanges");
+
+		    captureMIBs.Checked = Config.GetBool("CaptureMibs");
 
             lightLevelBar.Value = Config.GetInt("LightLevel");
             double percent = Math.Round((lightLevelBar.Value / (double)lightLevelBar.Maximum) * 100.0);
@@ -3651,12 +3669,12 @@ namespace Assistant
             else if (tabs.SelectedTab == moreMoreOptTab)
 			{
 			    tabs.Size = new Size(tabs.Size.Width, 313);
-			    Size = new Size(tabs.Size.Width + 10, tabs.Size.Height + 35);
+			    Size = new Size(tabs.Size.Width + 10, tabs.Size.Height + 32);
             }
 			else if (tabs.SelectedTab == moreOptTab)
 			{
 			    tabs.Size = new Size(tabs.Size.Width, 313);
-			    Size = new Size(tabs.Size.Width + 10, tabs.Size.Height + 35);
+			    Size = new Size(tabs.Size.Width + 10, tabs.Size.Height + 32);
 			}
         }
 
@@ -6267,7 +6285,7 @@ namespace Assistant
             }
 	            
 
-	        str = String.Format(str, Engine.Version);
+	        str = String.Format(str, m_Ver);
 
 	        if (World.Player != null)
 	        {
@@ -7369,6 +7387,11 @@ namespace Assistant
 
             string profileToClone = (string)profiles.Items[profiles.SelectedIndex];
             MessageBox.Show(SplashScreen.Instance, $"Saved current settings to profile {Path.Combine(Config.GetUserDirectory("Profiles"), $"{profileToClone}.xml")}", "Save Profile", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void captureMIBs_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.SetProperty("CaptureMibs", captureMIBs.Checked);
         }
     }
 }
