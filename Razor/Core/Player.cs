@@ -179,7 +179,7 @@ namespace Assistant
 		private ushort m_Str, m_Dex, m_Int;
 		private LockType m_StrLock, m_DexLock, m_IntLock;
 		private uint m_Gold;
-		private ushort m_Weight;
+        private ushort m_Weight;
 		private Skill[] m_Skills;
 		private ushort m_AR;
 		private ushort m_StatCap;
@@ -364,7 +364,7 @@ namespace Assistant
 			set{ m_Gold = value; }
 		}
 
-		public ushort Weight
+        public ushort Weight
 		{
 			get{ return m_Weight; }
 			set{ m_Weight = value; }

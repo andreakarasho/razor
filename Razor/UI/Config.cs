@@ -160,6 +160,11 @@ namespace Assistant
 	        AddProperty("ShowOverheadMessages", false);
 	        AddProperty("CaptureMibs", false);
 
+            //OverheadFormat
+	        AddProperty("OverheadFormat", "[{msg}]");
+
+            AddProperty("GoldPerDisplay", false);
+
 	        AddProperty("LightLevel", 31);
 	        AddProperty("LogSkillChanges", false);
 
@@ -274,6 +279,8 @@ namespace Assistant
 			HotKey.Load( root["hotkeys"] );
 			PasswordMemory.Load( root["passwords"] );
 		    OverheadMessages.Load(root["overheadmessages"]);
+
+            GoldPerHourTimer.Stop();
 
             if ( m_Props.ContainsKey( "ForceSize" ) )
 			{

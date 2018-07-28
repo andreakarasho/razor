@@ -137,6 +137,7 @@
     </Compile>
     <Compile Include="Core\MessageInBottleCapture.cs" />
     <Compile Include="Core\OverheadMessages.cs" />
+    <Compile Include="Core\GoldPerHourTimer.cs" />
     <Compile Include="Core\SkillTimer.cs" />
     <Compile Include="Core\BandageTimer.cs">
       <SubType>Code</SubType>

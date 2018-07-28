@@ -281,6 +281,7 @@ namespace Assistant
         private Label lightLevel;
         private TrackBar lightLevelBar;
         private CheckBox captureMIBs;
+        private CheckBox goldPerDisplay;
         private TreeView _hotkeyTreeViewCache = new TreeView();
 
 		[DllImport( "User32.dll" )]
@@ -593,6 +594,7 @@ namespace Assistant
             this.label21 = new System.Windows.Forms.Label();
             this.aboutVer = new System.Windows.Forms.Label();
             this.timerTimer = new System.Windows.Forms.Timer(this.components);
+            this.goldPerDisplay = new System.Windows.Forms.CheckBox();
             this.tabs.SuspendLayout();
             this.generalTab.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -1502,6 +1504,7 @@ namespace Assistant
             // 
             // displayTab
             // 
+            this.displayTab.Controls.Add(this.goldPerDisplay);
             this.displayTab.Controls.Add(this.showNotoHue);
             this.displayTab.Controls.Add(this.warnNum);
             this.displayTab.Controls.Add(this.warnCount);
@@ -3245,6 +3248,17 @@ namespace Assistant
             this.timerTimer.Interval = 5;
             this.timerTimer.Tick += new System.EventHandler(this.timerTimer_Tick);
             // 
+            // goldPerDisplay
+            // 
+            this.goldPerDisplay.AutoSize = true;
+            this.goldPerDisplay.Location = new System.Drawing.Point(216, 245);
+            this.goldPerDisplay.Name = "goldPerDisplay";
+            this.goldPerDisplay.Size = new System.Drawing.Size(228, 19);
+            this.goldPerDisplay.TabIndex = 48;
+            this.goldPerDisplay.Text = "Enable gold per sec/min/hour counter";
+            this.goldPerDisplay.UseVisualStyleBackColor = true;
+            this.goldPerDisplay.CheckedChanged += new System.EventHandler(this.goldPerDisplay_CheckedChanged);
+            // 
             // MainForm
             // 
             this.AutoScaleBaseSize = new System.Drawing.Size(6, 16);
@@ -3572,6 +3586,10 @@ namespace Assistant
 
 		    captureMIBs.Checked = Config.GetBool("CaptureMibs");
 
+            // Reset the timer
+		    goldPerDisplay.Checked = false;
+            //GoldPerHourTimer.Stop();
+
             lightLevelBar.Value = Config.GetInt("LightLevel");
             double percent = Math.Round((lightLevelBar.Value / (double)lightLevelBar.Maximum) * 100.0);
 		    lightLevel.Text = $"Light: {percent}%";
@@ -3613,7 +3631,10 @@ namespace Assistant
 				Counter.Redraw( counters );
 
 			    titleBarParams.SelectedIndex = 0;
-			}
+
+			    tabs.Size = new Size(tabs.Size.Width, 313);
+			    Size = new Size(tabs.Size.Width + 10, tabs.Size.Height + 32);
+            }
 			else if ( tabs.SelectedTab == dressTab )
 			{
 				int sel = dressList.SelectedIndex;
@@ -7392,6 +7413,20 @@ namespace Assistant
         private void captureMIBs_CheckedChanged(object sender, EventArgs e)
         {
             Config.SetProperty("CaptureMibs", captureMIBs.Checked);
+        }
+
+        private void goldPerDisplay_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.SetProperty("GoldPerDisplay", goldPerDisplay.Checked);
+
+            if (goldPerDisplay.Checked)
+            {
+                GoldPerHourTimer.Start();
+            }
+            else
+            {
+                GoldPerHourTimer.Stop();
+            }
         }
     }
 }

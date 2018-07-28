@@ -41,6 +41,8 @@
             this.saveOverheadMessages = new System.Windows.Forms.Button();
             this.cancelOverheadMessages = new System.Windows.Forms.Button();
             this.removeOverheadMessage = new System.Windows.Forms.Button();
+            this.overheadFormat = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // cliLocSearchView
@@ -154,12 +156,32 @@
             this.removeOverheadMessage.UseVisualStyleBackColor = true;
             this.removeOverheadMessage.Click += new System.EventHandler(this.removeOverheadMessage_Click);
             // 
+            // overheadFormat
+            // 
+            this.overheadFormat.Location = new System.Drawing.Point(353, 153);
+            this.overheadFormat.Name = "overheadFormat";
+            this.overheadFormat.Size = new System.Drawing.Size(92, 23);
+            this.overheadFormat.TabIndex = 9;
+            this.overheadFormat.Text = "[{msg}]";
+            this.overheadFormat.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(299, 156);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(48, 15);
+            this.label2.TabIndex = 10;
+            this.label2.Text = "Format:";
+            // 
             // OverheadMessages
             // 
             this.AcceptButton = this.cliLocSearch;
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(457, 346);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.overheadFormat);
             this.Controls.Add(this.removeOverheadMessage);
             this.Controls.Add(this.cancelOverheadMessages);
             this.Controls.Add(this.saveOverheadMessages);
@@ -195,5 +217,7 @@
         private System.Windows.Forms.Button saveOverheadMessages;
         private System.Windows.Forms.Button cancelOverheadMessages;
         private System.Windows.Forms.Button removeOverheadMessage;
+        private System.Windows.Forms.TextBox overheadFormat;
+        private System.Windows.Forms.Label label2;
     }
 }

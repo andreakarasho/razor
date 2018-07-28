@@ -896,7 +896,12 @@ namespace Assistant
 
 	            sb.Replace(@"{gold}", World.Player.Gold.ToString());
 
-	            sb.Replace(@"{bandage}", BandageTimer.Running ? $"~#FF8000{BandageTimer.Count}~#~" : "-");
+	            sb.Replace(@"{gps}", GoldPerHourTimer.Running ? $"{GoldPerHourTimer.GoldPerSecond:N2}" : "-");
+                sb.Replace(@"{gpm}", GoldPerHourTimer.Running ? $"{GoldPerHourTimer.GoldPerMinute:N2}" : "-");
+                sb.Replace(@"{gph}", GoldPerHourTimer.Running ? $"{GoldPerHourTimer.GoldPerHour:N2}" : "-");
+	            sb.Replace(@"{totalgold}", GoldPerHourTimer.Running ? $"{GoldPerHourTimer.GoldSinceStart}" : "-");
+
+                sb.Replace(@"{bandage}", BandageTimer.Running ? $"~#FF8000{BandageTimer.Count}~#~" : "-");
 
 	            sb.Replace(@"{skill}", SkillTimer.Running ? $"{SkillTimer.Count}" : "-");
 

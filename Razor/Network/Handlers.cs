@@ -1859,14 +1859,18 @@ namespace Assistant
 				        World.Player.ResetCriminalTimer();
 				    }
 
+                    // Overhead message override
 				    if (Config.GetBool("ShowOverheadMessages") && OverheadMessages.OverheadMessageList.Count > 0)
 				    {
+				        string overheadFormat = Config.GetString("OverheadFormat");
+
 				        foreach (OverheadMessages.OverheadMessage message in OverheadMessages.OverheadMessageList)
 				        {
 				            if (text.IndexOf(message.SearchMessage, StringComparison.OrdinalIgnoreCase) != -1)
 				            {
-				                World.Player.OverheadMessage(message.MessageOverhead);
-                            }
+				                World.Player.OverheadMessage(overheadFormat.Replace("{msg}", message.MessageOverhead));
+				                break;
+				            }
 				        }
 				    }
                 }
