@@ -101,6 +101,7 @@
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net40\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System">
       <Name>System</Name>
@@ -200,6 +201,24 @@
     <Compile Include="Core\ItemID.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="JMap\GDI32.cs" />
+    <Compile Include="JMap\JimmyMap.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="JMap\JimmyMap.Designer.cs">
+      <DependentUpon>JimmyMap.cs</DependentUpon>
+    </Compile>
+    <Compile Include="JMap\Map.cs" />
+    <Compile Include="JMap\MapGeneration.cs" />
+    <Compile Include="JMap\MapPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="JMap\MapRegion.cs" />
+    <Compile Include="JMap\Markers.cs" />
+    <Compile Include="JMap\RiffPalette.cs" />
+    <Compile Include="JMap\TileDisplay.cs" />
+    <Compile Include="JMap\UIElements.cs" />
+    <Compile Include="JMap\World.cs" />
     <Compile Include="Macros\AbsoluteTarget.cs" />
     <Compile Include="Macros\Actions.cs">
       <SubType>Component</SubType>
@@ -353,6 +372,12 @@
     <EmbeddedResource Include="Boat\BoatWindow.resx">
       <DependentUpon>BoatWindow.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="JMap\JimmyMap.resx">
+      <DependentUpon>JimmyMap.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="JMap\MapPanel.resx">
+      <DependentUpon>MapPanel.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Macros\Actions.resx">
       <DependentUpon>Actions.cs</DependentUpon>
     </EmbeddedResource>
@@ -445,6 +470,11 @@
       <Project>{5d66ace6-b2a4-400f-b5a5-24525959ac5c}</Project>
       <Name>Ultima</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="JMap\Resources\Cursors\" />
+    <Folder Include="JMap\Resources\Markers\" />
+    <Folder Include="JMap\Resources\Signs\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
