@@ -428,6 +428,7 @@ namespace Assistant
             this.gameSize = new System.Windows.Forms.CheckBox();
             this.chkPartyOverhead = new System.Windows.Forms.CheckBox();
             this.displayTab = new System.Windows.Forms.TabPage();
+            this.goldPerDisplay = new System.Windows.Forms.CheckBox();
             this.showNotoHue = new System.Windows.Forms.CheckBox();
             this.warnNum = new System.Windows.Forms.TextBox();
             this.warnCount = new System.Windows.Forms.CheckBox();
@@ -594,7 +595,6 @@ namespace Assistant
             this.label21 = new System.Windows.Forms.Label();
             this.aboutVer = new System.Windows.Forms.Label();
             this.timerTimer = new System.Windows.Forms.Timer(this.components);
-            this.goldPerDisplay = new System.Windows.Forms.CheckBox();
             this.tabs.SuspendLayout();
             this.generalTab.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -1242,7 +1242,7 @@ namespace Assistant
             // overHeadMessages
             // 
             this.overHeadMessages.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.overHeadMessages.Location = new System.Drawing.Point(425, 237);
+            this.overHeadMessages.Location = new System.Drawing.Point(412, 237);
             this.overHeadMessages.Name = "overHeadMessages";
             this.overHeadMessages.Size = new System.Drawing.Size(33, 19);
             this.overHeadMessages.TabIndex = 75;
@@ -1382,7 +1382,7 @@ namespace Assistant
             // 
             this.alwaysStealth.Location = new System.Drawing.Point(245, 83);
             this.alwaysStealth.Name = "alwaysStealth";
-            this.alwaysStealth.Size = new System.Drawing.Size(190, 20);
+            this.alwaysStealth.Size = new System.Drawing.Size(174, 20);
             this.alwaysStealth.TabIndex = 57;
             this.alwaysStealth.Text = "Always show stealth steps ";
             this.alwaysStealth.CheckedChanged += new System.EventHandler(this.alwaysStealth_CheckedChanged);
@@ -1400,7 +1400,7 @@ namespace Assistant
             // 
             this.chkStealth.Location = new System.Drawing.Point(245, 57);
             this.chkStealth.Name = "chkStealth";
-            this.chkStealth.Size = new System.Drawing.Size(190, 20);
+            this.chkStealth.Size = new System.Drawing.Size(135, 20);
             this.chkStealth.TabIndex = 12;
             this.chkStealth.Text = "Count stealth steps";
             this.chkStealth.CheckedChanged += new System.EventHandler(this.chkStealth_CheckedChanged);
@@ -1519,6 +1519,17 @@ namespace Assistant
             this.displayTab.Size = new System.Drawing.Size(482, 460);
             this.displayTab.TabIndex = 1;
             this.displayTab.Text = "Display/Counters";
+            // 
+            // goldPerDisplay
+            // 
+            this.goldPerDisplay.AutoSize = true;
+            this.goldPerDisplay.Location = new System.Drawing.Point(216, 245);
+            this.goldPerDisplay.Name = "goldPerDisplay";
+            this.goldPerDisplay.Size = new System.Drawing.Size(228, 19);
+            this.goldPerDisplay.TabIndex = 48;
+            this.goldPerDisplay.Text = "Enable gold per sec/min/hour counter";
+            this.goldPerDisplay.UseVisualStyleBackColor = true;
+            this.goldPerDisplay.CheckedChanged += new System.EventHandler(this.goldPerDisplay_CheckedChanged);
             // 
             // showNotoHue
             // 
@@ -3248,21 +3259,10 @@ namespace Assistant
             this.timerTimer.Interval = 5;
             this.timerTimer.Tick += new System.EventHandler(this.timerTimer_Tick);
             // 
-            // goldPerDisplay
-            // 
-            this.goldPerDisplay.AutoSize = true;
-            this.goldPerDisplay.Location = new System.Drawing.Point(216, 245);
-            this.goldPerDisplay.Name = "goldPerDisplay";
-            this.goldPerDisplay.Size = new System.Drawing.Size(228, 19);
-            this.goldPerDisplay.TabIndex = 48;
-            this.goldPerDisplay.Text = "Enable gold per sec/min/hour counter";
-            this.goldPerDisplay.UseVisualStyleBackColor = true;
-            this.goldPerDisplay.CheckedChanged += new System.EventHandler(this.goldPerDisplay_CheckedChanged);
-            // 
             // MainForm
             // 
             this.AutoScaleBaseSize = new System.Drawing.Size(6, 16);
-            this.ClientSize = new System.Drawing.Size(541, 439);
+            this.ClientSize = new System.Drawing.Size(541, 517);
             this.Controls.Add(this.tabs);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;

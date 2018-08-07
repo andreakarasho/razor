@@ -134,9 +134,5 @@ namespace Assistant.UI
             Close();
         }
 
-        private void cliLocTextSearch_TextChanged(object sender, EventArgs e)
-        {
-
-        }
     }
 }
