@@ -1919,9 +1919,14 @@ namespace Assistant
 			{
 				HandleSpeech( p, args, serial, body, type, hue, font, "A", name, text );
 
-				if ( !serial.IsValid )
-					BandageTimer.OnAsciiMessage( text );
-			}
+			    if (!serial.IsValid)
+			    {
+			        BandageTimer.OnAsciiMessage(text);
+                   }
+
+			    GateTimer.OnAsciiMessage(text);
+
+            }
 		}
 
 		public static void UnicodeSpeech( Packet p, PacketHandlerEventArgs args )
