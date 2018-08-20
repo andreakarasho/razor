@@ -674,7 +674,10 @@ namespace Assistant
 
 				if ( Engine.MainWindow != null && Engine.MainWindow.MapWindow != null )
 					Engine.MainWindow.MapWindow.PlayerMoved();
-			}
+
+                if (Engine.MainWindow != null && Engine.MainWindow.jMap != null)
+                    Engine.MainWindow.jMap.PlayerMoved();
+            }
 		}
 
 		public override void OnPositionChanging( Point3D newPos )
@@ -743,7 +746,10 @@ namespace Assistant
 			
 			if ( Engine.MainWindow != null && Engine.MainWindow.MapWindow != null )
 				Engine.MainWindow.MapWindow.PlayerMoved();
-		}
+
+            if (Engine.MainWindow != null && Engine.MainWindow.jMap != null)
+                Engine.MainWindow.jMap.PlayerMoved();
+        }
 
 		/*public override void OnMapChange( byte old, byte cur )
 		{

@@ -235,15 +235,15 @@ namespace Assistant
         private Button nextMacroAction;
         private Button disableSmartCPU;
         private TabPage mapTab;
-        private CheckBox trackPlayerPosition;
+        public CheckBox trackPlayerPosition;
         private GroupBox groupMapPoints;
         private ListBox mapPoints;
         private Button openUOPS;
-        private CheckBox tiltMap;
-        private CheckBox showPartyMemberPositions;
-        private Button removeMapPoint;
-        private Button addMapPoint;
-        private CheckBox showPlayerPosition;
+        public CheckBox tiltMap;
+        public CheckBox showPartyMemberPositions;
+        public Button removeMapPoint;
+        public Button addMapPoint;
+        public CheckBox showPlayerPosition;
         private TextBox forceSizeX;
         private TextBox forceSizeY;
         private TextBox healthFmt;
@@ -280,6 +280,7 @@ namespace Assistant
         private Button saveProfile;
         private Label lightLevel;
         private TrackBar lightLevelBar;
+        private Label label25;
         private TreeView _hotkeyTreeViewCache = new TreeView();
 
 		[DllImport( "User32.dll" )]
@@ -591,6 +592,7 @@ namespace Assistant
             this.label21 = new System.Windows.Forms.Label();
             this.aboutVer = new System.Windows.Forms.Label();
             this.timerTimer = new System.Windows.Forms.Timer(this.components);
+            this.label25 = new System.Windows.Forms.Label();
             this.tabs.SuspendLayout();
             this.generalTab.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -2485,6 +2487,7 @@ namespace Assistant
             // mapTab
             // 
             this.mapTab.BackColor = System.Drawing.SystemColors.Control;
+            this.mapTab.Controls.Add(this.label25);
             this.mapTab.Controls.Add(this.boatControl);
             this.mapTab.Controls.Add(this.btnMap);
             this.mapTab.Controls.Add(this.showPlayerPosition);
@@ -2521,7 +2524,8 @@ namespace Assistant
             // showPlayerPosition
             // 
             this.showPlayerPosition.AutoSize = true;
-            this.showPlayerPosition.Location = new System.Drawing.Point(6, 52);
+            this.showPlayerPosition.Enabled = false;
+            this.showPlayerPosition.Location = new System.Drawing.Point(9, 89);
             this.showPlayerPosition.Name = "showPlayerPosition";
             this.showPlayerPosition.Size = new System.Drawing.Size(172, 19);
             this.showPlayerPosition.TabIndex = 5;
@@ -2532,7 +2536,8 @@ namespace Assistant
             // tiltMap
             // 
             this.tiltMap.AutoSize = true;
-            this.tiltMap.Location = new System.Drawing.Point(6, 127);
+            this.tiltMap.Enabled = false;
+            this.tiltMap.Location = new System.Drawing.Point(9, 164);
             this.tiltMap.Name = "tiltMap";
             this.tiltMap.Size = new System.Drawing.Size(93, 19);
             this.tiltMap.TabIndex = 4;
@@ -2543,7 +2548,8 @@ namespace Assistant
             // showPartyMemberPositions
             // 
             this.showPartyMemberPositions.AutoSize = true;
-            this.showPartyMemberPositions.Location = new System.Drawing.Point(6, 102);
+            this.showPartyMemberPositions.Enabled = false;
+            this.showPartyMemberPositions.Location = new System.Drawing.Point(9, 139);
             this.showPartyMemberPositions.Name = "showPartyMemberPositions";
             this.showPartyMemberPositions.Size = new System.Drawing.Size(184, 19);
             this.showPartyMemberPositions.TabIndex = 3;
@@ -2557,7 +2563,7 @@ namespace Assistant
             this.openUOPS.Name = "openUOPS";
             this.openUOPS.Size = new System.Drawing.Size(134, 32);
             this.openUOPS.TabIndex = 2;
-            this.openUOPS.Text = "Open UOPS 2.0";
+            this.openUOPS.Text = "Open JMap";
             this.openUOPS.UseVisualStyleBackColor = true;
             this.openUOPS.Click += new System.EventHandler(this.openUOPS_Click);
             // 
@@ -2575,6 +2581,7 @@ namespace Assistant
             // 
             // removeMapPoint
             // 
+            this.removeMapPoint.Enabled = false;
             this.removeMapPoint.Location = new System.Drawing.Point(123, 191);
             this.removeMapPoint.Name = "removeMapPoint";
             this.removeMapPoint.Size = new System.Drawing.Size(71, 35);
@@ -2584,6 +2591,7 @@ namespace Assistant
             // 
             // addMapPoint
             // 
+            this.addMapPoint.Enabled = false;
             this.addMapPoint.Location = new System.Drawing.Point(6, 191);
             this.addMapPoint.Name = "addMapPoint";
             this.addMapPoint.Size = new System.Drawing.Size(71, 35);
@@ -2593,6 +2601,7 @@ namespace Assistant
             // 
             // mapPoints
             // 
+            this.mapPoints.Enabled = false;
             this.mapPoints.FormattingEnabled = true;
             this.mapPoints.ItemHeight = 15;
             this.mapPoints.Location = new System.Drawing.Point(6, 16);
@@ -2603,7 +2612,8 @@ namespace Assistant
             // trackPlayerPosition
             // 
             this.trackPlayerPosition.AutoSize = true;
-            this.trackPlayerPosition.Location = new System.Drawing.Point(6, 77);
+            this.trackPlayerPosition.Enabled = false;
+            this.trackPlayerPosition.Location = new System.Drawing.Point(9, 114);
             this.trackPlayerPosition.Name = "trackPlayerPosition";
             this.trackPlayerPosition.Size = new System.Drawing.Size(220, 19);
             this.trackPlayerPosition.TabIndex = 0;
@@ -3231,10 +3241,19 @@ namespace Assistant
             this.timerTimer.Interval = 5;
             this.timerTimer.Tick += new System.EventHandler(this.timerTimer_Tick);
             // 
+            // label25
+            // 
+            this.label25.ForeColor = System.Drawing.Color.Red;
+            this.label25.Location = new System.Drawing.Point(6, 49);
+            this.label25.Name = "label25";
+            this.label25.Size = new System.Drawing.Size(267, 37);
+            this.label25.TabIndex = 61;
+            this.label25.Text = "For JMap options, please use the right-click context menu within the map itself.";
+            // 
             // MainForm
             // 
             this.AutoScaleBaseSize = new System.Drawing.Size(6, 16);
-            this.ClientSize = new System.Drawing.Size(541, 486);
+            this.ClientSize = new System.Drawing.Size(541, 352);
             this.Controls.Add(this.tabs);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -3544,9 +3563,9 @@ namespace Assistant
 
 		    //hotKeyStop.Checked = Config.GetBool("HotKeyStop");
 
-		    showPartyMemberPositions.Checked = Config.GetBool("ShowPlayerPosition");
+		    showPartyMemberPositions.Checked = Config.GetBool("ShowPartyMemberPositions");
             trackPlayerPosition.Checked = Config.GetBool("TrackPlayerPosition");
-            showPlayerPosition.Checked = Config.GetBool("ShowPartyMemberPositions");
+            showPlayerPosition.Checked = Config.GetBool("ShowPlayerPosition");
             tiltMap.Checked = Config.GetBool("TiltMap");
 
 		    showTargetMessagesOverChar.Checked = Config.GetBool("ShowTargetSelfLastClearOverhead");
@@ -4334,7 +4353,7 @@ namespace Assistant
 
 		private void MainForm_Closing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
-			if ( !m_CanClose && ClientCommunication.ClientRunning )
+            if ( !m_CanClose && ClientCommunication.ClientRunning )
 			{
 				DisableCloseButton();
 				e.Cancel = true;
@@ -6919,7 +6938,9 @@ namespace Assistant
 
 		public Assistant.MapUO.MapWindow MapWindow;
 
-		[System.Runtime.InteropServices.DllImport( "user32.dll" )]
+        public Assistant.JMap.JimmyMap jMap;
+
+        [System.Runtime.InteropServices.DllImport( "user32.dll" )]
 		private static extern IntPtr SetParent( IntPtr child, IntPtr newParent );
 
 		private void btnMap_Click(object sender, System.EventArgs e)
@@ -7295,21 +7316,85 @@ namespace Assistant
         private void showPlayerPosition_CheckedChanged(object sender, EventArgs e)
         {
             Config.SetProperty("ShowPlayerPosition", showPlayerPosition.Checked);
+
+            /*if (jMap != null)
+            {
+                if (jMap.mapPanel.IsShowPlayerPosition)
+                {
+                    jMap.mapPanel.IsShowPlayerPosition = false;
+                    jMap.mapPanel.Menu_ShowPlayerPosition.Checked = false;
+                }
+                else
+                {
+                    jMap.mapPanel.IsShowPlayerPosition = true;
+                    jMap.mapPanel.Menu_ShowPlayerPosition.Checked = true;
+                }
+            }*/
+
+
         }
 
         private void trackPlayerPosition_CheckedChanged(object sender, EventArgs e)
         {
             Config.SetProperty("TrackPlayerPosition", trackPlayerPosition.Checked);
+
+            /*if (jMap != null)
+            {
+                if (jMap.mapPanel.IsTrackPlayerPosition)
+                {
+                    jMap.mapPanel.IsTrackPlayerPosition = false;
+                    jMap.mapPanel.Menu_TrackPlayerPosition.Checked = false;
+                }
+                else
+                {
+                    jMap.mapPanel.IsTrackPlayerPosition = true;
+                    jMap.mapPanel.Menu_TrackPlayerPosition.Checked = true;
+                }
+            }*/
+
+
         }
 
         private void showPartyMemberPositions_CheckedChanged(object sender, EventArgs e)
         {
             Config.SetProperty("ShowPartyMemberPositions", showPartyMemberPositions.Checked);
+
+            /*if (jMap != null)
+            {
+                if (jMap.mapPanel.IsShowPartyPositions)
+                {
+                    jMap.mapPanel.IsShowPartyPositions = false;
+                    jMap.mapPanel.Menu_ShowPartyPositions.Checked = false;
+                }
+                else
+                {
+                    jMap.mapPanel.IsShowPartyPositions = true;
+                    jMap.mapPanel.Menu_ShowPartyPositions.Checked = true;
+                }
+            }*/
+
+
         }
 
         private void tiltMap_CheckedChanged(object sender, EventArgs e)
         {
-            Config.SetProperty("TiltMap", showPartyMemberPositions.Checked);
+            Config.SetProperty("TiltMap", tiltMap.Checked);
+
+            /*if (jMap != null)
+            {
+                if (jMap.mapPanel.mapRotated)
+                {
+                    jMap.mapPanel.mapRotated = false;
+                    jMap.mapPanel.TiltMap45.Checked = false;
+                }
+                else
+                {
+                    jMap.mapPanel.mapRotated = true;
+                    jMap.mapPanel.TiltMap45.Checked = true;
+                }
+            }*/
+
+
         }
 
         private void boatControl_Click(object sender, EventArgs e)
@@ -7333,9 +7418,27 @@ namespace Assistant
 
         private void openUOPS_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Soon(tm)");
+            if (jMap == null)
+            {
+                jMap = new Assistant.JMap.JimmyMap()
+                {
+                    mainForm = this
+                }; 
+            }
 
-            return;
+            jMap.Enabled = true;
+            
+
+            //SetParent(jMap.Handle, ClientCommunication.FindUOWindow());
+            //jMap.Owner = (Form)Form.FromHandle(ClientCommunication.FindUOWindow());
+            
+            //we handle showing in the jmap class due to map generation 
+            //jMap.Show();
+            //jMap.BringToFront();
+
+            //MessageBox.Show("Soon(tm)");
+
+            //return;
 
             /*if (World.Player != null)
             {

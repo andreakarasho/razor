@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -33,10 +34,21 @@ namespace Assistant.JMap
 
         public TileDisplay tileDisplay;
 
-        public MapGeneration(JimmyMap main, Panel mapPanel, int MapID, TileDisplay tileDisp)
+        public MapGeneration(JimmyMap main, MapPanel mapPanel, int MapID, TileDisplay tileDisp)
         {
+            /*if (!Directory.Exists($"{Config.GetInstallDirectory()}\\Map"))
+            {
+                Directory.CreateDirectory($"{Config.GetInstallDirectory()}\\Map");
+            }*/
+
+            //genProgressBar = new ProgressBar();
+            
+
+
             this.tileDisplay = tileDisp;
             Debug.WriteLine("Gen called!");
+
+            
             
             //DEFAULT, FELUCCA MAP
             map = JMap.Map.GetMap(MapID);
@@ -46,7 +58,7 @@ namespace Assistant.JMap
 
 
             RiffPalette _loadedPalette = new RiffPalette();
-            _loadedPalette.Load(@"F:\UOStuff\\UOArt\\Maps\\palettes\\felucca.pal");
+            _loadedPalette.Load($"{Config.GetInstallDirectory()}\\JMap\\Resources\\Palettes\\felucca.pal");
 
             //RiffPalette _loadedHeightPalette = new RiffPalette();
             //_loadedHeightPalette.Load(@"F:\UOStuff\\UOArt\\Maps\\palettes\\heightmap.pal");
@@ -109,7 +121,10 @@ namespace Assistant.JMap
             heightLockBitmap.LockBits();
             */
             #endregion
+            int currentStep = 0;
+            int maxStep = 512; //(map.Height / 8) + (map.Width / 8);
 
+            //main.mapGenProgressBar.progressBar.Maximum = maxStep;
 
             Random rnd = new Random();
 
@@ -261,9 +276,25 @@ namespace Assistant.JMap
 
                     //tileDisplay.CacheTiles(bX, bY, BlockCache);
                     //tileDisplay.CacheStatics(bX, bY, StaticCache);
+
+                    //currentStep
+
+
+
+                    //int step = Convert.ToInt32(Math.Floor((double)((currentStep / maxStep) * 100)));
+
+                    //Debug.WriteLine($"Current:{currentStep} Max:{maxStep} ReportedStep:{step}");
+
+                    //main.mapGenWorker.ReportProgress(step);
+
                 }
 
                 data = new short[0];
+
+                currentStep++;
+                int step = (currentStep / maxStep) * maxStep;
+                //Debug.WriteLine($"Current:{currentStep} Max:{maxStep}");
+                main.mapGenWorker.ReportProgress(currentStep);
             }
 
 
@@ -285,16 +316,16 @@ namespace Assistant.JMap
                         }
             */
 
-            newMap.Save(@"F:\UOStuff\\UOArt\\Maps\\Generated\\Regular\\MAP0-1.BMP", ImageFormat.Bmp);
+            newMap.Save($"{Config.GetInstallDirectory()}\\JMap\\MAP0-1.BMP", ImageFormat.Bmp);
 
-            Bitmap newMap2 = new Bitmap(newMap, sizeX / 2, sizeY / 2);
-            newMap2.Save(@"F:\UOStuff\\UOArt\\Maps\\Generated\\Regular\\MAP0-2.BMP", ImageFormat.Bmp);
+            //Bitmap newMap2 = new Bitmap(newMap, sizeX / 2, sizeY / 2);
+            //newMap2.Save($"{Config.GetInstallDirectory()}\\JMap\\MAP0-2.BMP", ImageFormat.Bmp);
 
-            Bitmap newMap4 = new Bitmap(newMap, sizeX / 4, sizeY / 4);
-            newMap4.Save(@"F:\UOStuff\\UOArt\\Maps\\Generated\\Regular\\MAP0-4.BMP", ImageFormat.Bmp);
+            //Bitmap newMap4 = new Bitmap(newMap, sizeX / 4, sizeY / 4);
+            //newMap4.Save($"{Config.GetInstallDirectory()}\\JMap\\MAP0-4.BMP", ImageFormat.Bmp);
 
-            Bitmap newMap8 = new Bitmap(newMap, sizeX / 8, sizeY / 8);
-            newMap8.Save(@"F:\UOStuff\\UOArt\\Maps\\Generated\\Regular\\MAP0-8.BMP", ImageFormat.Bmp);
+            //Bitmap newMap8 = new Bitmap(newMap, sizeX / 8, sizeY / 8);
+            //newMap8.Save($"{Config.GetInstallDirectory()}\\JMap\\MAP0-8.BMP", ImageFormat.Bmp);
 
             lockBitmap.source = null;
             lockBitmap.bitmapData = null;
@@ -303,9 +334,9 @@ namespace Assistant.JMap
             colorTable = null;
 
             newMap.Dispose();
-            newMap2.Dispose();
-            newMap4.Dispose();
-            newMap8.Dispose();
+            //newMap2.Dispose();
+            //newMap4.Dispose();
+            //newMap8.Dispose();
 
             /*
             heightMap.Save(@"F:\UOStuff\\UOArt\\Maps\\Generated\\Regular\\MAP0-1-HM.BMP", ImageFormat.Bmp);
@@ -369,7 +400,7 @@ namespace Assistant.JMap
 
 
             // Loop through the entire palette BACKWARD, looking for the closest color match
-            /*for (int indexR = map.Palette.Entries.Length - 1; indexR > -1; indexR--)
+            for (int indexR = map.Palette.Entries.Length - 1; indexR > -1; indexR--)
             {
                 //if (distanceFwd == 0)
                 //    break;
@@ -401,10 +432,8 @@ namespace Assistant.JMap
                         break;
                     }
                 }
-            }*/
+            }
 
-
-            
             // Loop through the entire palette FORWARD, looking for the closest color match
             for (int indexF = 0; indexF < map.Palette.Entries.Length; indexF++)
             {
@@ -439,41 +468,41 @@ namespace Assistant.JMap
                 }
             }
 
-
             //Debug.WriteLine("LeastDistanceFwd: {0} With Index: {1} ", leastDistanceFwd, colorIndexFwd);
             //Debug.WriteLine("LeastDistanceRev: {0} With Index: {1} ", leastDistanceRev, colorIndexRev);
-            /*
+            
             int indexDiff = colorIndexFwd - colorIndexRev;
             
             if(distanceFwd == distanceRev) // Conflict? Which has the matching high value?
             {
                 if (paletteStrongFwd > paletteStrongRev)
                 {
-                    Debug.WriteLine("Conflict won by Fwd, high value: " + paletteStrongFwd);
-                    fwdfound++;
+                    //Debug.WriteLine("Conflict won by Fwd, high value: " + paletteStrongFwd);
+                    //fwdfound++;
                     return colorIndexFwd;
                 }
-                Debug.WriteLine("Conflict won by Rev, high value: " + paletteStrongRev);
+                //Debug.WriteLine("Conflict won by Rev, high value: " + paletteStrongRev);
                 revfound++;
                 return colorIndexRev;
             }
             
             if(distanceFwd < distanceRev)
             {
-                Debug.WriteLine("Forward was best. {0} indices different.", indexDiff);
-                fwdfound++;
+                //Debug.WriteLine("Forward was best. {0} indices different.", indexDiff);
+                //fwdfound++;
                 return colorIndexFwd;
             }
+            /*
             Debug.WriteLine("Reverse was best. {0} indices different.", indexDiff);
             revfound++;
-            return colorIndexRev;
+            
             */
-
+            return colorIndexRev;
 
 
 
             //return colorIndexRev;
-            return colorIndexFwd;
+            //return colorIndexFwd;
         }
 
     }

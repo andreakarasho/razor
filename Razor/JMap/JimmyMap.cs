@@ -21,8 +21,16 @@ namespace Assistant.JMap
     {
         delegate void UpdateMapCallback();
 
-        private MapPanel mapPanel;
+        public MainForm mainForm;
+
+        public MapPanel mapPanel;
         private TileDisplay tileDisplay;
+
+        public MapGenProgressBar mapGenProgressBar;
+        //public ProgressBar mapGenProgressBar;
+        public BackgroundWorker mapGenWorker;
+
+        public int currentGenStep = 0;
 
         [DllImport("user32.dll")]
         public static extern int SendMessage(IntPtr hWnd, Int32 wMsg, bool wParam, Int32 lParam);
@@ -31,6 +39,7 @@ namespace Assistant.JMap
         public JimmyMap()
         {
             InitializeComponent();
+            Enabled = false;
             SetTopLevel(true);
 
             DoubleBuffered = true;
@@ -53,75 +62,163 @@ namespace Assistant.JMap
             //MaximumSize = new Size((int)(mapPanel.mapWidth - mapPanel.bgLeft), (int)(mapPanel.mapHeight - mapPanel.bgTop));
 
             this.MouseEnter += new EventHandler(main_MouseEnter);
-            //MouseLeave += new EventHandler(main_MouseLeave);
+            this.MouseLeave += new EventHandler(main_MouseLeave);
             this.MouseDown += new MouseEventHandler(main_MouseDown);
             this.MouseUp += new MouseEventHandler(main_MouseUp);
             this.MouseMove += new MouseEventHandler(main_MouseMove);
             this.MouseDoubleClick += new MouseEventHandler(main_DoubleClick);
             this.MouseWheel += new MouseEventHandler(main_OnMouseWheel);
             this.Closing += new CancelEventHandler(JMap_Closing);
+            this.FormClosing += new FormClosingEventHandler(main_Closing_SaveAll);
+            this.EnabledChanged += new EventHandler(main_Enabled);
             //FormClosing += new FormClosingEventHandler(main_Exit);
 
             Activate();
-            JimmyMap_Load();
+            
+            
             Text = "UO Map";
             Size = new Size(416, 439);
-            Show();
+            
 
-            mapPanel.Invalidate();
-            mapPanel.UpdateAll();
 
-            if (mapPanel.trackingPlayer)
-                mapPanel.TrackPlayer(mapPanel.pntPlayer);
+        }
 
-            Invalidate();
+        private void main_Enabled(object sender, EventArgs e)
+        {
+            JimmyMap_Load();
         }
 
         private void JimmyMap_Load()
         {
             tileDisplay = new TileDisplay();
 
+            if (!File.Exists($"{Config.GetInstallDirectory()}\\JMap\\MAP0-1.BMP"))
+            {
+                //GenerateMaps();
+                mapGenProgressBar = new MapGenProgressBar();
+
+                // Hack to make progress bar function.. sort of :)
+                Ultima.Map map = JMap.Map.GetMap(1);
+                if (map == null)
+                    map = Ultima.Map.Felucca;
+
+                int maxStep = 512;// (map.Height / 8) + (map.Width / 8);
+                mapGenProgressBar.progressBar.Maximum = maxStep;
+                // End hacky fix
+
+
+                mapGenProgressBar.Show();
+                mapGenProgressBar.BringToFront();
+
+                GenerationWorker();
+            }
+            else
+            {
+                JimmyMap_ContinueLoad();
+            }
             //-----------------------------  GenerateMaps(); ------------------------------------------//
-            
-            
+
+
             //Bitmap multiMap = MultiMap.GetMultiMap();
             //multiMap.Save(@"F:\UO Stuff\\UO Art\\Maps\\Generated\\Multis\\MULTI0-1.BMP", ImageFormat.Bmp);
 
-            if (mapPanel == null)
-            {
-                Controls.Add
-                (
-                    mapPanel = new JMap.MapPanel()
-                    {
-                        main = this,
-                        Size = ClientRectangle.Size,
-                        Parent = this,
-                        BackColor = Color.Black,
-                        BackgroundImageLayout = ImageLayout.Zoom,
-                        Location = new Point(0, 0),
-                        Name = "mapPanel",
-                        TabIndex = 0,
-                        tileDisplay = this.tileDisplay
-                    }
-                );
+        }
 
-                mapPanel.LoadMap();
+        private void JimmyMap_ContinueLoad()
+        {
+            try
+            {
+                if (mapPanel == null)
+                {
+                    Controls.Add
+                    (
+                        mapPanel = new JMap.MapPanel()
+                        {
+                            main = this,
+                            Size = ClientRectangle.Size,
+                            Parent = this,
+                            BackColor = Color.Black,
+                            BackgroundImageLayout = ImageLayout.Zoom,
+                            Location = new Point(0, 0),
+                            Name = "mapPanel",
+                            TabIndex = 0,
+                            tileDisplay = this.tileDisplay
+                        }
+                    );
+
+                    mapPanel.mainForm = this.mainForm;
+                    mapPanel.LoadMap();
+                }
             }
+            catch (Exception e)
+            {
+                Debug.WriteLine($"EXCEPTION: {e.ToString()}");
+            }
+
+            this.Show();
+            this.BringToFront();
 
             ClientCommunication.SetMapWndHandle(this);
 
+            //mapPanel.Invalidate();
+            mapPanel.UpdatePlayerPos();
+            //mapPanel.UpdateAll();
 
+            if (mapPanel.trackingPlayer)
+                mapPanel.TrackPlayer();
+            else
+                mapPanel.UpdateAll();
+            //Invalidate();
 
             //MapGeneration mapGen = new MapGeneration(this, mapPanel, 0);
         }
+
+        #region MAP GEN WORKER
+
+        public void GenerationWorker()
+        {
+            if (mapGenWorker != null)
+                mapGenWorker.Dispose();
+
+            mapGenWorker = new BackgroundWorker();
+            mapGenWorker.DoWork += new DoWorkEventHandler(GenerationWorker_DoWork);
+            mapGenWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(Generation_RunWorkerCompleted);
+            mapGenWorker.ProgressChanged += new ProgressChangedEventHandler(Generation_ReportProgress);
+            mapGenWorker.WorkerReportsProgress = true;
+            mapGenWorker.WorkerSupportsCancellation = true;
+            mapGenWorker.RunWorkerAsync();
+
+        }
+
+        private void GenerationWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            BackgroundWorker worker = sender as BackgroundWorker;
+            GenerateMaps();
+        }
+
+        private void Generation_ReportProgress(object sender, ProgressChangedEventArgs e)
+        {
+            if(e.ProgressPercentage > currentGenStep)
+            {
+                mapGenProgressBar.progressBar.PerformStep();
+                currentGenStep = e.ProgressPercentage;
+            }
+            
+        }
+
+        private void Generation_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            JimmyMap_ContinueLoad();
+
+            mapGenProgressBar.Dispose();
+        }
+
+        #endregion
 
         public void GenerateMaps()
         {
             
             MapGeneration mapGen = new MapGeneration(this, mapPanel, 1, tileDisplay);
-
-            
-
             CleanUp(mapGen, 1);
         }
 
@@ -175,10 +272,12 @@ namespace Assistant.JMap
             //SuspendLayout();
 
             //mapPanel.UpdateAll();
+            mapPanel.UpdatePlayerPos();
 
             if (mapPanel.trackingPlayer)
-                mapPanel.TrackPlayer(mapPanel.pntPlayer);
-
+                mapPanel.TrackPlayer();
+            else
+                mapPanel.UpdateAll();
             //ResumeLayout();
             //mapPanel.UpdateAll();
 
@@ -189,7 +288,7 @@ namespace Assistant.JMap
             if (mob.InParty)
             {
 
-                mapPanel.Invalidate();
+                //mapPanel.Invalidate();
                 //mapPanel.Update();
                 mapPanel.UpdateAll();
             }
@@ -208,8 +307,9 @@ namespace Assistant.JMap
                     Serial s = (Serial)mItem.Tag;
                     Mobile m = World.FindMobile(s);
                     mapPanel.FocusMobile = m;
-                    mapPanel.Invalidate();
+                    //mapPanel.Invalidate();
                     //mapPanel.Update();
+                    mapPanel.UpdatePlayerPos();
                     mapPanel.UpdateAll();
 
                 }
@@ -237,19 +337,21 @@ namespace Assistant.JMap
                 Activate();
                 Focus();
             }
-                
-                
+
+            mapPanel.mapPanel_MouseEnter(sender, e);    
         }
 
-        /*public void main_MouseLeave(object sender, EventArgs e)
+        public void main_MouseLeave(object sender, EventArgs e)
         {
-            Debug.WriteLine("MouseLeave");
-            if (Focused && TopMost)
-            {//Doesn't work as intended, inactive function
-                SendToBack();
-                BringToFront();
-            }
-        }*/
+            //Debug.WriteLine("MouseLeave");
+            //if (Focused && TopMost)
+            //{//Doesn't work as intended, inactive function
+            //    SendToBack();
+            //    BringToFront();
+            //}
+
+            mapPanel.mapPanel_MouseLeave(sender, e);
+        }
 
         public void main_MouseDown(object sender, MouseEventArgs e)
         {
@@ -287,6 +389,11 @@ namespace Assistant.JMap
                 Engine.MainWindow.BringToFront();
                 ClientCommunication.BringToFront(ClientCommunication.FindUOWindow());
             }
+        }
+
+        private void main_Closing_SaveAll(object sender, FormClosingEventArgs e)
+        {
+            mapPanel.WriteUpdatedCSV();
         }
 
         // MAP BORDER ZONES

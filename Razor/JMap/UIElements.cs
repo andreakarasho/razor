@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Drawing.Text;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -28,7 +29,7 @@ namespace Assistant.JMap
              * if another action occurs.
              */
 
-            Debug.WriteLine("NewButton Called");
+            //Debug.WriteLine("NewButton Called");
             try
             {
                 switch (type)
@@ -52,19 +53,20 @@ namespace Assistant.JMap
             {
                 return new JMapButton()
                 {
-                    curPath = @"F:\UOStuff\UOArt\Maps\Resources\Markers\mapPin32A21.cur",
-                    Size = new Size(32, 32),
+                    curPath = $"{Config.GetInstallDirectory()}\\JMap\\Resources\\Cursors\\mapPin32A21.cur",
+                    //Size = new Size(32, 32),
 
                     mapPanel = mapPanel,
                     type = JMapButtonType.MapPin,
                     mapLoc = new PointF(mapLocX, mapLocY),
                     displayText = displayText,
-                    extraText = extraText,
+                    extraText = extraText
+                    
                     //hasPane = hasPane,
                     //hasText = hasText,
                     //hasExtra = hasExtra,
-                    Name = displayText + "_" + mapLocX.ToString() + "_" + mapLocY.ToString(),
-                    Text = "",
+                    //Name = displayText + "_" + mapLocX.ToString() + "_" + mapLocY.ToString(),
+                    //Text = "",
 
                     
                     
@@ -91,7 +93,7 @@ namespace Assistant.JMap
         }
     }
 
-    public partial class JMapButton : Control, IButtonControl
+    public partial class JMapButton //: Control, IButtonControl
     {
         public MapPanel mapPanel;
 
@@ -104,9 +106,15 @@ namespace Assistant.JMap
         private Region hitbox { get; set; } //?? maybe not
         public PointF mapLoc { get; set; }
         public Point hotSpot { get; set; }
-
-
-
+        public PointF renderPoint { get; set; }
+        public PointF renderLoc { get; set; }
+        public PointF offset;
+        public PointF zeroPoint;
+        public PointF bgRot;
+        public PointF bgReg;
+        public float bgLeft;
+        public float bgTop;
+        public RectangleF renderingBounds;
         // States
         public bool IsHovered { get; set; }
         public Point mousePos { get; set; }
@@ -139,86 +147,110 @@ namespace Assistant.JMap
 
         public JMapButton()
         {
-            Enabled = false;
-            this.EnabledChanged += new EventHandler(LoadButton);
+            //Enabled = false;
+            //this.EnabledChanged += new EventHandler(LoadButton);
+            
             
         }
 
-        protected override void OnPaint(PaintEventArgs pe)
+        public void UpdateButton()
         {
-            //base.OnPaint(pe);
+            bgReg = mapPanel.bgReg;
+            bgTop = mapPanel.bgTop;
+            bgRot = mapPanel.bgRot;
+            offset = mapPanel.offset;
 
-            try
+            if (mapPanel.mapRotated)
             {
-                //Debug.WriteLine("Button OnPaint");
-                pe.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-                pe.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
-
-                if (Active)
-                {
-                    //pe.Graphics.Clear(Color.Transparent);
-
-                    PointF offset = mapPanel.offset;
-                    PointF zeroPoint = mapPanel.zeroPoint;
-
-                    mapLoc = new PointF(((mapLoc.X * offset.X) + zeroPoint.X), (mapLoc.Y * offset.Y) + zeroPoint.Y);
-
-                    if (mapPanel.mapRotated)
-                    {
-                        mapLoc = mapPanel.RotatePointF(mapLoc, mapPanel.pntPlayer, 45);
-                    }
-
-                    //Debug.WriteLine("Cursor Size: " + cur.Size);
-                    //Debug.WriteLine("img Size: " + img.Size);
-                    //Debug.WriteLine("Image Size: " + Image.Size);
-
-                    this.Left = 100 - hotSpot.X;//(int)(mapLoc.X - hotSpot.X);
-                    this.Top = 100 - hotSpot.Y; //(int)(mapLoc.Y - hotSpot.Y);
-
-
-
-                    //using (img)
-                    //{
-                        Rectangle rectF = this.DisplayRectangle;
-                        pe.Graphics.DrawImage(img, rectF);   //rectF.Width, rectF.Height
-
-                    if (IsHovered)
-                    {
-                        Debug.WriteLine("Should be highlighting");
-                        pe.Graphics.FillPath(highlightBrush, highlightArea);
-                    }
-                        
-                    // loc 0,0 + 13,3    8x8 elipse
-                    //}
-                    //cur.DrawStretched(pe.Graphics, rectF);
-                }
-
+                zeroPoint.X = bgRot.X;
+                zeroPoint.Y = bgRot.Y;
             }
-            catch(Exception e)
+            else
             {
-                Debug.WriteLine("ONPAINT ERROR: " + e.ToString());
+                zeroPoint.X = bgReg.X;
+                zeroPoint.Y = bgReg.Y;
             }
-            
+
+
+            renderPoint = new PointF(
+                                    Convert.ToInt32((Math.Floor((double)((mapLoc.X * offset.X) + zeroPoint.X) - hotSpot.X))),
+                                    Convert.ToInt32((Math.Floor((double)(mapLoc.Y * offset.Y) + zeroPoint.Y) - hotSpot.Y)));
+
+            renderLoc = renderPoint;
+            if (mapPanel.mapRotated)
+            {
+                renderLoc = mapPanel.RotatePointF(renderPoint, mapPanel.zeroPoint, 45);
+                renderLoc = new PointF(Convert.ToInt32(Math.Floor((double)renderLoc.X)), Convert.ToInt32(Math.Floor((double)renderLoc.Y)));
+            }
         }
+
+        
+        /*protected override void OnPaint(PaintEventArgs pe)
+        {
+            
+            //if (!Active)
+            //    return;
+            pe.Graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
+            pe.Graphics.SmoothingMode = SmoothingMode.HighQuality;
+            pe.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+            pe.Graphics.PageUnit = GraphicsUnit.Pixel;
+
+            offset = mapPanel.offset;
+            zeroPoint = mapPanel.zeroPoint;
+
+            renderPoint = new PointF(Convert.ToInt32(Math.Floor((double)((mapLoc.X * offset.X) + zeroPoint.X) - hotSpot.X)),
+                        Convert.ToInt32(Math.Floor((double)(mapLoc.Y * offset.Y) + zeroPoint.Y) - hotSpot.Y));
+
+            renderLoc = renderPoint;
+            if (mapPanel.mapRotated)
+            {
+                renderLoc = mapPanel.RotatePointF(renderPoint, mapPanel.pntPlayer, 45);
+            }
+
+            this.Left = Convert.ToInt32(Math.Floor((double)renderLoc.X));
+            this.Top = Convert.ToInt32(Math.Floor((double)renderLoc.Y));
+
+            //Rectangle rectF = this.DisplayRectangle; //Default size, 32,32 as it is a cursor
+
+            
+            //pe.Graphics.DrawImage(img, 0, 0, 24, 24);
+            
+            
+            //pe.Graphics.DrawImage(img, rectF);
+
+            
+            
+            //ResumeLayout();
+            //if (IsHovered)
+            //{
+            //    Debug.WriteLine("Should be highlighting");
+            //    pe.Graphics.FillPath(highlightBrush, highlightArea);
+            //}
+
+            // loc 0,0 + 13,3    8x8 elipse
+            //cur.DrawStretched(pe.Graphics, rectF);
+            //base.OnPaint(pe);
+            
+        }*/
 
         private void OnMouseMove(object sender, MouseEventArgs e)
         {
             //if(IsHovered)
             //{
-                mousePos = e.Location;
+                //mousePos = e.Location;
             //}
-            RectangleF buttonRect = new RectangleF(Left, Top, Width, Height);
+            //RectangleF buttonRect = new RectangleF(Left, Top, Width, Height);
 
-            if (buttonRect.Contains(mousePos) && img.GetPixel(mousePos.X, mousePos.Y).A > 11)
-            {
-                IsHovered = true;
-                Debug.WriteLine("Mouse moved, but still within button");
-            }
-            Invalidate();
-            Update();
+            //if (buttonRect.Contains(mousePos) && img.GetPixel(mousePos.X, mousePos.Y).A > 11)
+            //{
+            //    IsHovered = true;
+            //    Debug.WriteLine("Mouse moved, but still within button");
+            //}
+            //Invalidate();
+            //Update();
         }
 
-        private void OnMouseEnter(object sender, EventArgs e)
+        /*private void OnMouseEnter(object sender, EventArgs e)
         {
             Debug.WriteLine("Mouse entered, mouse pos: " + mousePos);
             RectangleF buttonRect = new RectangleF(Left, Top, Width, Height);
@@ -230,9 +262,9 @@ namespace Assistant.JMap
             }
             Invalidate();
             Update();
-        }
+        }*/
 
-        private void OnMouseHover(object sender, EventArgs e)
+        /*private void OnMouseHover(object sender, EventArgs e)
         {
             
             Debug.WriteLine("Hover triggered, mouse pos: " + mousePos);
@@ -245,55 +277,43 @@ namespace Assistant.JMap
             }
             Invalidate();
             Update();
-        }
+        }*/
 
-        private void OnMouseLeave(object sender, EventArgs e)
+        /*private void OnMouseLeave(object sender, EventArgs e)
         {
             IsHovered = false;
             Invalidate();
             Update();
-        }
+        }*/
 
-        protected override void OnPaintBackground(PaintEventArgs pe)
+        /*protected override void OnPaintBackground(PaintEventArgs pe)
         {
-            //pe.Graphics.Clear(this.BackColor);
-            //pe.Graphics.Clear(Color.Transparent);
             //Prevent anything occurring.
             //base.OnPaintBackground(pe);
-        }
+        }*/
 
-        protected override CreateParams CreateParams
-        {
-            get
-            {
-                const int WS_EX_TRANSPARENT = 0x20;
-                CreateParams cp = base.CreateParams;
-                cp.ExStyle |= WS_EX_TRANSPARENT;
-                return cp;
-            }
-        }
-
-
-
-        public void LoadButton(object sender, EventArgs e)
+        public void LoadButton()//object sender, EventArgs e)
         {
             try
             {
-                MouseHover += new EventHandler(OnMouseHover);
-                MouseMove += new MouseEventHandler(OnMouseMove);
-                MouseEnter += new EventHandler(OnMouseEnter);
-                
+                //MouseHover += new EventHandler(OnMouseHover);
+                //MouseMove += new MouseEventHandler(OnMouseMove);
+                //MouseEnter += new EventHandler(OnMouseEnter);
 
-                //mapPanel = (MapPanel)Parent;
-                //img = Markers.BitmapFromCursor(Markers.LoadCursor(@"F:\UOStuff\UOArt\Maps\Resources\Markers\mapPin24.cur"));
                 this.cur = Markers.LoadCursor(this.curPath);
-                //this.img = Markers.BitmapFromCursor(cur);
                 Icon i = Icon.ExtractAssociatedIcon(this.curPath);
                 this.img = i.ToBitmap();
-
                 this.hotSpot = cur.HotSpot;
-                this.Left = 100 - hotSpot.X;//(int)(mapLoc.X - hotSpot.X);
-                this.Top = 100 - hotSpot.Y; //(int)(mapLoc.Y - hotSpot.Y);
+
+                if(type == JMapButtonType.MapPin)
+                {
+                    this.hotSpot = new Point(this.hotSpot.X - 3, this.hotSpot.Y - 4);
+                }
+                //SetStyle(ControlStyles.SupportsTransparentBackColor, true);
+                //SetStyle(ControlStyles.Opaque, true);
+                //SetStyle(ControlStyles.ResizeRedraw, true);
+
+                //this.BackColor = Color.Transparent;
 
                 highlightColor = Color.Silver;
                 highlightArea = new GraphicsPath();
@@ -304,28 +324,15 @@ namespace Assistant.JMap
                 highlightBrush.SurroundColors = colors;
                 highlightBrush.FocusScales = new PointF(0.785f, 0.785f);
 
-                //SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
-                SetStyle(ControlStyles.SupportsTransparentBackColor, true);
-                SetStyle(ControlStyles.Opaque, true);
-                SetStyle(ControlStyles.ResizeRedraw, true);
-                this.BackColor = Color.Transparent;
+                //this.TabStop = false;
+                //this.Margin = new Padding(0);
 
-                this.TabStop = false;
-
-                //this.BackgroundImage = img;
-                //this.BackgroundImageLayout = ImageLayout.Center;
-                //this.AutoSize = true;
-                this.Margin = new Padding(0);
-
-                //this.FlatAppearance.BorderSize = 0;
-                //this.FlatStyle = FlatStyle.Flat;
-
-                //this.FlatAppearance.MouseDownBackColor = Color.Transparent;
-                //this.FlatAppearance.MouseOverBackColor = Color.Transparent;
-                this.Name = displayText + mapLoc.X.ToString() + mapLoc.Y.ToString();
+                //this.Name = displayText + "_" + mapLoc.X.ToString() + "_" + mapLoc.Y.ToString();
                 //this.Text = displayText;
-                this.Active = true;
-                this.Show();
+                //this.Active = true;
+                //this.Visible = false;
+                //this.Show();
+                
 
             }
             catch (Exception ex)
@@ -333,6 +340,16 @@ namespace Assistant.JMap
                 Debug.WriteLine("BUTTON LOAD ERROR: " + ex.ToString());
             }
         }
+
+        /*protected override CreateParams CreateParams
+        {
+            get
+            {
+                CreateParams cp = base.CreateParams;
+                cp.ExStyle |= 0x00000020; //WS_EX_TRANSPARENT
+                return cp;
+            }
+        }*/
 
         public void NotifyDefault(bool value)
         {
