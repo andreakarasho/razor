@@ -169,6 +169,17 @@ namespace Assistant
 	        AddProperty("LogSkillChanges", false);
 	        AddProperty("StealthOverhead", false);
 
+            // JMap options
+	        AddProperty("MapShowPlayerPosition", true);
+	        AddProperty("MapShowPartyPositions", true);
+	        AddProperty("MapShowPetPositions", true);
+	        AddProperty("MapTrackPlayerPosition", true);
+
+	        AddProperty("MapGuardLines", true);
+	        AddProperty("MapGridLines", false);
+
+	        AddProperty("MapTilt", true);
+
             Counter.Default();
 	        Filter.DisableAll();
 	        DressList.ClearAll();

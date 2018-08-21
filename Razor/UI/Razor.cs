@@ -392,6 +392,7 @@ namespace Assistant
             this.label3 = new System.Windows.Forms.Label();
             this.incomingCorpse = new System.Windows.Forms.CheckBox();
             this.moreMoreOptTab = new System.Windows.Forms.TabPage();
+            this.stealthOverhead = new System.Windows.Forms.CheckBox();
             this.overHeadMessages = new System.Windows.Forms.Button();
             this.showOverheadMessages = new System.Windows.Forms.CheckBox();
             this.showTargetMessagesOverChar = new System.Windows.Forms.CheckBox();
@@ -582,7 +583,6 @@ namespace Assistant
             this.label21 = new System.Windows.Forms.Label();
             this.aboutVer = new System.Windows.Forms.Label();
             this.timerTimer = new System.Windows.Forms.Timer(this.components);
-            this.stealthOverhead = new System.Windows.Forms.CheckBox();
             this.tabs.SuspendLayout();
             this.generalTab.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -1228,6 +1228,17 @@ namespace Assistant
             this.moreMoreOptTab.TabIndex = 10;
             this.moreMoreOptTab.Text = "More Options";
             // 
+            // stealthOverhead
+            // 
+            this.stealthOverhead.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.stealthOverhead.Location = new System.Drawing.Point(385, 57);
+            this.stealthOverhead.Name = "stealthOverhead";
+            this.stealthOverhead.Size = new System.Drawing.Size(92, 20);
+            this.stealthOverhead.TabIndex = 76;
+            this.stealthOverhead.Text = "Overhead";
+            this.stealthOverhead.UseVisualStyleBackColor = true;
+            this.stealthOverhead.CheckedChanged += new System.EventHandler(this.stealthOverhead_CheckedChanged);
+            // 
             // overHeadMessages
             // 
             this.overHeadMessages.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -1598,6 +1609,10 @@ namespace Assistant
             "{followersmax}",
             "{followers}",
             "{gold}",
+            "{gpm}",
+            "{gps}",
+            "{gph}",
+            "{gate}",
             "{hpmax}",
             "{hp}",
             "{int}",
@@ -2546,7 +2561,8 @@ namespace Assistant
             this.mapPins.Name = "mapPins";
             this.mapPins.Size = new System.Drawing.Size(188, 202);
             this.mapPins.TabIndex = 63;
-            this.mapPins.SelectedIndexChanged += new System.EventHandler(this.mapPins_SelectedIndexChanged);
+            this.mapPins.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.mapPins_ItemCheck);
+            this.mapPins.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mapPins_MouseClick);
             // 
             // videoTab
             // 
@@ -3168,17 +3184,6 @@ namespace Assistant
             this.timerTimer.Interval = 5;
             this.timerTimer.Tick += new System.EventHandler(this.timerTimer_Tick);
             // 
-            // stealthOverhead
-            // 
-            this.stealthOverhead.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.stealthOverhead.Location = new System.Drawing.Point(385, 57);
-            this.stealthOverhead.Name = "stealthOverhead";
-            this.stealthOverhead.Size = new System.Drawing.Size(92, 20);
-            this.stealthOverhead.TabIndex = 76;
-            this.stealthOverhead.Text = "Overhead";
-            this.stealthOverhead.UseVisualStyleBackColor = true;
-            this.stealthOverhead.CheckedChanged += new System.EventHandler(this.stealthOverhead_CheckedChanged);
-            // 
             // MainForm
             // 
             this.AutoScaleBaseSize = new System.Drawing.Size(6, 16);
@@ -3314,18 +3319,26 @@ namespace Assistant
 	        m_Tip.Active = true;
 	        m_Tip.SetToolTip(titleStr, Language.GetString(LocString.TitleBarTip));
 
-	        if (Directory.Exists(Config.GetInstallDirectory("JMap")))
-	        {
-	            foreach (string file in Directory.GetFiles(Config.GetInstallDirectory("JMap"), "*.csv"))
-	            {
-	                mapPins.Items.Add(Path.GetFileNameWithoutExtension(file));
-	            }
-	        }
+	        RefreshMapPins(null, null);
 
 	        SplashScreen.End();
 	    }
-		
-		private bool m_Initializing = false;
+
+	    private void RefreshMapPins(Object sender, System.EventArgs e)
+	    {
+	        mapPins.Items.Clear();
+
+             if (Directory.Exists(Config.GetInstallDirectory("JMap")))
+	        {
+	            foreach (string fullPath in Directory.GetFiles(Config.GetInstallDirectory("JMap"), "*.csv"))
+	            {
+	                string file = Path.GetFileNameWithoutExtension(fullPath);
+                     mapPins.Items.Add(file);
+	            }
+	        }
+	    }
+
+	    private bool m_Initializing = false;
 
 	    public void InitConfig()
 	    {
@@ -7282,8 +7295,11 @@ namespace Assistant
                 jMap = new Assistant.JMap.JimmyMap()
                 {
                     mainForm = this
-                }; 
+                };
             }
+
+            jMap.Show();
+            jMap.BringToFront();
 
             jMap.Enabled = true;
             
@@ -7333,10 +7349,34 @@ namespace Assistant
             MessageBox.Show(SplashScreen.Instance, $"Saved current settings to profile {Path.Combine(Config.GetUserDirectory("Profiles"), $"{profileToClone}.xml")}", "Save Profile", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        private void mapPins_SelectedIndexChanged(object sender, EventArgs e)
-        {
+	    private void mapPins_ItemCheck(object sender, ItemCheckEventArgs e)
+	    {
+	        if (e.NewValue == CheckState.Checked)
+	        {
+	            jMap?.mapPanel.ReadMarkers($"{Config.GetInstallDirectory("JMap")}\\{mapPins.SelectedItem}.csv");
 
+	            jMap?.mapPanel.UpdateAll();
+            }
+	        else
+	        {
+	            jMap?.mapPanel.RemoveMarkers($"{mapPins.SelectedItem}");
+
+	            jMap?.mapPanel.UpdateAll();
+            }
+	    }
+
+         private void mapPins_MouseClick(object sender, MouseEventArgs e)
+	    {
+	        if (e.Button == MouseButtons.Right)
+	        {
+	            MenuItem[] mi = { new MenuItem("Refresh List", RefreshMapPins) };
+	            mapPins.ContextMenu = new ContextMenu(mi);
+
+                mapPins.ContextMenu.Show(mapPins, new Point(e.X, e.Y));
+
+            }
         }
+
 
         private void stealthOverhead_CheckedChanged(object sender, EventArgs e)
         {

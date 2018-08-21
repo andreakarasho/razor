@@ -131,7 +131,7 @@ namespace Assistant.JMap
         ArrayList markedLocations = new ArrayList();
 
 
-        ArrayList mapButtons = new ArrayList();
+        public List<JMapButton> mapButtons = new List<JMapButton>();
         ArrayList bufferingMapButtons = new ArrayList();
         ArrayList visibleMapButtons = new ArrayList();
 
@@ -343,7 +343,7 @@ namespace Assistant.JMap
             else
             {
                 Debug.WriteLine("Marked Locations Found!");
-                ReadMarkers($"{Config.GetInstallDirectory()}\\JMap\\MarkedLocations.csv");
+                //ReadMarkers($"{Config.GetInstallDirectory()}\\JMap\\MarkedLocations.csv");
             }
 
             InitializeComponent();
@@ -355,25 +355,38 @@ namespace Assistant.JMap
 
 
             //DEFAULTS
-            HasAllOverlays = true;
-            HasGuardLines = true;
-            HasGridLines = true;
+            HasGuardLines = Config.GetBool("MapGuardLines");
+            HasGridLines = Config.GetBool("MapGridLines");
+
+            HasAllOverlays = HasGridLines && HasGuardLines;
 
             IsShowAllPositions = true;
-            IsShowPlayerPosition = true;
-            IsShowPetPositions = true;
-            IsShowPartyPositions = true;
-            IsTrackPlayerPosition = true;
 
-            mapRotated = true;
+            IsShowPlayerPosition = Config.GetBool("MapShowPlayerPosition");
+            IsShowPetPositions = Config.GetBool("MapShowPetPositions");
+            IsShowPartyPositions = Config.GetBool("MapShowPartyPositions");
+            IsTrackPlayerPosition = Config.GetBool("MapTrackPlayerPosition");
+
+            IsShowAllPositions = IsShowPlayerPosition && IsShowPetPositions && IsShowPlayerPosition &&
+                                 IsTrackPlayerPosition;
+
+            mapRotated = Config.GetBool("MapTilt");
             //END DEFAULTS
 
+            Menu_ShowPlayerPosition.Checked = IsShowPlayerPosition;
+            Menu_ShowPetPositions.Checked = IsShowPetPositions;
+            Menu_ShowPartyPositions.Checked = IsShowPartyPositions;
+            Menu_TrackPlayerPosition.Checked = IsTrackPlayerPosition;
 
+            Menu_OverlaysGrid.Checked = HasGridLines;
+            Menu_OverlaysGuard.Checked = HasGuardLines;
 
+            Menu_ShowAllPositions.Checked = IsShowPlayerPosition && IsShowPetPositions && IsShowPlayerPosition &&
+                                            IsTrackPlayerPosition;
 
+            Menu_OverlaysAll.Checked = HasGridLines && HasGuardLines;
 
-
-        compassLoc = new PointF(renderArea.Right - 20, renderArea.Top + 20);
+            compassLoc = new PointF(renderArea.Right - 20, renderArea.Top + 20);
             UpdatePlayerPos();
 
             if (trackingPlayer)
@@ -2303,7 +2316,7 @@ namespace Assistant.JMap
             mapButtons.Remove(btnToDelete);
             visibleMapButtons.Remove(btnToDelete);
 
-            mapButtons.TrimToSize();
+            //mapButtons.TrimToSize();
 
         }
 
@@ -2316,6 +2329,9 @@ namespace Assistant.JMap
 
             foreach (JMapButton btn in mapButtons)
             {
+                // Dont save other pins to this file that were from other files
+                if (!btn.id.Equals("MarkedLocations")) 
+                    continue;
                 
                 float x = btn.mapLoc.X;
                 float y = btn.mapLoc.Y;
@@ -2355,7 +2371,7 @@ namespace Assistant.JMap
             //Write it to file
             File.AppendAllText($"{Config.GetInstallDirectory()}\\JMap\\MarkedLocations.csv", Environment.NewLine + newLine);
 
-            JMapButton btn = UIElements.NewButton(this, JMapButtonType.MapPin, x, y, text, extra);
+            JMapButton btn = UIElements.NewButton(this, JMapButtonType.MapPin, x, y, "MarkedLocations", text, extra);
 
             mapButtons.Add(btn);
             btn.LoadButton();
@@ -2369,6 +2385,8 @@ namespace Assistant.JMap
 
         public void ReadMarkers(string path)
         {
+            string fileName = Path.GetFileNameWithoutExtension(path);
+
             using (StreamReader sr = new StreamReader(path))
             {
                 //int row = 0;
@@ -2392,12 +2410,22 @@ namespace Assistant.JMap
                     string text = line[2];
                     string extra = line[3];
                                                                 //(JMapButtonType)type
-                    JMapButton btn = UIElements.NewButton(this, JMapButtonType.MapPin, x, y, text, extra);
+                    JMapButton btn = UIElements.NewButton(this, JMapButtonType.MapPin, x, y, fileName, text, extra);
 
                     mapButtons.Add(btn);
                     btn.LoadButton();
                     ++i;
                 }                    
+            }
+        }
+
+        public void RemoveMarkers(string id)
+        {
+            List<JMapButton> markersToRemove = mapButtons.Where(x => x.id.Equals(id)).ToList();
+
+            foreach (JMapButton jMapButton in markersToRemove)
+            {
+                DeleteMarker(jMapButton);
             }
         }
 
@@ -2816,7 +2844,8 @@ namespace Assistant.JMap
             }
             tiltChanged = true;
 
-            
+            Config.SetProperty("MapTilt", mapRotated);
+
             UpdatePlayerPos();
             UpdateMapPos();
 
@@ -2835,6 +2864,8 @@ namespace Assistant.JMap
             else
                 HasGuardLines = true;
 
+            Config.SetProperty("MapGuardLines", HasGuardLines);
+
             if (trackingPlayer)
                 TrackPlayer();
             else
@@ -2847,6 +2878,8 @@ namespace Assistant.JMap
                 HasGridLines = false;
             else
                 HasGridLines = true;
+
+            Config.SetProperty("MapGridLines", HasGridLines);
 
             if (trackingPlayer)
                 TrackPlayer();
@@ -2863,6 +2896,9 @@ namespace Assistant.JMap
                 this.Menu_OverlaysGrid.CheckState = CheckState.Unchecked;
                 HasGridLines = false;
 
+                Config.SetProperty("MapGridLines", HasGridLines);
+                Config.SetProperty("MapGuardLines", HasGuardLines);
+
                 HasAllOverlays = false;
             }    
             else
@@ -2871,6 +2907,9 @@ namespace Assistant.JMap
                 HasGuardLines = true;
                 this.Menu_OverlaysGrid.CheckState = CheckState.Checked;
                 HasGridLines = true;
+
+                Config.SetProperty("MapGridLines", HasGridLines);
+                Config.SetProperty("MapGuardLines", HasGuardLines);
 
                 HasAllOverlays = true;
             }
@@ -2885,40 +2924,44 @@ namespace Assistant.JMap
             if (IsShowAllPositions)
             {
                 this.Menu_ShowPlayerPosition.CheckState = CheckState.Unchecked;
-                //mainForm.showPlayerPosition.Checked = false;//State.Unchecked;
                 IsShowPlayerPosition = false;
 
                 this.Menu_ShowPetPositions.CheckState = CheckState.Unchecked;
                 IsShowPetPositions = false;
 
                 this.Menu_ShowPartyPositions.CheckState = CheckState.Unchecked;
-                //mainForm.showPartyMemberPositions.Checked = false;//State.Unchecked;
                 IsShowPartyPositions = false;
 
                 this.Menu_TrackPlayerPosition.CheckState = CheckState.Unchecked;
-                //mainForm.trackPlayerPosition.Checked = false;//State.Unchecked;
                 IsTrackPlayerPosition = false;
 
                 IsShowAllPositions = false;
+
+                Config.SetProperty("MapShowPlayerPosition", false);
+                Config.SetProperty("MapShowPetPositions", false);
+                Config.SetProperty("MapShowPartyPositions", false);
+                Config.SetProperty("MapTrackPlayerPosition", false);
             }
             else
             {
                 this.Menu_ShowPlayerPosition.CheckState = CheckState.Checked;
-                //mainForm.showPlayerPosition.Checked = true;//State.Checked;
                 IsShowPlayerPosition = true;
 
                 this.Menu_ShowPetPositions.CheckState = CheckState.Checked;
                 IsShowPetPositions = true;
 
                 this.Menu_ShowPartyPositions.CheckState = CheckState.Checked;
-                //mainForm.showPartyMemberPositions.Checked = true;//State.Checked;
                 IsShowPartyPositions = true;
 
                 this.Menu_TrackPlayerPosition.CheckState = CheckState.Checked;
-                //mainForm.trackPlayerPosition.Checked = true;// State = CheckState.Checked;
                 IsTrackPlayerPosition = true;
 
                 IsShowAllPositions = true;
+
+                Config.SetProperty("MapShowPlayerPosition", true);
+                Config.SetProperty("MapShowPetPositions", true);
+                Config.SetProperty("MapShowPartyPositions", true);
+                Config.SetProperty("MapTrackPlayerPosition", true);
             }
 
             if (trackingPlayer)
@@ -2932,13 +2975,14 @@ namespace Assistant.JMap
             if (IsShowPlayerPosition)
             {
                 IsShowPlayerPosition = false;
-                //mainForm.showPlayerPosition.Checked = false;//State.Unchecked;
             }    
             else
             {
                 IsShowPlayerPosition = true;
-                //mainForm.showPlayerPosition.Checked = true;//State.Checked;
+                
             }
+
+            Config.SetProperty("MapShowPlayerPosition", IsShowPlayerPosition);
 
             if (trackingPlayer)
                 TrackPlayer();
@@ -2954,7 +2998,9 @@ namespace Assistant.JMap
             else
             {
                 IsShowPetPositions = true;
-            }           
+            }
+
+            Config.SetProperty("MapShowPetPositions", IsShowPetPositions);
 
             if (trackingPlayer)
                 TrackPlayer();
@@ -2974,7 +3020,9 @@ namespace Assistant.JMap
                 IsShowPartyPositions = true;
                 //mainForm.showPartyMemberPositions.Checked = true;//State.Checked;
             }
-                
+
+            Config.SetProperty("MapShowPartyPositions", IsShowPartyPositions);
+
             if (trackingPlayer)
                 TrackPlayer();
             else
@@ -2992,7 +3040,9 @@ namespace Assistant.JMap
             {
                 IsTrackPlayerPosition = true;
                 //mainForm.trackPlayerPosition.Checked = true;//State.Checked;
-            }              
+            }
+
+            Config.SetProperty("MapTrackPlayerPosition", IsTrackPlayerPosition);
 
             if (trackingPlayer)
                 TrackPlayer();

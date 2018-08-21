@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using Assistant.Core;
 using Ultima;
 
 namespace Assistant
@@ -202,7 +203,10 @@ namespace Assistant
 
 		public static int FastWalkKey = 0;
 
-		public override void SaveState( BinaryWriter writer )
+	    internal List<BuffIcon> m_Buffs = new List<BuffIcon>();
+	    internal List<BuffIcon> Buffs { get { return m_Buffs; } }
+
+        public override void SaveState( BinaryWriter writer )
 		{
 			base.SaveState (writer);
 

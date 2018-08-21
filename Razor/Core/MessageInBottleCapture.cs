@@ -19,11 +19,11 @@ namespace Assistant.Core
         public static void CaptureMibCoordinates(string coords)
         {
             string mibLog =
-                $"{Config.GetInstallDirectory()}\\MibLog\\MibLog.csv";
+                $"{Config.GetInstallDirectory()}\\JMap\\MIBPins.csv";
 
-            if (!Directory.Exists($"{Config.GetInstallDirectory()}\\MibLog"))
+            if (!Directory.Exists($"{Config.GetInstallDirectory()}\\JMap"))
             {
-                Directory.CreateDirectory($"{Config.GetInstallDirectory()}\\MibLog");
+                Directory.CreateDirectory($"{Config.GetInstallDirectory()}\\JMap");
             }
 
             if (!File.Exists(mibLog))

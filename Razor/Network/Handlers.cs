@@ -83,13 +83,15 @@ namespace Assistant
 			PacketHandler.RegisterServerToClientFilter( 0xCC, new PacketFilterCallback( OnLocalizedMessageAffix ) );
 			PacketHandler.RegisterServerToClientViewer( 0xD6, new PacketViewerCallback( EncodedPacket ) );//0xD6 "encoded" packets
 			PacketHandler.RegisterServerToClientViewer( 0xD8, new PacketViewerCallback( CustomHouseInfo ) );
-			PacketHandler.RegisterServerToClientFilter( 0xDC, new PacketFilterCallback( ServOPLHash ) );
+			//PacketHandler.RegisterServerToClientFilter( 0xDC, new PacketFilterCallback( ServOPLHash ) );
 			PacketHandler.RegisterServerToClientViewer( 0xDD, new PacketViewerCallback( CompressedGump ) );
 			PacketHandler.RegisterServerToClientViewer( 0xF0, new PacketViewerCallback( RunUOProtocolExtention ) ); // Special RunUO protocol extentions (for KUOC/Razor)
 
 			PacketHandler.RegisterServerToClientViewer( 0xF3, new PacketViewerCallback( SAWorldItem ) );
 
 		    PacketHandler.RegisterServerToClientViewer(0x2C, new PacketViewerCallback(ResurrectionGump));
+
+		    PacketHandler.RegisterServerToClientViewer(0xDF, new PacketViewerCallback(BuffDebuff));
         }
 		
 		private static void DisplayStringQuery( PacketReader p, PacketHandlerEventArgs args )
@@ -2664,5 +2666,37 @@ namespace Assistant
 	            ScreenCapManager.DeathCapture(0.75);
             }
         }
+
+	    private static void BuffDebuff(PacketReader p, PacketHandlerEventArgs args)
+	    {
+	        Serial ser = p.ReadUInt32();
+	        ushort icon = p.ReadUInt16();
+	        ushort action = p.ReadUInt16();
+
+	        if (Enum.IsDefined(typeof(BuffIcon), icon))
+	        {
+	            BuffIcon buff = (BuffIcon) icon;
+	            switch (action)
+	            {
+	                case 0x01: // show
+	                    if (World.Player != null && !World.Player.Buffs.Contains(buff))
+	                    {
+	                        World.Player.Buffs.Add(buff);
+	                    }
+
+	                    break;
+
+	                case 0x0: // remove
+	                    if (World.Player != null && World.Player.Buffs.Contains(buff))
+	                    {
+	                        World.Player.Buffs.Remove(buff);
+	                    }
+
+	                    break;
+                }
+
+	            ClientCommunication.RequestTitlebarUpdate();
+            }
+	    }
     }
 }

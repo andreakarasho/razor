@@ -20,7 +20,7 @@ namespace Assistant.JMap
 
     public class UIElements
     {
-        public static JMapButton NewButton(MapPanel mapPanel, JMapButtonType type, float mapLocX, float mapLocY, string displayText = "", string extraText = "")
+        public static JMapButton NewButton(MapPanel mapPanel, JMapButtonType type, float mapLocX, float mapLocY, string buttonId, string displayText = "", string extraText = "")
         {
             /* When map is clicked in order to create a marker
              * we need to have a prompt. A little pop up next to the 
@@ -34,9 +34,9 @@ namespace Assistant.JMap
             {
                 switch (type)
                 {
-                    case JMapButtonType.GenericButton: return GenericButton(mapPanel, type, mapLocX, mapLocY, displayText, extraText);
-                    case JMapButtonType.MapPin: return MapPin(mapPanel, type, mapLocX, mapLocY, displayText, extraText);
-                    default: return MapPin(mapPanel, type, mapLocX, mapLocY, displayText, extraText);
+                    case JMapButtonType.GenericButton: return GenericButton(mapPanel, type, mapLocX, mapLocY, buttonId, displayText, extraText);
+                    case JMapButtonType.MapPin: return MapPin(mapPanel, type, mapLocX, mapLocY, buttonId, displayText, extraText);
+                    default: return MapPin(mapPanel, type, mapLocX, mapLocY, buttonId, displayText, extraText);
                 }
             }
             catch(Exception e)
@@ -47,7 +47,7 @@ namespace Assistant.JMap
 
         }
 
-        private static JMapButton MapPin(MapPanel mapPanel, JMapButtonType type, float mapLocX, float mapLocY, string displayText = "", string extraText = "")
+        private static JMapButton MapPin(MapPanel mapPanel, JMapButtonType type, float mapLocX, float mapLocY, string buttonId, string displayText = "", string extraText = "")
         {
             try
             {
@@ -60,16 +60,17 @@ namespace Assistant.JMap
                     type = JMapButtonType.MapPin,
                     mapLoc = new PointF(mapLocX, mapLocY),
                     displayText = displayText,
-                    extraText = extraText
-                    
+                    extraText = extraText,
+                    id = buttonId
+
                     //hasPane = hasPane,
                     //hasText = hasText,
                     //hasExtra = hasExtra,
                     //Name = displayText + "_" + mapLocX.ToString() + "_" + mapLocY.ToString(),
                     //Text = "",
 
-                    
-                    
+
+
 
                 };
             }
@@ -80,14 +81,15 @@ namespace Assistant.JMap
             }
         }
 
-        private static JMapButton GenericButton(MapPanel mapPanel, JMapButtonType type, float mapLocX, float mapLocY, string displayText = "", string extraText = "") 
+        private static JMapButton GenericButton(MapPanel mapPanel, JMapButtonType type, float mapLocX, float mapLocY, string buttonId, string displayText = "", string extraText = "") 
         {
             return new JMapButton()
             {
-                type = JMapButtonType.GenericButton
+                type = JMapButtonType.GenericButton,
                 //hasPane = hasPane,
                 //hasText = hasText,
                 //hasExtra = hasExtra
+                id = buttonId
             };
 
         }
@@ -99,6 +101,7 @@ namespace Assistant.JMap
 
         // Core
         public JMapButtonType type { get; set; }
+        public string id { get; set; }
         public Cursor cur { get; set; }
         public string curPath { get; set; }
         public Bitmap img { get; set; }

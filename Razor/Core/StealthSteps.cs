@@ -17,6 +17,11 @@ namespace Assistant
             get { return m_Hidden; }
         }
 
+        public static bool Hidden
+        {
+            get { return m_Hidden; }
+        }
+
         public static void OnMove()
         {
             if (m_Hidden && Config.GetBool("CountStealthSteps") && World.Player != null)

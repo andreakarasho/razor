@@ -908,7 +908,9 @@ namespace Assistant
 
                  sb.Replace(@"{stealthsteps}", StealthSteps.Counting ? StealthSteps.Count.ToString() : "-");
 
-	            string statStr = String.Format("{0}{1:X2}{2:X2}{3:X2}",
+	            //sb.Replace(@"{buffs}", StealthSteps.Counting ? String.Join(",", World.Player.Buffs) : "None");
+
+                string statStr = String.Format("{0}{1:X2}{2:X2}{3:X2}",
 	                (int) (p.GetStatusCode()),
 	                (int) (World.Player.HitsMax == 0 ? 0 : (double) World.Player.Hits / World.Player.HitsMax * 99),
 	                (int) (World.Player.ManaMax == 0 ? 0 : (double) World.Player.Mana / World.Player.ManaMax * 99),
