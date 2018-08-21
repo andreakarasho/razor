@@ -185,6 +185,7 @@ MainForm::dataDir=Open Data Directory
 MainForm::showTargetMessagesOverChar=Show Target Self/Last/Clear Overhead
 MainForm::showOverheadMessages=Show Overhead Messages
 MainForm::goldPerDisplay=Enable Gold Per Sec/Min/Hour Counters
+MainForm::stealthOverhead=Overhead
 
 HueEntry::Text=Select a Hue
 HueEntry::cancel=Cancel

@@ -151,10 +151,10 @@ namespace Assistant
 	        AddProperty("StepThroughMacro", false);
 
             // Map options
-	        AddProperty("ShowPlayerPosition", true);
+	        /*AddProperty("ShowPlayerPosition", true);
 	        AddProperty("TrackPlayerPosition", true);
 	        AddProperty("ShowPartyMemberPositions", true);
-	        AddProperty("TiltMap", true);
+	        AddProperty("TiltMap", true);*/
 
 	        AddProperty("ShowTargetSelfLastClearOverhead", true);
 	        AddProperty("ShowOverheadMessages", false);
@@ -167,6 +167,7 @@ namespace Assistant
 
 	        AddProperty("LightLevel", 31);
 	        AddProperty("LogSkillChanges", false);
+	        AddProperty("StealthOverhead", false);
 
             Counter.Default();
 	        Filter.DisableAll();
