@@ -231,7 +231,7 @@ namespace Ultima
 			m_Tiles.CloseStreams();
 		}
 
-		private short[] GetRenderedBlock(int x, int y, bool statics)
+		public short[] GetRenderedBlock(int x, int y, bool statics)
 		{
 			TileMatrix matrix = this.Tiles;
 

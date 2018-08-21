@@ -420,6 +420,7 @@ namespace Assistant
         BullSounds,
         DragonSounds,
         SetSellAgentHotBag,
+	    AddUseOnceContainer,
 
         __End
 	}

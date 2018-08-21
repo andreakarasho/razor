@@ -160,8 +160,9 @@ namespace Assistant
 			PacketHandler.RegisterClientToServerViewer( 0x09, new PacketViewerCallback( OnSingleClick ) );
 			HotKey.Add( HKCategory.Agents, LocString.UseOnceAgent, new HotKeyCallback( OnHotKey ) );
 			HotKey.Add( HKCategory.Agents, LocString.AddUseOnce, new HotKeyCallback( OnAdd ) );
+		    HotKey.Add(HKCategory.Agents, LocString.AddUseOnceContainer, new HotKeyCallback(OnAddContainer));
 
-			Agent.OnItemCreated += new ItemCreatedEventHandler( CheckItemOPL );
+            Agent.OnItemCreated += new ItemCreatedEventHandler( CheckItemOPL );
 		}
 		
 		public override void Clear()
@@ -299,8 +300,14 @@ namespace Assistant
 			World.Player.SendMessage( MsgLevel.Force, LocString.TargItemAdd );
 			Targeting.OneTimeTarget( new Targeting.TargetResponseCallback( OnTarget ) );
 		}
-		
-		private void OnTarget( bool location, Serial serial, Point3D loc, ushort gfx )
+
+	    private void OnAddContainer()
+	    {
+	        World.Player.SendMessage(MsgLevel.Force, LocString.TargItemAdd);
+	        Targeting.OneTimeTarget(new Targeting.TargetResponseCallback(OnTargetBag));
+	    }
+
+        private void OnTarget( bool location, Serial serial, Point3D loc, ushort gfx )
 		{
             if ( Config.GetBool("AlwaysOnTop") )
             {
