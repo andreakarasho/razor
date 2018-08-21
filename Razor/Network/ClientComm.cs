@@ -1047,7 +1047,9 @@ namespace Assistant
 			Engine.MainWindow.OnLogout();
 			if( Engine.MainWindow.MapWindow != null )
 				Engine.MainWindow.MapWindow.Close();
-			PacketHandlers.Party.Clear();
+            if (Engine.MainWindow.jMap != null)
+                Engine.MainWindow.jMap.Close();
+            PacketHandlers.Party.Clear();
 			PacketHandlers.IgnoreGumps.Clear();
 			Config.Save();
 

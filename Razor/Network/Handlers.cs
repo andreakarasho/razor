@@ -1286,7 +1286,9 @@ namespace Assistant
 			m.Hits = p.ReadUInt16();
 			m.HitsMax = p.ReadUInt16();
 
-			p.ReadBoolean();//CanBeRenamed
+            //p.ReadBoolean();//CanBeRenamed
+            if (p.ReadBoolean())
+                m.CanRename = true;
 
 			byte type = p.ReadByte();
 
@@ -2186,13 +2188,13 @@ namespace Assistant
 				case 1: // Custom Party information
 				{
 					Serial serial;
-
+                                                
 					PacketHandlers.SpecialPartyReceived++;
 
 					while ((serial = p.ReadUInt32()) > 0)
 					{
 						Mobile mobile = World.FindMobile(serial);
-						
+
 						short x = p.ReadInt16();
 						short y = p.ReadInt16();
 						byte map = p.ReadByte();
@@ -2218,7 +2220,10 @@ namespace Assistant
 					if (Engine.MainWindow.MapWindow != null)
 						Engine.MainWindow.MapWindow.UpdateMap();
 
-					break;
+                        if (Engine.MainWindow.jMap != null)
+                            Engine.MainWindow.jMap.UpdateMap();
+
+                        break;
 				}
 				case 0xFE: // Begin Handshake/Features Negotiation
 				{
@@ -2300,7 +2305,10 @@ namespace Assistant
 			
 			if (Engine.MainWindow.MapWindow != null)
 				Engine.MainWindow.MapWindow.UpdateMap();
-		}
+
+            if (Engine.MainWindow.jMap != null)
+                Engine.MainWindow.jMap.UpdateMap();
+        }
 
 		private static void PartyAutoDecline()
 		{
