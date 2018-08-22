@@ -32,6 +32,8 @@ namespace Assistant.Core
                 {
                     sr.WriteLine("Timestamp,Coordinates,X,Y,UOAM");
                 }
+
+                File.Create(mibLog);
             }
 
             // 130°15'N,63°16'W
@@ -43,7 +45,7 @@ namespace Assistant.Core
 
             using (StreamWriter sw = File.AppendText(mibLog))
             {
-                sw.WriteLine($"{DateTime.Now},\"{coords}\",{xAxis},{yAxis},+treasure: {xAxis} {yAxis} 0 x");
+                sw.WriteLine($"{xAxis},{yAxis},mib,");
             }
         }
 

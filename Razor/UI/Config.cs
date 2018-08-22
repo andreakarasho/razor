@@ -180,6 +180,8 @@ namespace Assistant
 
 	        AddProperty("MapTilt", true);
 
+	        AddProperty("MapSelectedPinList", "");
+
             Counter.Default();
 	        Filter.DisableAll();
 	        DressList.ClearAll();

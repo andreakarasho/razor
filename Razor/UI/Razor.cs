@@ -425,6 +425,7 @@ namespace Assistant
             this.gameSize = new System.Windows.Forms.CheckBox();
             this.chkPartyOverhead = new System.Windows.Forms.CheckBox();
             this.displayTab = new System.Windows.Forms.TabPage();
+            this.trackIncomingGold = new System.Windows.Forms.CheckBox();
             this.showNotoHue = new System.Windows.Forms.CheckBox();
             this.warnNum = new System.Windows.Forms.TextBox();
             this.warnCount = new System.Windows.Forms.CheckBox();
@@ -586,7 +587,6 @@ namespace Assistant
             this.label21 = new System.Windows.Forms.Label();
             this.aboutVer = new System.Windows.Forms.Label();
             this.timerTimer = new System.Windows.Forms.Timer(this.components);
-            this.trackIncomingGold = new System.Windows.Forms.CheckBox();
             this.tabs.SuspendLayout();
             this.generalTab.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -1523,6 +1523,17 @@ namespace Assistant
             this.displayTab.Size = new System.Drawing.Size(482, 460);
             this.displayTab.TabIndex = 1;
             this.displayTab.Text = "Display/Counters";
+            // 
+            // trackIncomingGold
+            // 
+            this.trackIncomingGold.AutoSize = true;
+            this.trackIncomingGold.Location = new System.Drawing.Point(216, 245);
+            this.trackIncomingGold.Name = "trackIncomingGold";
+            this.trackIncomingGold.Size = new System.Drawing.Size(177, 19);
+            this.trackIncomingGold.TabIndex = 48;
+            this.trackIncomingGold.Text = "Track gold per sec/min/hour";
+            this.trackIncomingGold.UseVisualStyleBackColor = true;
+            this.trackIncomingGold.CheckedChanged += new System.EventHandler(this.trackIncomingGold_CheckedChanged);
             // 
             // showNotoHue
             // 
@@ -3202,17 +3213,6 @@ namespace Assistant
             this.timerTimer.Interval = 5;
             this.timerTimer.Tick += new System.EventHandler(this.timerTimer_Tick);
             // 
-            // trackIncomingGold
-            // 
-            this.trackIncomingGold.AutoSize = true;
-            this.trackIncomingGold.Location = new System.Drawing.Point(216, 245);
-            this.trackIncomingGold.Name = "trackIncomingGold";
-            this.trackIncomingGold.Size = new System.Drawing.Size(177, 19);
-            this.trackIncomingGold.TabIndex = 48;
-            this.trackIncomingGold.Text = "Track gold per sec/min/hour";
-            this.trackIncomingGold.UseVisualStyleBackColor = true;
-            this.trackIncomingGold.CheckedChanged += new System.EventHandler(this.trackIncomingGold_CheckedChanged);
-            // 
             // MainForm
             // 
             this.AutoScaleBaseSize = new System.Drawing.Size(6, 16);
@@ -3353,21 +3353,7 @@ namespace Assistant
 
 	        SplashScreen.End();
 	    }
-
-	    private void RefreshMapPins(Object sender, System.EventArgs e)
-	    {
-	        mapPins.Items.Clear();
-
-             if (Directory.Exists(Config.GetInstallDirectory("JMap")))
-	        {
-	            foreach (string fullPath in Directory.GetFiles(Config.GetInstallDirectory("JMap"), "*.csv"))
-	            {
-	                string file = Path.GetFileNameWithoutExtension(fullPath);
-                     mapPins.Items.Add(file);
-	            }
-	        }
-	    }
-
+        
 	    private bool m_Initializing = false;
 
 	    public void InitConfig()
@@ -7384,19 +7370,35 @@ namespace Assistant
 
 	    private void mapPins_ItemCheck(object sender, ItemCheckEventArgs e)
 	    {
-	        if (e.NewValue == CheckState.Checked)
+	        string list = Config.GetString("MapSelectedPinList");
+
+            if (e.NewValue == CheckState.Checked)
 	        {
 	            jMap?.mapPanel.ReadMarkers($"{Config.GetInstallDirectory("JMap")}\\{mapPins.SelectedItem}.csv");
 
 	            jMap?.mapPanel.UpdateAll();
+
+	            list = string.IsNullOrEmpty(list) ? $"{mapPins.SelectedItem}" : $"{list},{mapPins.SelectedItem}";
+
             }
 	        else
 	        {
 	            jMap?.mapPanel.RemoveMarkers($"{mapPins.SelectedItem}");
 
 	            jMap?.mapPanel.UpdateAll();
-            }
-	    }
+
+	            List<string> items = list.Split(',').ToList();
+	            items.Remove(mapPins.SelectedItem.ToString());
+
+	            list = string.Join(",", items.ToArray());
+	        }
+
+
+
+            Config.SetProperty("MapSelectedPinList", list);
+        }
+
+
 
          private void mapPins_MouseClick(object sender, MouseEventArgs e)
 	    {
@@ -7430,6 +7432,35 @@ namespace Assistant
             {
                 GoldPerHourTimer.Stop();
             }
+        }
+
+	    private void RefreshMapPins(Object sender, System.EventArgs e)
+	    {
+            
+	        mapPins.Items.Clear();
+
+	        if (Directory.Exists(Config.GetInstallDirectory("JMap")))
+	        {
+	            foreach (string fullPath in Directory.GetFiles(Config.GetInstallDirectory("JMap"), "*.csv"))
+	            {
+	                string file = Path.GetFileNameWithoutExtension(fullPath);
+	                mapPins.Items.Add(file);
+	            }
+	        }
+
+	        mapPins.ItemCheck -= mapPins_ItemCheck;
+
+            for (var i = 0; i < mapPins.Items.Count; i++)
+	        {
+	            var pin = mapPins.Items[i];
+	            if (Config.GetString("MapSelectedPinList").Contains(pin.ToString()))
+	            {
+	                mapPins.SetItemChecked(i, true);
+	            }
+	        }
+
+	        mapPins.ItemCheck += mapPins_ItemCheck;
+
         }
     }
 }
