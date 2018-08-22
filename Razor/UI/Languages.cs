@@ -305,7 +305,7 @@ namespace Assistant
 		TargRandCriminal,
 		ForceEndHolding,
 		RestartClient,
-		RelogRequired,
+		ApplyOptionsRequired,
 		LiftQueued,
 		RestockQueued,
 		StrChanged,

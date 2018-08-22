@@ -360,8 +360,6 @@ namespace Assistant.JMap
 
             HasAllOverlays = HasGridLines && HasGuardLines;
 
-            IsShowAllPositions = true;
-
             IsShowPlayerPosition = Config.GetBool("MapShowPlayerPosition");
             IsShowPetPositions = Config.GetBool("MapShowPetPositions");
             IsShowPartyPositions = Config.GetBool("MapShowPartyPositions");
@@ -372,6 +370,8 @@ namespace Assistant.JMap
 
             mapRotated = Config.GetBool("MapTilt");
             //END DEFAULTS
+
+            TiltMap45.Checked = mapRotated;
 
             Menu_ShowPlayerPosition.Checked = IsShowPlayerPosition;
             Menu_ShowPetPositions.Checked = IsShowPetPositions;
@@ -2833,15 +2833,8 @@ namespace Assistant.JMap
 
         private void mapPanel_Tilt(object sender, EventArgs e)
         {
-            if (!mapRotated)
-            {
-                mapRotated = true;
-            }
-
-            else if (mapRotated)
-            {
-                mapRotated = false;
-            }
+            mapRotated = TiltMap45.Checked;
+            
             tiltChanged = true;
 
             Config.SetProperty("MapTilt", mapRotated);
@@ -2859,10 +2852,7 @@ namespace Assistant.JMap
 
         private void mapPanel_OverlaysGuard(object sender, EventArgs e)
         {
-            if (HasGuardLines)
-                HasGuardLines = false;
-            else
-                HasGuardLines = true;
+            HasGuardLines = Menu_OverlaysGuard.Checked;
 
             Config.SetProperty("MapGuardLines", HasGuardLines);
 
@@ -2874,11 +2864,8 @@ namespace Assistant.JMap
 
         private void mapPanel_OverlaysGrid(object sender, EventArgs e)
         {
-            if (HasGridLines)
-                HasGridLines = false;
-            else
-                HasGridLines = true;
-
+            HasGridLines = Menu_OverlaysGrid.Checked;
+            
             Config.SetProperty("MapGridLines", HasGridLines);
 
             if (trackingPlayer)
@@ -2889,18 +2876,18 @@ namespace Assistant.JMap
 
         private void mapPanel_OverlaysAll(object sender, EventArgs e)
         {
-            if (HasAllOverlays)
+            if (Menu_OverlaysAll.Checked)
             {
-                this.Menu_OverlaysGuard.CheckState = CheckState.Unchecked;
-                HasGuardLines = false;
-                this.Menu_OverlaysGrid.CheckState = CheckState.Unchecked;
-                HasGridLines = false;
+                this.Menu_OverlaysGuard.CheckState = CheckState.Checked;
+                HasGuardLines = true;
+                this.Menu_OverlaysGrid.CheckState = CheckState.Checked;
+                HasGridLines = true;
 
                 Config.SetProperty("MapGridLines", HasGridLines);
                 Config.SetProperty("MapGuardLines", HasGuardLines);
 
-                HasAllOverlays = false;
-            }    
+                HasAllOverlays = true;
+            }
             else
             {
                 this.Menu_OverlaysGuard.CheckState = CheckState.Checked;
@@ -2913,6 +2900,7 @@ namespace Assistant.JMap
 
                 HasAllOverlays = true;
             }
+
             if (trackingPlayer)
                 TrackPlayer();
             else
@@ -2923,7 +2911,7 @@ namespace Assistant.JMap
         {
             if (IsShowAllPositions)
             {
-                this.Menu_ShowPlayerPosition.CheckState = CheckState.Unchecked;
+                /*this.Menu_ShowPlayerPosition.CheckState = CheckState.Unchecked;
                 IsShowPlayerPosition = false;
 
                 this.Menu_ShowPetPositions.CheckState = CheckState.Unchecked;
@@ -2935,7 +2923,14 @@ namespace Assistant.JMap
                 this.Menu_TrackPlayerPosition.CheckState = CheckState.Unchecked;
                 IsTrackPlayerPosition = false;
 
+                IsShowAllPositions = false;*/
+
                 IsShowAllPositions = false;
+
+                Menu_ShowPartyPositions.Checked = false;
+                Menu_ShowPetPositions.Checked = false;
+                Menu_ShowPlayerPosition.Checked = false;
+                Menu_TrackPlayerPosition.Checked = false;
 
                 Config.SetProperty("MapShowPlayerPosition", false);
                 Config.SetProperty("MapShowPetPositions", false);
@@ -2944,7 +2939,7 @@ namespace Assistant.JMap
             }
             else
             {
-                this.Menu_ShowPlayerPosition.CheckState = CheckState.Checked;
+                /*this.Menu_ShowPlayerPosition.CheckState = CheckState.Checked;
                 IsShowPlayerPosition = true;
 
                 this.Menu_ShowPetPositions.CheckState = CheckState.Checked;
@@ -2956,7 +2951,14 @@ namespace Assistant.JMap
                 this.Menu_TrackPlayerPosition.CheckState = CheckState.Checked;
                 IsTrackPlayerPosition = true;
 
+                IsShowAllPositions = true;*/
+
                 IsShowAllPositions = true;
+
+                Menu_ShowPartyPositions.Checked = true;
+                Menu_ShowPetPositions.Checked = true;
+                Menu_ShowPlayerPosition.Checked = true;
+                Menu_TrackPlayerPosition.Checked = true;
 
                 Config.SetProperty("MapShowPlayerPosition", true);
                 Config.SetProperty("MapShowPetPositions", true);
@@ -2972,15 +2974,7 @@ namespace Assistant.JMap
 
         private void mapPanel_ShowPlayerPosition(object sender, EventArgs e)
         {
-            if (IsShowPlayerPosition)
-            {
-                IsShowPlayerPosition = false;
-            }    
-            else
-            {
-                IsShowPlayerPosition = true;
-                
-            }
+            IsShowPlayerPosition = Menu_ShowPlayerPosition.Checked;
 
             Config.SetProperty("MapShowPlayerPosition", IsShowPlayerPosition);
 
@@ -2991,14 +2985,7 @@ namespace Assistant.JMap
         }
         private void mapPanel_ShowPetPositions(object sender, EventArgs e)
         {
-            if (IsShowPetPositions)
-            {
-                IsShowPetPositions = false;
-            }    
-            else
-            {
-                IsShowPetPositions = true;
-            }
+            IsShowPetPositions = Menu_ShowPetPositions.Checked;
 
             Config.SetProperty("MapShowPetPositions", IsShowPetPositions);
 
@@ -3009,17 +2996,7 @@ namespace Assistant.JMap
         }
         private void mapPanel_ShowPartyPositions(object sender, EventArgs e)
         {
-            if (IsShowPartyPositions)
-            {
-                IsShowPartyPositions = false;
-                //mainForm.showPartyMemberPositions.Checked = false;//State.Unchecked;
-            }
-                
-            else
-            {
-                IsShowPartyPositions = true;
-                //mainForm.showPartyMemberPositions.Checked = true;//State.Checked;
-            }
+            IsShowPartyPositions = Menu_ShowPartyPositions.Checked;
 
             Config.SetProperty("MapShowPartyPositions", IsShowPartyPositions);
 
@@ -3031,16 +3008,7 @@ namespace Assistant.JMap
 
         private void mapPanel_IsTrackPlayerPosition(object sender, EventArgs e)
         {
-            if (IsTrackPlayerPosition)
-            {
-                IsTrackPlayerPosition = false;
-                //mainForm.trackPlayerPosition.Checked = false;//State.Unchecked;
-            }   
-            else
-            {
-                IsTrackPlayerPosition = true;
-                //mainForm.trackPlayerPosition.Checked = true;//State.Checked;
-            }
+            IsTrackPlayerPosition = Menu_TrackPlayerPosition.Checked;
 
             Config.SetProperty("MapTrackPlayerPosition", IsTrackPlayerPosition);
 

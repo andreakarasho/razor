@@ -6714,7 +6714,7 @@ namespace Assistant
 			}
 
 			if ( !m_Initializing )
-				MessageBox.Show( this, Language.GetString( LocString.RelogRequired ), "Relog Required", MessageBoxButtons.OK, MessageBoxIcon.Information );
+				MessageBox.Show( this, Language.GetString( LocString.ApplyOptionsRequired), "Additional Step", MessageBoxButtons.OK, MessageBoxIcon.Information );
 
 		}
 

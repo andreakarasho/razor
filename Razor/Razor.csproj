@@ -502,6 +502,9 @@
     <None Include="JMap\Resources\Palettes\feluccaHM.pal">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="JMap\TreasureMapLocations.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
     <None Include="Razor.manifest" />
   </ItemGroup>
