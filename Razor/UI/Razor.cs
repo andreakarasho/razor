@@ -256,7 +256,6 @@ namespace Assistant
         private CheckBox showtargtext;
         private CheckBox rangeCheckLT;
         private CheckBox actionStatusMsg;
-        private Label label5;
         private Label label8;
         private Label label6;
         private Label label18;
@@ -278,6 +277,7 @@ namespace Assistant
         private CheckBox stealthOverhead;
         private CheckBox captureMibs;
         private CheckBox trackIncomingGold;
+        private CheckBox objectDelay;
         private TreeView _hotkeyTreeViewCache = new TreeView();
 
 		[DllImport( "User32.dll" )]
@@ -417,7 +417,6 @@ namespace Assistant
             this.showtargtext = new System.Windows.Forms.CheckBox();
             this.rangeCheckLT = new System.Windows.Forms.CheckBox();
             this.actionStatusMsg = new System.Windows.Forms.CheckBox();
-            this.label5 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.label18 = new System.Windows.Forms.Label();
@@ -587,6 +586,7 @@ namespace Assistant
             this.label21 = new System.Windows.Forms.Label();
             this.aboutVer = new System.Windows.Forms.Label();
             this.timerTimer = new System.Windows.Forms.Timer(this.components);
+            this.objectDelay = new System.Windows.Forms.CheckBox();
             this.tabs.SuspendLayout();
             this.generalTab.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -1196,6 +1196,7 @@ namespace Assistant
             // 
             // moreMoreOptTab
             // 
+            this.moreMoreOptTab.Controls.Add(this.objectDelay);
             this.moreMoreOptTab.Controls.Add(this.stealthOverhead);
             this.moreMoreOptTab.Controls.Add(this.overHeadMessages);
             this.moreMoreOptTab.Controls.Add(this.showOverheadMessages);
@@ -1219,7 +1220,6 @@ namespace Assistant
             this.moreMoreOptTab.Controls.Add(this.showtargtext);
             this.moreMoreOptTab.Controls.Add(this.rangeCheckLT);
             this.moreMoreOptTab.Controls.Add(this.actionStatusMsg);
-            this.moreMoreOptTab.Controls.Add(this.label5);
             this.moreMoreOptTab.Controls.Add(this.label8);
             this.moreMoreOptTab.Controls.Add(this.label6);
             this.moreMoreOptTab.Controls.Add(this.label18);
@@ -1348,7 +1348,7 @@ namespace Assistant
             // 
             // txtObjDelay
             // 
-            this.txtObjDelay.Location = new System.Drawing.Point(85, 55);
+            this.txtObjDelay.Location = new System.Drawing.Point(108, 56);
             this.txtObjDelay.Name = "txtObjDelay";
             this.txtObjDelay.Size = new System.Drawing.Size(32, 23);
             this.txtObjDelay.TabIndex = 37;
@@ -1445,14 +1445,6 @@ namespace Assistant
             this.actionStatusMsg.Text = "Show Action-Queue status messages";
             this.actionStatusMsg.CheckedChanged += new System.EventHandler(this.actionStatusMsg_CheckedChanged);
             // 
-            // label5
-            // 
-            this.label5.Location = new System.Drawing.Point(6, 58);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(81, 18);
-            this.label5.TabIndex = 35;
-            this.label5.Text = "Object delay:";
-            // 
             // label8
             // 
             this.label8.Location = new System.Drawing.Point(200, 111);
@@ -1463,7 +1455,7 @@ namespace Assistant
             // 
             // label6
             // 
-            this.label6.Location = new System.Drawing.Point(123, 59);
+            this.label6.Location = new System.Drawing.Point(146, 60);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(32, 18);
             this.label6.TabIndex = 36;
@@ -3213,6 +3205,16 @@ namespace Assistant
             this.timerTimer.Interval = 5;
             this.timerTimer.Tick += new System.EventHandler(this.timerTimer_Tick);
             // 
+            // objectDelay
+            // 
+            this.objectDelay.Location = new System.Drawing.Point(8, 57);
+            this.objectDelay.Name = "objectDelay";
+            this.objectDelay.Size = new System.Drawing.Size(99, 21);
+            this.objectDelay.TabIndex = 77;
+            this.objectDelay.Text = "Object Delay:";
+            this.objectDelay.UseVisualStyleBackColor = true;
+            this.objectDelay.CheckedChanged += new System.EventHandler(this.objectDelay_CheckedChanged);
+            // 
             // MainForm
             // 
             this.AutoScaleBaseSize = new System.Drawing.Size(6, 16);
@@ -3442,7 +3444,10 @@ namespace Assistant
 	        alwaysStealth.Checked = Config.GetBool("AlwaysStealth");
 	        autoOpenDoors.Checked = Config.GetBool("AutoOpenDoors");
 
-	        msglvl.SelectedIndex = Config.GetInt("MessageLevel");
+	        objectDelay.Checked = Config.GetBool("ObjectDelayEnabled");
+             txtObjDelay.Enabled = Config.GetBool("ObjectDelayEnabled");
+
+             msglvl.SelectedIndex = Config.GetInt("MessageLevel");
 
 	        try
 	        {
@@ -7461,6 +7466,13 @@ namespace Assistant
 
 	        mapPins.ItemCheck += mapPins_ItemCheck;
 
+        }
+
+        private void objectDelay_CheckedChanged(object sender, EventArgs e)
+        {
+            txtObjDelay.Enabled = objectDelay.Checked;
+
+            Config.SetProperty("ObjectDelayEnabled", objectDelay.Checked);
         }
     }
 }
