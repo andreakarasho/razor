@@ -20,44 +20,38 @@ namespace Assistant.JMap
 
     public class UIElements
     {
-        public static JMapButton NewButton(MapPanel mapPanel, JMapButtonType type, float mapLocX, float mapLocY, string displayText = "", string extraText = "")
+        public static JMapButton NewButton(MapPanel mapPanel, JMapButtonType type, string markerOwner, bool IsPublic, float mapLocX, float mapLocY, string displayText = "", string extraText = "")
         {
-            /* When map is clicked in order to create a marker
-             * we need to have a prompt. A little pop up next to the 
-             * marker asking "Details?" could work.
-             * It should disappear if not clicked in X seconds or
-             * if another action occurs.
-             */
-
-            //Debug.WriteLine("NewButton Called");
             try
             {
                 switch (type)
                 {
-                    case JMapButtonType.GenericButton: return GenericButton(mapPanel, type, mapLocX, mapLocY, displayText, extraText);
-                    case JMapButtonType.MapPin: return MapPin(mapPanel, type, mapLocX, mapLocY, displayText, extraText);
-                    default: return MapPin(mapPanel, type, mapLocX, mapLocY, displayText, extraText);
+                    case JMapButtonType.GenericButton: return GenericButton(mapPanel, type, markerOwner, IsPublic, mapLocX, mapLocY, displayText, extraText);
+                    case JMapButtonType.MapPin: return MapPin(mapPanel, type, markerOwner, IsPublic, mapLocX, mapLocY, displayText, extraText);
+                    default: return MapPin(mapPanel, type, markerOwner, IsPublic, mapLocX, mapLocY, displayText, extraText);
                 }
             }
             catch(Exception e)
             {
                 Debug.WriteLine(e.ToString());
-                return MapPin(mapPanel, type, mapLocX, mapLocY, displayText, extraText);
+                return MapPin(mapPanel, type, markerOwner, IsPublic, mapLocX, mapLocY, displayText, extraText);
             }
 
         }
 
-        private static JMapButton MapPin(MapPanel mapPanel, JMapButtonType type, float mapLocX, float mapLocY, string displayText = "", string extraText = "")
+        private static JMapButton MapPin(MapPanel mapPanel, JMapButtonType type, string markerOwner, bool IsPublic, float mapLocX, float mapLocY, string displayText = "", string extraText = "")
         {
             try
             {
                 return new JMapButton()
                 {
-                    curPath = $"{Config.GetInstallDirectory()}\\JMap\\Resources\\Cursors\\mapPin32A21.cur",
+                    //curPath = $"{Config.GetInstallDirectory()}\\JMap\\Resources\\Cursors\\mapPin32A21.cur",
                     //Size = new Size(32, 32),
 
                     mapPanel = mapPanel,
                     type = JMapButtonType.MapPin,
+                    MarkerOwner = markerOwner,
+                    IsPublic = IsPublic,
                     mapLoc = new PointF(mapLocX, mapLocY),
                     displayText = displayText,
                     extraText = extraText
@@ -76,11 +70,11 @@ namespace Assistant.JMap
             catch(Exception e)
             {
                 Debug.WriteLine("BUTTON CREATION ERROR: " + e.ToString());
-                return MapPin(mapPanel, type, mapLocX, mapLocY, displayText, extraText);
+                return MapPin(mapPanel, type, markerOwner, IsPublic, mapLocX, mapLocY, displayText, extraText);
             }
         }
 
-        private static JMapButton GenericButton(MapPanel mapPanel, JMapButtonType type, float mapLocX, float mapLocY, string displayText = "", string extraText = "") 
+        private static JMapButton GenericButton(MapPanel mapPanel, JMapButtonType type, string markerOwner, bool IsPublic, float mapLocX, float mapLocY, string displayText = "", string extraText = "") 
         {
             return new JMapButton()
             {
@@ -120,6 +114,8 @@ namespace Assistant.JMap
         public Point mousePos { get; set; }
 
         // Options
+        public bool IsPublic { get; set; }
+        public string MarkerOwner { get; set; }
         //public bool hasPane { get; set; }
         //public bool hasText { get; set; }
         //public bool hasExtra { get; set; }
@@ -184,55 +180,6 @@ namespace Assistant.JMap
             }
         }
 
-        
-        /*protected override void OnPaint(PaintEventArgs pe)
-        {
-            
-            //if (!Active)
-            //    return;
-            pe.Graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
-            pe.Graphics.SmoothingMode = SmoothingMode.HighQuality;
-            pe.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
-            pe.Graphics.PageUnit = GraphicsUnit.Pixel;
-
-            offset = mapPanel.offset;
-            zeroPoint = mapPanel.zeroPoint;
-
-            renderPoint = new PointF(Convert.ToInt32(Math.Floor((double)((mapLoc.X * offset.X) + zeroPoint.X) - hotSpot.X)),
-                        Convert.ToInt32(Math.Floor((double)(mapLoc.Y * offset.Y) + zeroPoint.Y) - hotSpot.Y));
-
-            renderLoc = renderPoint;
-            if (mapPanel.mapRotated)
-            {
-                renderLoc = mapPanel.RotatePointF(renderPoint, mapPanel.pntPlayer, 45);
-            }
-
-            this.Left = Convert.ToInt32(Math.Floor((double)renderLoc.X));
-            this.Top = Convert.ToInt32(Math.Floor((double)renderLoc.Y));
-
-            //Rectangle rectF = this.DisplayRectangle; //Default size, 32,32 as it is a cursor
-
-            
-            //pe.Graphics.DrawImage(img, 0, 0, 24, 24);
-            
-            
-            //pe.Graphics.DrawImage(img, rectF);
-
-            
-            
-            //ResumeLayout();
-            //if (IsHovered)
-            //{
-            //    Debug.WriteLine("Should be highlighting");
-            //    pe.Graphics.FillPath(highlightBrush, highlightArea);
-            //}
-
-            // loc 0,0 + 13,3    8x8 elipse
-            //cur.DrawStretched(pe.Graphics, rectF);
-            //base.OnPaint(pe);
-            
-        }*/
-
         private void OnMouseMove(object sender, MouseEventArgs e)
         {
             //if(IsHovered)
@@ -292,13 +239,23 @@ namespace Assistant.JMap
             //base.OnPaintBackground(pe);
         }*/
 
-        public void LoadButton()//object sender, EventArgs e)
+        public void LoadButton()
         {
             try
             {
-                //MouseHover += new EventHandler(OnMouseHover);
-                //MouseMove += new MouseEventHandler(OnMouseMove);
-                //MouseEnter += new EventHandler(OnMouseEnter);
+                if(this.type == JMapButtonType.MapPin)
+                {
+                    if (IsPublic)
+                    {
+                        curPath = $"{Config.GetInstallDirectory()}\\JMap\\Resources\\Cursors\\mapPin32A21_Gold.cur";
+                        textColor = Color.Yellow;
+                    }
+                    else if(!IsPublic)
+                    {
+                        curPath = $"{Config.GetInstallDirectory()}\\JMap\\Resources\\Cursors\\mapPin32A21.cur";
+                        textColor = Color.Red;
+                    }
+                }
 
                 this.cur = Markers.LoadCursor(this.curPath);
                 Icon i = Icon.ExtractAssociatedIcon(this.curPath);
@@ -309,11 +266,6 @@ namespace Assistant.JMap
                 {
                     this.hotSpot = new Point(this.hotSpot.X - 3, this.hotSpot.Y - 4);
                 }
-                //SetStyle(ControlStyles.SupportsTransparentBackColor, true);
-                //SetStyle(ControlStyles.Opaque, true);
-                //SetStyle(ControlStyles.ResizeRedraw, true);
-
-                //this.BackColor = Color.Transparent;
 
                 highlightColor = Color.Silver;
                 highlightArea = new GraphicsPath();
@@ -323,33 +275,12 @@ namespace Assistant.JMap
                 Color[] colors = { highlightColor , Color.FromArgb(0, highlightColor) };
                 highlightBrush.SurroundColors = colors;
                 highlightBrush.FocusScales = new PointF(0.785f, 0.785f);
-
-                //this.TabStop = false;
-                //this.Margin = new Padding(0);
-
-                //this.Name = displayText + "_" + mapLoc.X.ToString() + "_" + mapLoc.Y.ToString();
-                //this.Text = displayText;
-                //this.Active = true;
-                //this.Visible = false;
-                //this.Show();
-                
-
             }
             catch (Exception ex)
             {
                 Debug.WriteLine("BUTTON LOAD ERROR: " + ex.ToString());
             }
         }
-
-        /*protected override CreateParams CreateParams
-        {
-            get
-            {
-                CreateParams cp = base.CreateParams;
-                cp.ExStyle |= 0x00000020; //WS_EX_TRANSPARENT
-                return cp;
-            }
-        }*/
 
         public void NotifyDefault(bool value)
         {

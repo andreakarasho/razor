@@ -18,10 +18,13 @@ using Assistant;
 using Assistant.Properties;
 using Ultima;
 
+
 namespace Assistant.JMap
 {
     public class MapPanel : Panel
     {
+        
+
         public MainForm mainForm;
         delegate void UpdateMapCallback();
 
@@ -333,6 +336,9 @@ namespace Assistant.JMap
 
             //_mapHeight_1.MakeTransparent(Color.White);
 
+            InitializeComponent();
+            Active = true;
+
             m_Regions = JMap.MapRegion.Load($"{Config.GetInstallDirectory()}\\guardlines.def");
             Debug.WriteLine("MapPanel Loaded Guardlines!");
 
@@ -346,8 +352,7 @@ namespace Assistant.JMap
                 ReadMarkers($"{Config.GetInstallDirectory()}\\JMap\\MarkedLocations.csv");
             }
 
-            InitializeComponent();
-            Active = true;
+
 
             MouseHoverWorker();
 
@@ -373,7 +378,7 @@ namespace Assistant.JMap
 
 
 
-        compassLoc = new PointF(renderArea.Right - 20, renderArea.Top + 20);
+            compassLoc = new PointF(renderArea.Right - 20, renderArea.Top + 20);
             UpdatePlayerPos();
 
             if (trackingPlayer)
@@ -491,8 +496,9 @@ namespace Assistant.JMap
                             else
                                 displayString = btn.mapLoc.X + "," + btn.mapLoc.Y;
 
+                            Brush textBrush = new SolidBrush(btn.textColor);
 
-                            gfx.DrawString(displayString, m_RegFont, Brushes.Red, btn.renderLoc.X + (strLength.Width / 2), (btn.renderLoc.Y - 5) - (strLength.Height / 2), stringFormat);
+                            gfx.DrawString(displayString, m_RegFont, textBrush, btn.renderLoc.X + (strLength.Width / 2), (btn.renderLoc.Y - 5) - (strLength.Height / 2), stringFormat);
 
 
                             gfx.Dispose();
@@ -500,7 +506,12 @@ namespace Assistant.JMap
                         if (!btnRef.Item1.Contains(mousePosNow) && btn.IsHovered)
                         {
                             btn.IsHovered = false;
-                            //MarkerToEdit = null;
+
+                            if(!EditingMarker && !AddingMarker)
+                            {
+                                MarkerToEdit = null;
+                            }
+                            
                             Invalidate();
                         }
                     }
@@ -1819,7 +1830,8 @@ namespace Assistant.JMap
 
 
             // GUARDLINES & OTHER REGIONS
-            regions = RegionList(0, 0, _mapSize.Width);
+            if(m_Regions != null)
+                regions = RegionList(0, 0, _mapSize.Width);
 
             // COORDINATES BARS
             //      PLAYER POSITION
@@ -1854,51 +1866,49 @@ namespace Assistant.JMap
         {
             TrackableMobs.Clear();
 
-            foreach (KeyValuePair<Serial, Mobile> m in World.Mobiles)
+            if (IsShowPetPositions)
             {
-                Mobile mob = World.FindMobile(m.Key);
+                foreach (KeyValuePair<Serial, Mobile> m in World.Mobiles)
+                {
+                    Mobile mob = World.FindMobile(m.Key);
 
-                //Mob is owned by the player but is not yet in the Pet List.
-                //Add it.
-                if (mob.CanRename && !PetList.ContainsKey(mob.Serial))
-                {
-                    PetList.Add(mob.Serial, mob);
-                    //Debug.WriteLine($"Pet '{mob.Name}' added to PetList");
-                }
-                
-                if(IsShowPetPositions)
-                {
-                    //Mob is owned by player, is in Pet List (stabled after perhaps), but is not in the TrackableMobs list yet.
+                    //Mob is owned by the player but is not yet in the Pet List.
                     //Add it.
-                    if (PetList.ContainsKey(mob.Serial) && !TrackableMobs.ContainsKey(mob.Serial))
+                    if (mob.CanRename && !PetList.ContainsKey(mob.Serial))
                     {
-                        TrackableMobs.Add(mob.Serial, mob);
-                        //Debug.WriteLine($"Pet '{mob.Name}' added to TrackableMobs");
+                        PetList.Add(mob.Serial, mob);
+                        //Debug.WriteLine($"Pet '{mob.Name}' added to PetList");
                     }
-                    //Mob is no longer under players command
-                    //Remove it you haxor!
-                    if (!mob.CanRename && PetList.ContainsKey(mob.Serial))
-                    {
-                        PetList.Remove(mob.Serial);
-                        TrackableMobs.Remove(mob.Serial);
-                        //Debug.WriteLine($"Pet '{mob.Name}' removed from PetList");
+                        //Mob is owned by player, is in Pet List (stabled after perhaps), but is not in the TrackableMobs list yet.
+                        //Add it.
+                        if (PetList.ContainsKey(mob.Serial) && !TrackableMobs.ContainsKey(mob.Serial))
+                        {
+                            TrackableMobs.Add(mob.Serial, mob);
+                            //Debug.WriteLine($"Pet '{mob.Name}' added to TrackableMobs");
+                        }
+                        //Mob is no longer under players command
+                        //Remove it you haxor!
+                        if (!mob.CanRename && PetList.ContainsKey(mob.Serial))
+                        {
+                            PetList.Remove(mob.Serial);
+                            TrackableMobs.Remove(mob.Serial);
+                            //Debug.WriteLine($"Pet '{mob.Name}' removed from PetList");
+                        }
                     }
-                }
-                
-            }
 
-            foreach (Serial s in PacketHandlers.Party)
+            }
+            if (IsShowPartyPositions)
             {
-                Mobile mob = World.FindMobile(s);
-                if(IsShowPartyPositions)
+                foreach (Serial s in PacketHandlers.Party)
                 {
+                    Mobile mob = World.FindMobile(s);
+
                     //Party member not yet in TrackedMobs list, add them! For honor and glory!
                     if (!TrackableMobs.ContainsKey(mob.Serial))
                         TrackableMobs.Add(mob.Serial, mob);
 
                     //Debug.WriteLine($"Character '{mob.Name}' added to TrackableMobs");
                 }
-
             }
         }
 
@@ -2334,14 +2344,18 @@ namespace Assistant.JMap
             }
         }
 
-        public void AddMarker(PointF markedLoc, string optionalName = "", string optionalExtra = "")
+        public void AddPublicMarker(PointF markedLoc, bool IsPublic, string markerOwner, string optionalName = "", string optionalExtra = "")
+        {
+            AddMarker(markedLoc, IsPublic, markerOwner, optionalName, optionalExtra);
+
+            //ClientCommunication.SendToServer(new ClientUniMessage(m_Type, hue, m_Font, m_Lang, m_Keywords, m_Speech));
+        }
+
+        public void AddMarker(PointF markedLoc, bool IsPublic, string markerOwner, string optionalName = "", string optionalExtra = "")
         {
             float xLoc = Convert.ToInt32(Math.Floor(markedLoc.X));
             float yLoc = Convert.ToInt32(Math.Floor(markedLoc.Y));
 
-            //int newLineNum = File.ReadLines($"{Config.GetInstallDirectory()}\\JMap\\MarkedLocations.csv").Count() + 1;
-            //StringBuilder builder = new StringBuilder();
-            //string lineNum = newLineNum.ToString();
             float x = xLoc;
             float y = yLoc;
             string text = optionalName;
@@ -2349,22 +2363,17 @@ namespace Assistant.JMap
 
             //Format the new line
             string newLine = string.Format($"{x},{y},{text},{extra}");
-            //builder.AppendLine(newLine);
 
             markedLocations.Add(newLine);
             //Write it to file
             File.AppendAllText($"{Config.GetInstallDirectory()}\\JMap\\MarkedLocations.csv", Environment.NewLine + newLine);
 
-            JMapButton btn = UIElements.NewButton(this, JMapButtonType.MapPin, x, y, text, extra);
+            JMapButton btn = UIElements.NewButton(this, JMapButtonType.MapPin, markerOwner, IsPublic, x, y, text, extra);
 
             mapButtons.Add(btn);
             btn.LoadButton();
 
             UpdateAll();
-            //written new marker, clear our arrays, read the file again and repopulate (this is not ideal, but whatever :))
-            //markedLocations.Clear();
-            //mapButtons.Clear();
-            //ReadMarkers($"{Config.GetInstallDirectory()}\\JMap\\MarkedLocations.csv");
         }
 
         public void ReadMarkers(string path)
@@ -2391,28 +2400,15 @@ namespace Assistant.JMap
                     float y = float.Parse(line[1]);
                     string text = line[2];
                     string extra = line[3];
-                                                                //(JMapButtonType)type
-                    JMapButton btn = UIElements.NewButton(this, JMapButtonType.MapPin, x, y, text, extra);
 
-                    mapButtons.Add(btn);
+                    string markerOwner = this.FocusMobile.Name;
+                                                               //(JMapButtonType)type                         //ispublic?
+                    JMapButton btn = UIElements.NewButton(this, JMapButtonType.MapPin, markerOwner, false, x, y, text, extra);
+
                     btn.LoadButton();
+                    mapButtons.Add(btn);
                     ++i;
                 }                    
-            }
-        }
-
-        private void LoadMapButtons()
-        {
-            int i = 0;
-
-            foreach (JMapButton btn in mapButtons)
-            {
-                ++i;
-                //Debug.WriteLine("Adding Button {0}/{1} Text:{2} X:{3} Y:{4}", i, mapButtons.Count, btn.displayText, btn.mapLoc.X, btn.mapLoc.Y);
-
-                
-                //this.Controls.Add(btn);
-                //btn.Enabled = true;
             }
         }
 
@@ -2568,7 +2564,7 @@ namespace Assistant.JMap
             if (mouse.Button == MouseButtons.Left)
             {
                 mouseDown = mouse.Location;
-                MarkerToEdit = null;
+                //MarkerToEdit = null;
             }
 
             else if (mouse.Button == MouseButtons.Right)
@@ -2675,10 +2671,10 @@ namespace Assistant.JMap
             }
             else
             {
-                if(!EditingMarker || !AddingMarker)
-                {
-                    MarkerToEdit = null;
-                }
+                //if(!EditingMarker || !AddingMarker)
+                //{
+                //    MarkerToEdit = null;
+                //}
                 MouseToMap(mousePosNow);
                 RenderMouseCoord();
                 //Debug.WriteLine($"MouseToMap: {MouseToMap(mousePosNow)} mousePosNow: {mousePosNow}");
@@ -3298,6 +3294,7 @@ namespace Assistant.JMap
             this.Menu_DeleteMarker});
             this.ContextMarkerMenu.Name = "ContextOptions";
             this.ContextMarkerMenu.Size = new System.Drawing.Size(148, 48);
+            this.ContextMarkerMenu.AutoClose = true;
             // 
             // Menu_EditMarker
             // 
@@ -3334,5 +3331,7 @@ namespace Assistant.JMap
             this.ResumeLayout(false);
 
         }
+
+
     }
 }
