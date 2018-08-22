@@ -9,7 +9,6 @@ namespace Assistant
         private static int m_PrevGoldAmount;
 
         public static int GoldSinceStart { get; set; }
-
         public static double GoldPerSecond { get; set; }
         public static double GoldPerMinute { get; set; }
         public static double GoldPerHour { get; set; }

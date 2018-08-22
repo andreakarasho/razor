@@ -186,6 +186,7 @@ MainForm::showTargetMessagesOverChar=Show Target Self/Last/Clear Overhead
 MainForm::showOverheadMessages=Show Overhead Messages
 MainForm::goldPerDisplay=Enable Gold Per Sec/Min/Hour Counters
 MainForm::stealthOverhead=Overhead
+MainForm::trackIncomingGold=Track gold per sec/min/hour
 
 HueEntry::Text=Select a Hue
 HueEntry::cancel=Cancel

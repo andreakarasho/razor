@@ -276,6 +276,8 @@ namespace Assistant
         private Label label25;
         private CheckedListBox mapPins;
         private CheckBox stealthOverhead;
+        private CheckBox captureMibs;
+        private CheckBox trackIncomingGold;
         private TreeView _hotkeyTreeViewCache = new TreeView();
 
 		[DllImport( "User32.dll" )]
@@ -519,6 +521,7 @@ namespace Assistant
             this.delMacro = new System.Windows.Forms.Button();
             this.newMacro = new System.Windows.Forms.Button();
             this.mapTab = new System.Windows.Forms.TabPage();
+            this.captureMibs = new System.Windows.Forms.CheckBox();
             this.label25 = new System.Windows.Forms.Label();
             this.boatControl = new System.Windows.Forms.Button();
             this.btnMap = new System.Windows.Forms.Button();
@@ -583,6 +586,7 @@ namespace Assistant
             this.label21 = new System.Windows.Forms.Label();
             this.aboutVer = new System.Windows.Forms.Label();
             this.timerTimer = new System.Windows.Forms.Timer(this.components);
+            this.trackIncomingGold = new System.Windows.Forms.CheckBox();
             this.tabs.SuspendLayout();
             this.generalTab.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -1504,6 +1508,7 @@ namespace Assistant
             // 
             // displayTab
             // 
+            this.displayTab.Controls.Add(this.trackIncomingGold);
             this.displayTab.Controls.Add(this.showNotoHue);
             this.displayTab.Controls.Add(this.warnNum);
             this.displayTab.Controls.Add(this.warnCount);
@@ -2493,6 +2498,7 @@ namespace Assistant
             // mapTab
             // 
             this.mapTab.BackColor = System.Drawing.SystemColors.Control;
+            this.mapTab.Controls.Add(this.captureMibs);
             this.mapTab.Controls.Add(this.label25);
             this.mapTab.Controls.Add(this.boatControl);
             this.mapTab.Controls.Add(this.btnMap);
@@ -2503,6 +2509,17 @@ namespace Assistant
             this.mapTab.Size = new System.Drawing.Size(482, 460);
             this.mapTab.TabIndex = 13;
             this.mapTab.Text = "Map";
+            // 
+            // captureMibs
+            // 
+            this.captureMibs.AutoSize = true;
+            this.captureMibs.Location = new System.Drawing.Point(9, 89);
+            this.captureMibs.Name = "captureMibs";
+            this.captureMibs.Size = new System.Drawing.Size(236, 19);
+            this.captureMibs.TabIndex = 62;
+            this.captureMibs.Text = "Capture MIB coordinates when opening";
+            this.captureMibs.UseVisualStyleBackColor = true;
+            this.captureMibs.CheckedChanged += new System.EventHandler(this.captureMibs_CheckedChanged);
             // 
             // label25
             // 
@@ -2527,9 +2544,9 @@ namespace Assistant
             // 
             // btnMap
             // 
-            this.btnMap.Location = new System.Drawing.Point(21, 203);
+            this.btnMap.Location = new System.Drawing.Point(21, 198);
             this.btnMap.Name = "btnMap";
-            this.btnMap.Size = new System.Drawing.Size(237, 24);
+            this.btnMap.Size = new System.Drawing.Size(237, 29);
             this.btnMap.TabIndex = 59;
             this.btnMap.Text = "Open UOPS";
             this.btnMap.Click += new System.EventHandler(this.btnMap_Click);
@@ -2556,6 +2573,7 @@ namespace Assistant
             // 
             // mapPins
             // 
+            this.mapPins.CheckOnClick = true;
             this.mapPins.FormattingEnabled = true;
             this.mapPins.Location = new System.Drawing.Point(6, 22);
             this.mapPins.Name = "mapPins";
@@ -3184,6 +3202,17 @@ namespace Assistant
             this.timerTimer.Interval = 5;
             this.timerTimer.Tick += new System.EventHandler(this.timerTimer_Tick);
             // 
+            // trackIncomingGold
+            // 
+            this.trackIncomingGold.AutoSize = true;
+            this.trackIncomingGold.Location = new System.Drawing.Point(216, 245);
+            this.trackIncomingGold.Name = "trackIncomingGold";
+            this.trackIncomingGold.Size = new System.Drawing.Size(177, 19);
+            this.trackIncomingGold.TabIndex = 48;
+            this.trackIncomingGold.Text = "Track gold per sec/min/hour";
+            this.trackIncomingGold.UseVisualStyleBackColor = true;
+            this.trackIncomingGold.CheckedChanged += new System.EventHandler(this.trackIncomingGold_CheckedChanged);
+            // 
             // MainForm
             // 
             this.AutoScaleBaseSize = new System.Drawing.Size(6, 16);
@@ -3234,6 +3263,7 @@ namespace Assistant
             this.absoluteTargetGroup.ResumeLayout(false);
             this.macroActGroup.ResumeLayout(false);
             this.mapTab.ResumeLayout(false);
+            this.mapTab.PerformLayout();
             this.groupMapPoints.ResumeLayout(false);
             this.videoTab.ResumeLayout(false);
             this.videoTab.PerformLayout();
@@ -3568,7 +3598,10 @@ namespace Assistant
 				Counter.Redraw( counters );
 
 			    titleBarParams.SelectedIndex = 0;
-			}
+
+			    tabs.Size = new Size(tabs.Size.Width, 313);
+			    Size = new Size(tabs.Size.Width + 10, tabs.Size.Height + 33);
+            }
 			else if ( tabs.SelectedTab == dressTab )
 			{
 				int sel = dressList.SelectedIndex;
@@ -3624,12 +3657,12 @@ namespace Assistant
             else if (tabs.SelectedTab == moreMoreOptTab)
 			{
 			    tabs.Size = new Size(tabs.Size.Width, 313);
-			    Size = new Size(tabs.Size.Width + 10, tabs.Size.Height + 35);
+			    Size = new Size(tabs.Size.Width + 10, tabs.Size.Height + 33);
             }
 			else if (tabs.SelectedTab == moreOptTab)
 			{
 			    tabs.Size = new Size(tabs.Size.Width, 313);
-			    Size = new Size(tabs.Size.Width + 10, tabs.Size.Height + 35);
+			    Size = new Size(tabs.Size.Width + 10, tabs.Size.Height + 33);
 			}
         }
 
@@ -7381,6 +7414,22 @@ namespace Assistant
         private void stealthOverhead_CheckedChanged(object sender, EventArgs e)
         {
             Config.SetProperty("StealthOverhead", stealthOverhead.Checked);
+        }
+
+        private void captureMibs_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.SetProperty("CaptureMibs", captureMibs.Checked);
+        }
+
+        private void trackIncomingGold_CheckedChanged(object sender, EventArgs e)
+        {
+            if (trackIncomingGold.Checked)
+            {
+                GoldPerHourTimer.Start();
+            } else
+            {
+                GoldPerHourTimer.Stop();
+            }
         }
     }
 }
