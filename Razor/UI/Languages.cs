@@ -305,7 +305,7 @@ namespace Assistant
 		TargRandCriminal,
 		ForceEndHolding,
 		RestartClient,
-		RelogRequired,
+		ApplyOptionsRequired,
 		LiftQueued,
 		RestockQueued,
 		StrChanged,
@@ -420,6 +420,7 @@ namespace Assistant
         BullSounds,
         DragonSounds,
         SetSellAgentHotBag,
+	    AddUseOnceContainer,
 
         __End
 	}

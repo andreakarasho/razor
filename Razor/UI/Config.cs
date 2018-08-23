@@ -151,16 +151,34 @@ namespace Assistant
 	        AddProperty("StepThroughMacro", false);
 
             // Map options
-	        AddProperty("ShowPlayerPosition", true);
+	        /*AddProperty("ShowPlayerPosition", true);
 	        AddProperty("TrackPlayerPosition", true);
 	        AddProperty("ShowPartyMemberPositions", true);
-	        AddProperty("TiltMap", true);
+	        AddProperty("TiltMap", true);*/
 
 	        AddProperty("ShowTargetSelfLastClearOverhead", true);
 	        AddProperty("ShowOverheadMessages", false);
+	        AddProperty("CaptureMibs", false);
+
+            //OverheadFormat
+	        AddProperty("OverheadFormat", "[{msg}]");
+
+            AddProperty("GoldPerDisplay", false);
 
 	        AddProperty("LightLevel", 31);
 	        AddProperty("LogSkillChanges", false);
+	        AddProperty("StealthOverhead", false);
+
+            // JMap options
+	        AddProperty("MapShowPlayerPosition", true);
+	        AddProperty("MapShowPartyPositions", true);
+	        AddProperty("MapShowPetPositions", true);
+	        AddProperty("MapTrackPlayerPosition", true);
+
+	        AddProperty("MapGuardLines", true);
+	        AddProperty("MapGridLines", false);
+
+	        AddProperty("MapTilt", true);
 
             Counter.Default();
 	        Filter.DisableAll();
@@ -273,6 +291,8 @@ namespace Assistant
 			HotKey.Load( root["hotkeys"] );
 			PasswordMemory.Load( root["passwords"] );
 		    OverheadMessages.Load(root["overheadmessages"]);
+
+            GoldPerHourTimer.Stop();
 
             if ( m_Props.ContainsKey( "ForceSize" ) )
 			{

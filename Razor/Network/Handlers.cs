@@ -83,13 +83,15 @@ namespace Assistant
 			PacketHandler.RegisterServerToClientFilter( 0xCC, new PacketFilterCallback( OnLocalizedMessageAffix ) );
 			PacketHandler.RegisterServerToClientViewer( 0xD6, new PacketViewerCallback( EncodedPacket ) );//0xD6 "encoded" packets
 			PacketHandler.RegisterServerToClientViewer( 0xD8, new PacketViewerCallback( CustomHouseInfo ) );
-			PacketHandler.RegisterServerToClientFilter( 0xDC, new PacketFilterCallback( ServOPLHash ) );
+			//PacketHandler.RegisterServerToClientFilter( 0xDC, new PacketFilterCallback( ServOPLHash ) );
 			PacketHandler.RegisterServerToClientViewer( 0xDD, new PacketViewerCallback( CompressedGump ) );
 			PacketHandler.RegisterServerToClientViewer( 0xF0, new PacketViewerCallback( RunUOProtocolExtention ) ); // Special RunUO protocol extentions (for KUOC/Razor)
 
 			PacketHandler.RegisterServerToClientViewer( 0xF3, new PacketViewerCallback( SAWorldItem ) );
 
 		    PacketHandler.RegisterServerToClientViewer(0x2C, new PacketViewerCallback(ResurrectionGump));
+
+		    PacketHandler.RegisterServerToClientViewer(0xDF, new PacketViewerCallback(BuffDebuff));
         }
 		
 		private static void DisplayStringQuery( PacketReader p, PacketHandlerEventArgs args )
@@ -1861,14 +1863,18 @@ namespace Assistant
 				        World.Player.ResetCriminalTimer();
 				    }
 
+                    // Overhead message override
 				    if (Config.GetBool("ShowOverheadMessages") && OverheadMessages.OverheadMessageList.Count > 0)
 				    {
+				        string overheadFormat = Config.GetString("OverheadFormat");
+
 				        foreach (OverheadMessages.OverheadMessage message in OverheadMessages.OverheadMessageList)
 				        {
 				            if (text.IndexOf(message.SearchMessage, StringComparison.OrdinalIgnoreCase) != -1)
 				            {
-				                World.Player.OverheadMessage(message.MessageOverhead);
-                            }
+				                World.Player.OverheadMessage(overheadFormat.Replace("{msg}", message.MessageOverhead));
+				                break;
+				            }
 				        }
 				    }
                 }
@@ -1917,9 +1923,14 @@ namespace Assistant
 			{
 				HandleSpeech( p, args, serial, body, type, hue, font, "A", name, text );
 
-				if ( !serial.IsValid )
-					BandageTimer.OnAsciiMessage( text );
-			}
+			    if (!serial.IsValid)
+			    {
+			        BandageTimer.OnAsciiMessage(text);
+                   }
+
+			    GateTimer.OnAsciiMessage(text);
+
+            }
 		}
 
 		public static void UnicodeSpeech( Packet p, PacketHandlerEventArgs args )
@@ -2531,11 +2542,17 @@ namespace Assistant
             if (Macros.MacroManager.AcceptActions && MacroManager.Action(new WaitForGumpAction(World.Player.CurrentGumpI)))
                 args.Block = true;
 
+            if (!Config.GetBool("CaptureMibs"))
+                return;
+
             try
             {
                 int x = p.ReadInt32(), y = p.ReadInt32();
 
                 string layout = p.GetCompressedReader().ReadString();
+
+                if (!MessageInBottleCapture.IsMibGump(layout))
+                    return;
 
                 int numStrings = p.ReadInt32();
                 if (numStrings < 0 || numStrings > 256)
@@ -2573,8 +2590,9 @@ namespace Assistant
                     gumpStrings.AddRange(ParseGumpString(gumpPieces, stringlistparse));
                 }
 
-                World.Player.CurrentGumpStrings.AddRange(gumpStrings);
+                MessageInBottleCapture.CaptureMibCoordinates(gumpStrings[2]);
 
+                World.Player.CurrentGumpStrings.AddRange(gumpStrings);
                 World.Player.CurrentGumpRawData = layout; // Get raw data of current gump
             }
             catch { }
@@ -2658,5 +2676,37 @@ namespace Assistant
 	            ScreenCapManager.DeathCapture(0.75);
             }
         }
+
+	    private static void BuffDebuff(PacketReader p, PacketHandlerEventArgs args)
+	    {
+	        Serial ser = p.ReadUInt32();
+	        ushort icon = p.ReadUInt16();
+	        ushort action = p.ReadUInt16();
+
+	        if (Enum.IsDefined(typeof(BuffIcon), icon))
+	        {
+	            BuffIcon buff = (BuffIcon) icon;
+	            switch (action)
+	            {
+	                case 0x01: // show
+	                    if (World.Player != null && !World.Player.Buffs.Contains(buff))
+	                    {
+	                        World.Player.Buffs.Add(buff);
+	                    }
+
+	                    break;
+
+	                case 0x0: // remove
+	                    if (World.Player != null && World.Player.Buffs.Contains(buff))
+	                    {
+	                        World.Player.Buffs.Remove(buff);
+	                    }
+
+	                    break;
+                }
+
+	            ClientCommunication.RequestTitlebarUpdate();
+            }
+	    }
     }
 }

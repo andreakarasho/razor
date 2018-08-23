@@ -50,7 +50,7 @@ namespace Assistant
             protected override void OnTick()
             {
                 m_Count++;
-                if (m_Count >= 10)
+                if (m_Count > 10)
                 {
                     Stop();
                 }

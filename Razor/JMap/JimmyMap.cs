@@ -172,7 +172,7 @@ namespace Assistant.JMap
 
             //MapGeneration mapGen = new MapGeneration(this, mapPanel, 0);
         }
-
+       
         #region MAP GEN WORKER
 
         public void GenerationWorker()
