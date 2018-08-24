@@ -278,6 +278,8 @@ namespace Assistant
         private CheckBox stealthOverhead;
         private CheckBox captureMibs;
         private CheckBox trackIncomingGold;
+        private ComboBox JMap_GuardlineDropdown;
+        private Label lblGuardlines;
         private TreeView _hotkeyTreeViewCache = new TreeView();
 
 		[DllImport( "User32.dll" )]
@@ -425,6 +427,7 @@ namespace Assistant
             this.gameSize = new System.Windows.Forms.CheckBox();
             this.chkPartyOverhead = new System.Windows.Forms.CheckBox();
             this.displayTab = new System.Windows.Forms.TabPage();
+            this.trackIncomingGold = new System.Windows.Forms.CheckBox();
             this.showNotoHue = new System.Windows.Forms.CheckBox();
             this.warnNum = new System.Windows.Forms.TextBox();
             this.warnCount = new System.Windows.Forms.CheckBox();
@@ -586,7 +589,8 @@ namespace Assistant
             this.label21 = new System.Windows.Forms.Label();
             this.aboutVer = new System.Windows.Forms.Label();
             this.timerTimer = new System.Windows.Forms.Timer(this.components);
-            this.trackIncomingGold = new System.Windows.Forms.CheckBox();
+            this.JMap_GuardlineDropdown = new System.Windows.Forms.ComboBox();
+            this.lblGuardlines = new System.Windows.Forms.Label();
             this.tabs.SuspendLayout();
             this.generalTab.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -1523,6 +1527,17 @@ namespace Assistant
             this.displayTab.Size = new System.Drawing.Size(482, 460);
             this.displayTab.TabIndex = 1;
             this.displayTab.Text = "Display/Counters";
+            // 
+            // trackIncomingGold
+            // 
+            this.trackIncomingGold.AutoSize = true;
+            this.trackIncomingGold.Location = new System.Drawing.Point(216, 245);
+            this.trackIncomingGold.Name = "trackIncomingGold";
+            this.trackIncomingGold.Size = new System.Drawing.Size(177, 19);
+            this.trackIncomingGold.TabIndex = 48;
+            this.trackIncomingGold.Text = "Track gold per sec/min/hour";
+            this.trackIncomingGold.UseVisualStyleBackColor = true;
+            this.trackIncomingGold.CheckedChanged += new System.EventHandler(this.trackIncomingGold_CheckedChanged);
             // 
             // showNotoHue
             // 
@@ -2498,6 +2513,8 @@ namespace Assistant
             // mapTab
             // 
             this.mapTab.BackColor = System.Drawing.SystemColors.Control;
+            this.mapTab.Controls.Add(this.lblGuardlines);
+            this.mapTab.Controls.Add(this.JMap_GuardlineDropdown);
             this.mapTab.Controls.Add(this.captureMibs);
             this.mapTab.Controls.Add(this.label25);
             this.mapTab.Controls.Add(this.boatControl);
@@ -3202,16 +3219,24 @@ namespace Assistant
             this.timerTimer.Interval = 5;
             this.timerTimer.Tick += new System.EventHandler(this.timerTimer_Tick);
             // 
-            // trackIncomingGold
+            // JMap_GuardlineDropdown
             // 
-            this.trackIncomingGold.AutoSize = true;
-            this.trackIncomingGold.Location = new System.Drawing.Point(216, 245);
-            this.trackIncomingGold.Name = "trackIncomingGold";
-            this.trackIncomingGold.Size = new System.Drawing.Size(177, 19);
-            this.trackIncomingGold.TabIndex = 48;
-            this.trackIncomingGold.Text = "Track gold per sec/min/hour";
-            this.trackIncomingGold.UseVisualStyleBackColor = true;
-            this.trackIncomingGold.CheckedChanged += new System.EventHandler(this.trackIncomingGold_CheckedChanged);
+            this.JMap_GuardlineDropdown.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.JMap_GuardlineDropdown.FormattingEnabled = true;
+            this.JMap_GuardlineDropdown.Location = new System.Drawing.Point(101, 115);
+            this.JMap_GuardlineDropdown.Name = "JMap_GuardlineDropdown";
+            this.JMap_GuardlineDropdown.Size = new System.Drawing.Size(144, 23);
+            this.JMap_GuardlineDropdown.TabIndex = 63;
+            this.JMap_GuardlineDropdown.SelectedIndexChanged += new System.EventHandler(this.JMap_GuardlineDropdown_SelectedIndexChanged);
+            // 
+            // lblGuardlines
+            // 
+            this.lblGuardlines.AutoSize = true;
+            this.lblGuardlines.Location = new System.Drawing.Point(8, 118);
+            this.lblGuardlines.Name = "lblGuardlines";
+            this.lblGuardlines.Size = new System.Drawing.Size(87, 15);
+            this.lblGuardlines.TabIndex = 64;
+            this.lblGuardlines.Text = "Guardlines File:";
             // 
             // MainForm
             // 
@@ -3350,8 +3375,11 @@ namespace Assistant
 	        m_Tip.SetToolTip(titleStr, Language.GetString(LocString.TitleBarTip));
 
 	        RefreshMapPins(null, null);
+            RefreshGuardLineList(null, null);
+            
 
-	        SplashScreen.End();
+
+            SplashScreen.End();
 	    }
 
 	    private void RefreshMapPins(Object sender, System.EventArgs e)
@@ -3368,7 +3396,24 @@ namespace Assistant
 	        }
 	    }
 
-	    private bool m_Initializing = false;
+        private void RefreshGuardLineList(Object sender, System.EventArgs e)
+        {
+            JMap_GuardlineDropdown.Items.Clear();
+
+            foreach (string fullPath in Directory.GetFiles(Config.GetInstallDirectory(), "*guardlines*.def"))
+            {
+                string file = Path.GetFileNameWithoutExtension(fullPath);
+                JMap_GuardlineDropdown.Items.Add(file);
+            }
+
+            //Cannot set text programmatically after making the dropdownstyle "DropDownList" which is non editable text as we want.
+            //Putting this in the designer constructor for the form doesn't seem to have an effect, I figure Config is loaded after that.
+            //Feel free to move this if required or desired.
+            //If we want "live" guardline file changes, this needs to move to MainForm_Load(), just after RefreshGuardLineList()
+            this.JMap_GuardlineDropdown.SelectedIndex = this.JMap_GuardlineDropdown.FindString(Config.GetString("GuardLinesFile"));
+        }
+
+        private bool m_Initializing = false;
 
 	    public void InitConfig()
 	    {
@@ -7430,6 +7475,14 @@ namespace Assistant
             {
                 GoldPerHourTimer.Stop();
             }
+        }
+
+        private void JMap_GuardlineDropdown_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Config.SetProperty("GuardLinesFile", JMap_GuardlineDropdown.Text);
+
+            if(jMap != null)
+                jMap.mapPanel.LoadGuardLines();
         }
     }
 }

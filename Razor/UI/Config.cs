@@ -177,11 +177,11 @@ namespace Assistant
 
 	        AddProperty("MapGuardLines", true);
 	        AddProperty("MapGridLines", false);
-
 	        AddProperty("MapTilt", true);
-
             AddProperty("DisplayMarkerNames", true);
             AddProperty("DisplayMarkerCoords", true);
+
+            AddProperty("GuardLinesFile", "uorguardlines");
 
             Counter.Default();
 	        Filter.DisableAll();

@@ -219,6 +219,8 @@ namespace Assistant.JMap
         public bool DisplayMarkerNames { get; set; }
         public bool DisplayMarkerCoords { get; set; }
 
+        public string GuardLinesFile { get; set; }
+
         #endregion
 
         [DllImport("user32.dll")]
@@ -259,6 +261,14 @@ namespace Assistant.JMap
 
         }
 
+        public void LoadGuardLines()
+        {
+            GuardLinesFile = Config.GetString("GuardLinesFile");
+            m_Regions = JMap.MapRegion.Load($"{Config.GetInstallDirectory()}\\" + GuardLinesFile + ".def");
+
+            UpdateAll();
+        }
+
         public void LoadMap()
         {
             map = JMap.Map.GetMap(1);
@@ -272,13 +282,11 @@ namespace Assistant.JMap
 
             //_mapHeight_1.MakeTransparent(Color.White);
 
-            m_Regions = JMap.MapRegion.Load($"{Config.GetInstallDirectory()}\\guardlines.def");
-            Debug.WriteLine("MapPanel Loaded Guardlines!");
+            GuardLinesFile = Config.GetString("GuardLinesFile");
+            LoadGuardLines();
 
             InitializeComponent();
             Active = true;
-
-            MouseHoverWorker();
 
             HasGuardLines = Config.GetBool("MapGuardLines");
             HasGridLines = Config.GetBool("MapGridLines");
@@ -314,6 +322,12 @@ namespace Assistant.JMap
                                             IsTrackPlayerPosition;
 
             Menu_OverlaysAll.Checked = HasGridLines && HasGuardLines;
+
+
+
+
+
+            MouseHoverWorker();
 
             compassLoc = new PointF(renderArea.Right - 20, renderArea.Top + 20);
             UpdatePlayerPos();
@@ -1912,7 +1926,6 @@ namespace Assistant.JMap
 
         private ArrayList RegionList(int x, int y, int maxDist)
         {
-
             int count = m_Regions.Length;
             ArrayList aList = new ArrayList();
             for (int i = 0; i < count; ++i)
