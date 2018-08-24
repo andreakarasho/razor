@@ -272,21 +272,21 @@
 5238,144,The Learned Mage,library
 2003,2726,Paladin's Library,library
 5243,179,Seat of Knowledge,library
-5301,88,The Alchemist of Wind,mage
-2892,654,The Bubbling Brew,mage
-1843,2711,Encyclopedia Magicka,mage
-5296,3978,Hut of Magics,mage
-1590,1654,Incantations & Enchantments,mage
-1424,3975,Jhelom Mage,mage
-602,2180,Mages' Menagerie,mage
-2918,672,The Magical Light,mage
-3704,2222,Magincia's Magicka,mage
-4448,1090,Moonglow's Finest Alchemy,mage
-659,2141,Mystic Treasures,mage
-3002,3350,Serpent's Spells,mage
-1485,1550,The Sorcerer's Delight,mage
-5731,3183,Tricks of the Trade,mage
-5148,60,Wind Alchemy,mage
+5301,88,The Alchemist of Wind,magesguild
+2892,654,The Bubbling Brew,magesguild
+1843,2711,Encyclopedia Magicka,magesguild
+5296,3978,Hut of Magics,magesguild
+1590,1654,Incantations & Enchantments,magesguild
+1424,3975,Jhelom Mage,magesguild
+602,2180,Mages' Menagerie,magesguild
+2918,672,The Magical Light,magesguild
+3704,2222,Magincia's Magicka,magesguild
+4448,1090,Moonglow's Finest Alchemy,magesguild
+659,2141,Mystic Treasures,magesguild
+3002,3350,Serpent's Spells,magesguild
+1485,1550,The Sorcerer's Delight,magesguild
+5731,3183,Tricks of the Trade,magesguild
+5148,60,Wind Alchemy,magesguild
 4545,860,Encyclopedia Magicka,magesguild
 4481,1085,Farmer's Market,market
 1392,3824,Farmer's Market,market
@@ -308,57 +308,57 @@
 645,2068,Skara Brae Moongate,moongate
 1829,2949,Trinsic Moongate,moongate
 771,754,Yew Moongate,moongate
-1947,2677,Mess Hall,other
-2891,744,The Musician's Hall,other
+1947,2677,Mess Hall,interest
+2891,744,The Musician's Hall,interest
 4525,1060,Academy of Arts,painter
 2906,710,The Colored Canvass,painter
-1962,2691,Barracks,pointofinterest
-1937,2711,Barracks,pointofinterest
-1938,2688,Barracks,pointofinterest
-1507,1567,Britannia Animal Care,pointofinterest
-2667,2087,Buccaneer's Bath,pointofinterest
-1538,1597,The Chamber of Virtue,pointofinterest
-3727,1361,The Chessboard,pointofinterest
-3715,1383,Debtor's Prison,pointofinterest
-1397,3744,The Dueling Pit,pointofinterest
-1608,1622,East Side Park,pointofinterest
-1635,1561,Gazebo,pointofinterest
-1855,2769,Jail,pointofinterest
-3796,2259,Magincia Parliment,pointofinterest
-2429,528,Minoc Town Hall,pointofinterest
-3723,1396,Nujel'm Court,pointofinterest
-3690,1284,Nujel'm Palace,pointofinterest
-1893,2763,park,pointofinterest
-5251,58,park,pointofinterest
-1541,1685,Senator Robin's House and Office,pointofinterest
-565,2213,Skara Brae Town Hall,pointofinterest
-2465,522,statues,pointofinterest
-1972,2698,Training Ground,pointofinterest
-1895,2719,Trinsic Meeting Hall,pointofinterest
-2743,980,Vesper Guard Tower,pointofinterest
-2923,981,Vesper Museum,pointofinterest
-1619,1760,The Watch Tower,pointofinterest
-5265,3939,Watch Tower and Keep,pointofinterest
-2212,1115,watchtower,pointofinterest
-618,886,Ye Olde Winery,pointofinterest
-553,826,Yew Mill,pointofinterest
-5737,3262,Adventure Outfitters,provisioner
-535,867,The Adventurer's Friend,provisioner
-2992,638,The Adventurer's Supplies,provisioner
-1469,1668,Britain's Premier Provisioners and Fish Shoppe,provisioner
-1850,2796,Britannia Provisions,provisioner
-2216,1192,The Farmer's Market,provisioner
-5154,97,Mage's Things,provisioner
-1444,3794,Needful Things,provisioner
-2453,425,The Old Miners' Supplies,provisioner
-2735,2254,Pirate's Provisioners,provisioner
-1602,1712,Profuse Provisions,provisioner
-1852,2831,Red's Curious Goods,provisioner
-4417,1064,The Scholar's Goods,provisioner
-578,2227,Sundry Supplies,provisioner
-3008,3389,Supplies,provisioner
-5219,4012,The Supply Depot,provisioner
-2532,548,The Survival Shop,provisioner
+1962,2691,Barracks,interest
+1937,2711,Barracks,interest
+1938,2688,Barracks,interest
+1507,1567,Britannia Animal Care,interest
+2667,2087,Buccaneer's Bath,interest
+1538,1597,The Chamber of Virtue,interest
+3727,1361,The Chessboard,interest
+3715,1383,Debtor's Prison,interest
+1397,3744,The Dueling Pit,interest
+1608,1622,East Side Park,interest
+1635,1561,Gazebo,interest
+1855,2769,Jail,interest
+3796,2259,Magincia Parliment,interest
+2429,528,Minoc Town Hall,interest
+3723,1396,Nujel'm Court,interest
+3690,1284,Nujel'm Palace,interest
+1893,2763,park,interest
+5251,58,park,interest
+1541,1685,Senator Robin's House and Office,interest
+565,2213,Skara Brae Town Hall,interest
+2465,522,statues,interest
+1972,2698,Training Ground,interest
+1895,2719,Trinsic Meeting Hall,interest
+2743,980,Vesper Guard Tower,interest
+2923,981,Vesper Museum,interest
+1619,1760,The Watch Tower,interest
+5265,3939,Watch Tower and Keep,interest
+2212,1115,watchtower,interest
+618,886,Ye Olde Winery,interest
+553,826,Yew Mill,interest
+5737,3262,Adventure Outfitters,provisionersguild
+535,867,The Adventurer's Friend,provisionersguild
+2992,638,The Adventurer's Supplies,provisionersguild
+1469,1668,Britain's Premier Provisioners and Fish Shoppe,provisionersguild
+1850,2796,Britannia Provisions,provisionersguild
+2216,1192,The Farmer's Market,provisionersguild
+5154,97,Mage's Things,provisionersguild
+1444,3794,Needful Things,provisionersguild
+2453,425,The Old Miners' Supplies,provisionersguild
+2735,2254,Pirate's Provisioners,provisionersguild
+1602,1712,Profuse Provisions,provisionersguild
+1852,2831,Red's Curious Goods,provisionersguild
+4417,1064,The Scholar's Goods,provisionersguild
+578,2227,Sundry Supplies,provisionersguild
+3008,3389,Supplies,provisionersguild
+5219,4012,The Supply Depot,provisionersguild
+2532,548,The Survival Shop,provisionersguild
 3013,3353,Britainian Herbs,reagents
 1498,1659,Ethereal Goods,reagents
 4416,1133,Herbal Splendor,reagents
@@ -379,15 +379,15 @@
 4708,1116,Telescope,scenic
 1651,2890,Volcano Tunnel,scenic
 1712,3005,waterfall,scenic
-3667,2252,The Furled Sail,shipwright
-634,1038,Great Oak Vessels,shipwright
-2997,819,The Majestic Boat,shipwright
-1416,1754,The Oaken Oar,shipwright
-5805,3270,Pier 39,shipwright
-1452,3747,Sailor's Keeper,shipwright
-3700,1214,Seaborne Ships,shipwright
-2026,2845,Sons Of The Sea,shipwright
-592,2277,Superior Ships,shipwright
+3667,2252,The Furled Sail,shipwrightsguild
+634,1038,Great Oak Vessels,shipwrightsguild
+2997,819,The Majestic Boat,shipwrightsguild
+1416,1754,The Oaken Oar,shipwrightsguild
+5805,3270,Pier 39,shipwrightsguild
+1452,3747,Sailor's Keeper,shipwrightsguild
+3700,1214,Seaborne Ships,shipwrightsguild
+2026,2845,Sons Of The Sea,shipwrightsguild
+592,2277,Superior Ships,shipwrightsguild
 1458,844,Chaos,shrine
 1858,874,Compassion,shrine
 4212,563,Honesty,shrine
@@ -398,17 +398,17 @@
 1595,2490,Spirituality,shrine
 2491,3933,Valor,shrine
 4684,1412,The Sorcerer's Guild,sorcerersguild
-571,2119,Beasts of Burden,stable
-1510,1543,The Bucking Horse Stables,stable
-5297,4007,Delucia Stable,stable
-2010,2807,First Trinsic Stablery,stable
-3036,3464,Serpent's Hold Stablery,stable
-2905,3517,Serpents Hold Stablery,stable
-1296,1759,Sosarian Steeds,stable
-5671,3287,Southside Stables,stable
-2526,375,Stables,stable
-1385,1658,The Stables,stable
-1822,2739,Trinsic Stablery,stable
+571,2119,Beasts of Burden,stables
+1510,1543,The Bucking Horse Stables,stables
+5297,4007,Delucia Stable,stables
+2010,2807,First Trinsic Stablery,stables
+3036,3464,Serpent's Hold Stablery,stables
+2905,3517,Serpents Hold Stablery,stables
+1296,1759,Sosarian Steeds,stables
+5671,3287,Southside Stables,stables
+2526,375,Stables,stables
+1385,1658,The Stables,stables
+1822,2739,Trinsic Stablery,stables
 1981,2838,Adventurer's Clothing,tailor
 1359,3781,Adventurer's Needle,tailor
 5234,4025,Delucia Tailor,tailor
