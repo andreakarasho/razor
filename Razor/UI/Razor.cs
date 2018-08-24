@@ -396,6 +396,7 @@ namespace Assistant
             this.label3 = new System.Windows.Forms.Label();
             this.incomingCorpse = new System.Windows.Forms.CheckBox();
             this.moreMoreOptTab = new System.Windows.Forms.TabPage();
+            this.txtObjDelay = new System.Windows.Forms.TextBox();
             this.objectDelay = new System.Windows.Forms.CheckBox();
             this.stealthOverhead = new System.Windows.Forms.CheckBox();
             this.overHeadMessages = new System.Windows.Forms.Button();
@@ -409,7 +410,6 @@ namespace Assistant
             this.blockHealPoison = new System.Windows.Forms.CheckBox();
             this.ltRange = new System.Windows.Forms.TextBox();
             this.potionEquip = new System.Windows.Forms.CheckBox();
-            this.txtObjDelay = new System.Windows.Forms.TextBox();
             this.QueueActions = new System.Windows.Forms.CheckBox();
             this.spellUnequip = new System.Windows.Forms.CheckBox();
             this.autoOpenDoors = new System.Windows.Forms.CheckBox();
@@ -1236,6 +1236,15 @@ namespace Assistant
             this.moreMoreOptTab.TabIndex = 10;
             this.moreMoreOptTab.Text = "More Options";
             // 
+            // txtObjDelay
+            // 
+            this.txtObjDelay.Location = new System.Drawing.Point(108, 56);
+            this.txtObjDelay.Name = "txtObjDelay";
+            this.txtObjDelay.Size = new System.Drawing.Size(32, 23);
+            this.txtObjDelay.TabIndex = 37;
+            this.txtObjDelay.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtObjDelay.TextChanged += new System.EventHandler(this.txtObjDelay_TextChanged);
+            // 
             // objectDelay
             // 
             this.objectDelay.Location = new System.Drawing.Point(8, 55);
@@ -1358,15 +1367,6 @@ namespace Assistant
             this.potionEquip.TabIndex = 67;
             this.potionEquip.Text = "Auto Un/Re-equip hands for potions";
             this.potionEquip.CheckedChanged += new System.EventHandler(this.potionEquip_CheckedChanged);
-            // 
-            // txtObjDelay
-            // 
-            this.txtObjDelay.Location = new System.Drawing.Point(108, 56);
-            this.txtObjDelay.Name = "txtObjDelay";
-            this.txtObjDelay.Size = new System.Drawing.Size(32, 23);
-            this.txtObjDelay.TabIndex = 37;
-            this.txtObjDelay.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.txtObjDelay.TextChanged += new System.EventHandler(this.txtObjDelay_TextChanged);
             // 
             // QueueActions
             // 
@@ -2531,7 +2531,7 @@ namespace Assistant
             // lblGuardlines
             // 
             this.lblGuardlines.AutoSize = true;
-            this.lblGuardlines.Location = new System.Drawing.Point(8, 118);
+            this.lblGuardlines.Location = new System.Drawing.Point(6, 115);
             this.lblGuardlines.Name = "lblGuardlines";
             this.lblGuardlines.Size = new System.Drawing.Size(87, 15);
             this.lblGuardlines.TabIndex = 64;
@@ -2541,7 +2541,7 @@ namespace Assistant
             // 
             this.JMap_GuardlineDropdown.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.JMap_GuardlineDropdown.FormattingEnabled = true;
-            this.JMap_GuardlineDropdown.Location = new System.Drawing.Point(101, 115);
+            this.JMap_GuardlineDropdown.Location = new System.Drawing.Point(97, 112);
             this.JMap_GuardlineDropdown.Name = "JMap_GuardlineDropdown";
             this.JMap_GuardlineDropdown.Size = new System.Drawing.Size(144, 23);
             this.JMap_GuardlineDropdown.TabIndex = 63;
@@ -2550,7 +2550,7 @@ namespace Assistant
             // captureMibs
             // 
             this.captureMibs.AutoSize = true;
-            this.captureMibs.Location = new System.Drawing.Point(9, 89);
+            this.captureMibs.Location = new System.Drawing.Point(9, 77);
             this.captureMibs.Name = "captureMibs";
             this.captureMibs.Size = new System.Drawing.Size(236, 19);
             this.captureMibs.TabIndex = 62;
@@ -2564,9 +2564,9 @@ namespace Assistant
             this.label25.ForeColor = System.Drawing.Color.DodgerBlue;
             this.label25.Location = new System.Drawing.Point(6, 49);
             this.label25.Name = "label25";
-            this.label25.Size = new System.Drawing.Size(267, 37);
+            this.label25.Size = new System.Drawing.Size(267, 25);
             this.label25.TabIndex = 61;
-            this.label25.Text = "For JMap options, please use the right-click context menu within the map itself.";
+            this.label25.Text = "For JMap options, right-click within the map itself";
             this.label25.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // boatControl
@@ -3040,6 +3040,7 @@ namespace Assistant
             // jsonApi
             // 
             this.jsonApi.AutoSize = true;
+            this.jsonApi.Enabled = false;
             this.jsonApi.Location = new System.Drawing.Point(202, 148);
             this.jsonApi.Name = "jsonApi";
             this.jsonApi.Size = new System.Drawing.Size(113, 19);
@@ -3574,7 +3575,7 @@ namespace Assistant
 	        dressList.SelectedIndex = -1;
 	        hotkeyTree.SelectedNode = null;
 
-	        jsonApi.Checked = Config.GetBool("JsonApi");
+	        //jsonApi.Checked = Config.GetBool("JsonApi");
 	        targetByTypeDifferent.Checked = Config.GetBool("DiffTargetByType");
 	        stepThroughMacro.Checked = Config.GetBool("StepThroughMacro");
 
@@ -7140,10 +7141,10 @@ namespace Assistant
         {
             Config.SetProperty("JsonApi", jsonApi.Checked);
 
-            if (jsonApi.Checked)
+            /*if (jsonApi.Checked)
             {
                 new JsonApiTimer(this).Start();
-            }
+            }*/
         }
 
         private void titleBarParams_SelectedIndexChanged(object sender, EventArgs e)
