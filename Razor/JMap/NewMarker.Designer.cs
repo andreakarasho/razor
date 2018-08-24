@@ -46,84 +46,84 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(5, 11);
+            this.label1.Location = new System.Drawing.Point(6, 13);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(38, 13);
+            this.label1.Size = new System.Drawing.Size(42, 15);
             this.label1.TabIndex = 0;
             this.label1.Text = "Name:";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(5, 70);
+            this.label2.Location = new System.Drawing.Point(6, 81);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(34, 13);
+            this.label2.Size = new System.Drawing.Size(35, 15);
             this.label2.TabIndex = 1;
             this.label2.Text = "Extra:";
             // 
             // newMarkerName
             // 
-            this.newMarkerName.Location = new System.Drawing.Point(48, 8);
+            this.newMarkerName.Location = new System.Drawing.Point(56, 9);
             this.newMarkerName.Name = "newMarkerName";
-            this.newMarkerName.Size = new System.Drawing.Size(131, 20);
+            this.newMarkerName.Size = new System.Drawing.Size(152, 23);
             this.newMarkerName.TabIndex = 2;
             // 
             // newMarkerExtra
             // 
-            this.newMarkerExtra.Location = new System.Drawing.Point(44, 67);
+            this.newMarkerExtra.Location = new System.Drawing.Point(51, 77);
             this.newMarkerExtra.Multiline = true;
             this.newMarkerExtra.Name = "newMarkerExtra";
-            this.newMarkerExtra.Size = new System.Drawing.Size(135, 57);
+            this.newMarkerExtra.Size = new System.Drawing.Size(157, 65);
             this.newMarkerExtra.TabIndex = 3;
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(6, 41);
+            this.label3.Location = new System.Drawing.Point(7, 47);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(17, 13);
+            this.label3.Size = new System.Drawing.Size(17, 15);
             this.label3.TabIndex = 4;
             this.label3.Text = "X:";
             // 
             // newMarkerX
             // 
-            this.newMarkerX.Location = new System.Drawing.Point(24, 38);
+            this.newMarkerX.Location = new System.Drawing.Point(28, 44);
             this.newMarkerX.Name = "newMarkerX";
-            this.newMarkerX.Size = new System.Drawing.Size(60, 20);
+            this.newMarkerX.Size = new System.Drawing.Size(69, 23);
             this.newMarkerX.TabIndex = 5;
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(96, 41);
+            this.label4.Location = new System.Drawing.Point(112, 47);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(17, 13);
+            this.label4.Size = new System.Drawing.Size(17, 15);
             this.label4.TabIndex = 6;
             this.label4.Text = "Y:";
             // 
             // newMarkerY
             // 
-            this.newMarkerY.Location = new System.Drawing.Point(114, 38);
+            this.newMarkerY.Location = new System.Drawing.Point(133, 44);
             this.newMarkerY.Name = "newMarkerY";
-            this.newMarkerY.Size = new System.Drawing.Size(65, 20);
+            this.newMarkerY.Size = new System.Drawing.Size(75, 23);
             this.newMarkerY.TabIndex = 7;
             // 
             // newMarkerOk
             // 
-            this.newMarkerOk.Location = new System.Drawing.Point(105, 178);
+            this.newMarkerOk.Location = new System.Drawing.Point(122, 205);
             this.newMarkerOk.Name = "newMarkerOk";
-            this.newMarkerOk.Size = new System.Drawing.Size(75, 23);
+            this.newMarkerOk.Size = new System.Drawing.Size(87, 27);
             this.newMarkerOk.TabIndex = 8;
-            this.newMarkerOk.Text = "Ok";
+            this.newMarkerOk.Text = "OK";
             this.newMarkerOk.UseVisualStyleBackColor = true;
             this.newMarkerOk.Click += new System.EventHandler(this.NewMarkerPoint);
             // 
             // newMarkerCancel
             // 
             this.newMarkerCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.newMarkerCancel.Location = new System.Drawing.Point(7, 178);
+            this.newMarkerCancel.Location = new System.Drawing.Point(8, 205);
             this.newMarkerCancel.Name = "newMarkerCancel";
-            this.newMarkerCancel.Size = new System.Drawing.Size(75, 23);
+            this.newMarkerCancel.Size = new System.Drawing.Size(87, 27);
             this.newMarkerCancel.TabIndex = 9;
             this.newMarkerCancel.Text = "Cancel";
             this.newMarkerCancel.UseVisualStyleBackColor = true;
@@ -132,37 +132,37 @@
             // IsPublicCheckbox
             // 
             this.IsPublicCheckbox.AutoSize = true;
-            this.IsPublicCheckbox.Location = new System.Drawing.Point(125, 132);
+            this.IsPublicCheckbox.Location = new System.Drawing.Point(146, 152);
             this.IsPublicCheckbox.Name = "IsPublicCheckbox";
             this.IsPublicCheckbox.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.IsPublicCheckbox.Size = new System.Drawing.Size(55, 17);
+            this.IsPublicCheckbox.Size = new System.Drawing.Size(59, 19);
             this.IsPublicCheckbox.TabIndex = 11;
             this.IsPublicCheckbox.Text = "Public";
             this.IsPublicCheckbox.UseVisualStyleBackColor = true;
             // 
             // label5
             // 
-            this.label5.Location = new System.Drawing.Point(6, 132);
+            this.label5.Location = new System.Drawing.Point(7, 152);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(66, 17);
+            this.label5.Size = new System.Drawing.Size(77, 20);
             this.label5.TabIndex = 12;
             this.label5.Text = "Placed By:";
             // 
             // OwnerLabel
             // 
-            this.OwnerLabel.Location = new System.Drawing.Point(6, 153);
+            this.OwnerLabel.Location = new System.Drawing.Point(7, 177);
             this.OwnerLabel.Name = "OwnerLabel";
-            this.OwnerLabel.Size = new System.Drawing.Size(173, 17);
+            this.OwnerLabel.Size = new System.Drawing.Size(202, 20);
             this.OwnerLabel.TabIndex = 13;
             this.OwnerLabel.Text = "You";
             // 
             // NewMarker
             // 
             this.AcceptButton = this.newMarkerOk;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.newMarkerCancel;
-            this.ClientSize = new System.Drawing.Size(187, 207);
+            this.ClientSize = new System.Drawing.Size(218, 239);
             this.Controls.Add(this.OwnerLabel);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.IsPublicCheckbox);
@@ -176,6 +176,7 @@
             this.Controls.Add(this.newMarkerName);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
+            this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.MaximizeBox = false;
             this.MinimizeBox = false;

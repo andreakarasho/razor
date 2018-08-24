@@ -396,6 +396,7 @@ namespace Assistant
             this.label3 = new System.Windows.Forms.Label();
             this.incomingCorpse = new System.Windows.Forms.CheckBox();
             this.moreMoreOptTab = new System.Windows.Forms.TabPage();
+            this.objectDelay = new System.Windows.Forms.CheckBox();
             this.stealthOverhead = new System.Windows.Forms.CheckBox();
             this.overHeadMessages = new System.Windows.Forms.Button();
             this.showOverheadMessages = new System.Windows.Forms.CheckBox();
@@ -523,6 +524,8 @@ namespace Assistant
             this.delMacro = new System.Windows.Forms.Button();
             this.newMacro = new System.Windows.Forms.Button();
             this.mapTab = new System.Windows.Forms.TabPage();
+            this.lblGuardlines = new System.Windows.Forms.Label();
+            this.JMap_GuardlineDropdown = new System.Windows.Forms.ComboBox();
             this.captureMibs = new System.Windows.Forms.CheckBox();
             this.label25 = new System.Windows.Forms.Label();
             this.boatControl = new System.Windows.Forms.Button();
@@ -588,9 +591,6 @@ namespace Assistant
             this.label21 = new System.Windows.Forms.Label();
             this.aboutVer = new System.Windows.Forms.Label();
             this.timerTimer = new System.Windows.Forms.Timer(this.components);
-            this.JMap_GuardlineDropdown = new System.Windows.Forms.ComboBox();
-            this.lblGuardlines = new System.Windows.Forms.Label();
-            this.objectDelay = new System.Windows.Forms.CheckBox();
             this.tabs.SuspendLayout();
             this.generalTab.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -1200,6 +1200,7 @@ namespace Assistant
             // 
             // moreMoreOptTab
             // 
+            this.moreMoreOptTab.Controls.Add(this.txtObjDelay);
             this.moreMoreOptTab.Controls.Add(this.objectDelay);
             this.moreMoreOptTab.Controls.Add(this.stealthOverhead);
             this.moreMoreOptTab.Controls.Add(this.overHeadMessages);
@@ -1213,7 +1214,6 @@ namespace Assistant
             this.moreMoreOptTab.Controls.Add(this.blockHealPoison);
             this.moreMoreOptTab.Controls.Add(this.ltRange);
             this.moreMoreOptTab.Controls.Add(this.potionEquip);
-            this.moreMoreOptTab.Controls.Add(this.txtObjDelay);
             this.moreMoreOptTab.Controls.Add(this.QueueActions);
             this.moreMoreOptTab.Controls.Add(this.spellUnequip);
             this.moreMoreOptTab.Controls.Add(this.autoOpenDoors);
@@ -1235,6 +1235,15 @@ namespace Assistant
             this.moreMoreOptTab.Size = new System.Drawing.Size(482, 460);
             this.moreMoreOptTab.TabIndex = 10;
             this.moreMoreOptTab.Text = "More Options";
+            // 
+            // objectDelay
+            // 
+            this.objectDelay.Location = new System.Drawing.Point(8, 55);
+            this.objectDelay.Name = "objectDelay";
+            this.objectDelay.Size = new System.Drawing.Size(104, 24);
+            this.objectDelay.TabIndex = 0;
+            this.objectDelay.Text = "Object Delay:";
+            this.objectDelay.CheckedChanged += new System.EventHandler(this.objectDelay_CheckedChanged);
             // 
             // stealthOverhead
             // 
@@ -2519,6 +2528,25 @@ namespace Assistant
             this.mapTab.TabIndex = 13;
             this.mapTab.Text = "Map";
             // 
+            // lblGuardlines
+            // 
+            this.lblGuardlines.AutoSize = true;
+            this.lblGuardlines.Location = new System.Drawing.Point(8, 118);
+            this.lblGuardlines.Name = "lblGuardlines";
+            this.lblGuardlines.Size = new System.Drawing.Size(87, 15);
+            this.lblGuardlines.TabIndex = 64;
+            this.lblGuardlines.Text = "Guardlines File:";
+            // 
+            // JMap_GuardlineDropdown
+            // 
+            this.JMap_GuardlineDropdown.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.JMap_GuardlineDropdown.FormattingEnabled = true;
+            this.JMap_GuardlineDropdown.Location = new System.Drawing.Point(101, 115);
+            this.JMap_GuardlineDropdown.Name = "JMap_GuardlineDropdown";
+            this.JMap_GuardlineDropdown.Size = new System.Drawing.Size(144, 23);
+            this.JMap_GuardlineDropdown.TabIndex = 63;
+            this.JMap_GuardlineDropdown.SelectedIndexChanged += new System.EventHandler(this.JMap_GuardlineDropdown_SelectedIndexChanged);
+            // 
             // captureMibs
             // 
             this.captureMibs.AutoSize = true;
@@ -3211,25 +3239,6 @@ namespace Assistant
             this.timerTimer.Interval = 5;
             this.timerTimer.Tick += new System.EventHandler(this.timerTimer_Tick);
             // 
-            // JMap_GuardlineDropdown
-            // 
-            this.JMap_GuardlineDropdown.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.JMap_GuardlineDropdown.FormattingEnabled = true;
-            this.JMap_GuardlineDropdown.Location = new System.Drawing.Point(101, 115);
-            this.JMap_GuardlineDropdown.Name = "JMap_GuardlineDropdown";
-            this.JMap_GuardlineDropdown.Size = new System.Drawing.Size(144, 23);
-            this.JMap_GuardlineDropdown.TabIndex = 63;
-            this.JMap_GuardlineDropdown.SelectedIndexChanged += new System.EventHandler(this.JMap_GuardlineDropdown_SelectedIndexChanged);
-            // 
-            // lblGuardlines
-            // 
-            this.lblGuardlines.AutoSize = true;
-            this.lblGuardlines.Location = new System.Drawing.Point(8, 118);
-            this.lblGuardlines.Name = "lblGuardlines";
-            this.lblGuardlines.Size = new System.Drawing.Size(87, 15);
-            this.lblGuardlines.TabIndex = 64;
-            this.lblGuardlines.Text = "Guardlines File:";
-            // 
             // MainForm
             // 
             this.AutoScaleBaseSize = new System.Drawing.Size(6, 16);
@@ -3373,21 +3382,7 @@ namespace Assistant
 
             SplashScreen.End();
 	    }
-
-	    private void RefreshMapPins(Object sender, System.EventArgs e)
-	    {
-	        mapPins.Items.Clear();
-
-             if (Directory.Exists(Config.GetInstallDirectory("JMap")))
-	        {
-	            foreach (string fullPath in Directory.GetFiles(Config.GetInstallDirectory("JMap"), "*.csv"))
-	            {
-	                string file = Path.GetFileNameWithoutExtension(fullPath);
-                     mapPins.Items.Add(file);
-	            }
-	        }
-	    }
-
+	  
         private void RefreshGuardLineList(Object sender, System.EventArgs e)
         {
             JMap_GuardlineDropdown.Items.Clear();
@@ -3401,7 +3396,7 @@ namespace Assistant
             //Cannot set text programmatically after making the dropdownstyle "DropDownList" which is non editable text as we want.
             //Putting this in the designer constructor for the form doesn't seem to have an effect, I figure Config is loaded after that.
             //Feel free to move this if required or desired.
-            //If we want "live" guardline file changes, this needs to move to MainForm_Load(), just after RefreshGuardLineList()
+            //If we want "live" it is ine file changes, this needs to move to MainForm_Load(), just after RefreshGuardLineList()
             this.JMap_GuardlineDropdown.SelectedIndex = this.JMap_GuardlineDropdown.FindString(Config.GetString("GuardLinesFile"));
         }
 
@@ -7523,5 +7518,14 @@ namespace Assistant
 
             Config.SetProperty("ObjectDelayEnabled", objectDelay.Checked);
         }
+
+	    private void JMap_GuardlineDropdown_SelectedIndexChanged(object sender, EventArgs e)
+	    {
+	        Config.SetProperty("GuardLinesFile", JMap_GuardlineDropdown.Text);
+
+	        if (jMap != null)
+	            jMap.mapPanel.LoadGuardLines();
+	    }
+
     }
 }

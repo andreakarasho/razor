@@ -1,284 +1,9 @@
-﻿314,1329,cave passage,dungeon
-226,1336,cave passage,dungeon
-576,1156,central dungeon,dungeon
-664,929,central dungeon,dungeon
-2499,916,Covetous,dungeon
-904,1362,cyclopse dungeon,dungeon
-4111,429,Deceit,dungeon
-1296,1082,Despise,dungeon
-1176,2635,Destard,dungeon
-2357,1268,Doom,dungeon
-940,502,Dragon's Lair,dungeon
-349,1428,Elemental Arena,dungeon
-1236,583,Entrance to Central Area,dungeon
-710,667,Entrance to Central Area,dungeon
-1363,1032,Etherial Tombs,dungeon
-2922,3402,Fire,dungeon
-5757,2909,Fire,dungeon
-4722,3814,Hythloth,dungeon
-5203,2328,Ice,dungeon
-1996,80,Ice,dungeon
-1457,1329,mushroom caves,dungeon
-1788,569,ne dungeon,dungeon
-548,454,nw dungeon,dungeon
-556,427,nw dungeon,dungeon
-1014,1434,Orc Cave,dungeon
-6075,3330,passage to Britain,dungeon
-1628,3318,passage to Delucia,dungeon
-5150,4063,passage to Trinsic,dungeon
-5138,3665,passage to Trinsic,dungeon
-1030,1154,ratman mine,dungeon
-1747,1235,se dungeon,dungeon
-811,874,Serpentine Passage,dungeon
-1492,1641,sewer entrance,dungeon
-512,1559,Shame,dungeon
-1420,910,spider dungeon,dungeon
-1490,879,spider dungeon,dungeon
-5426,3120,Terathan Keep,dungeon
-1361,890,Wind,dungeon
-652,1301,wisp dungeon,dungeon
-2042,226,Wrong,dungeon
-1371,1482,Britain Cemetery,graveyard
-2437,1104,cemetery,graveyard
-5696,3660,cemetery passage,graveyard
-327,889,graveyard,graveyard
-3649,2859,Graveyard,graveyard
-3404,2653,graveyard,graveyard
-1283,3731,Jhelom Cemetery,graveyard
-4541,1319,Moonglow Cemetery,graveyard
-3529,1141,Nujel'm Cemetery,graveyard
-2753,867,Vesper Cemetery,graveyard
-722,1117,Yew Cemetery,graveyard
-2122,2755,Barrier Isle,Island
-478,1531,abandoned mage tower,landmark
-575,1140,abandoned tower,landmark
-221,1363,ancient wyrm's lair,landmark
-437,1558,bandstand,landmark
-1123,1236,brigand tower,landmark
-295,764,Britannia Prison,landmark
-4511,1376,Britannia Royal Zoo,landmark
-1091,703,Controller Tower,landmark
-370,899,Court of Truth,landmark
-758,208,cyclopse camp,landmark
-907,1283,cyclopse's pyramid,landmark
-894,1000,dam,landmark
-635,851,Empath Abbey,landmark
-5165,246,entrance,landmark
-447,1526,fountain,landmark
-946,427,Gargoyle Mining Camp,landmark
-939,637,Grand Arena,landmark
-3715,2838,Hunters Cabin,landmark
-5291,1169,jail,landmark
-3457,3056,Lighthouse,landmark
-5671,2391,lighthouse passage,landmark
-3595,2865,Loggers Camp,landmark
-1530,1428,Lord Blackthorn's Castle,landmark
-1323,1624,Lord British's Castle,landmark
-4312,1000,The Lyceaeum,landmark
-2590,532,Mining Camp,landmark
-3498,2844,Mining Cave,landmark
-3610,2740,Mining Cave,landmark
-821,1060,Mistas,landmark
-3589,2808,Mongbat Tower,landmark
-1668,292,Montor,landmark
-3519,2787,Old Mine Entrance  Closed,landmark
-18,950,The Oracle,landmark
-1340,1226,Orc Forst,landmark
-881,1303,passage,landmark
-857,1312,passage,landmark
-2775,893,passage to Lost Cemetery,landmark
-2404,218,passage to Lost Lands,landmark
-6084,3674,passage to North Mines,landmark
-826,777,Power Core,landmark
-645,817,ratman lair,landmark
-1362,1073,Reg Volom,landmark
-1044,519,Savage Camp,landmark
-1238,733,Savage Clan Settlement,landmark
-2986,2887,Serpent Pillar (doracron),landmark
-425,3279,Serpent Pillar (doracron),landmark
-5974,2694,Serpent Pillar (sueacron),landmark
-5266,2757,Serpent Pillar (sueacron),landmark
-1442,1122,small lumber camp,landmark
-466,1584,statue,landmark
-318,789,to lighthouse,landmark
-1958,2068,to Lost Lands,landmark
-5126,3144,to Marble Building,landmark
-1675,1074,tower,landmark
-1256,865,Training Tower,landmark
-3610,2585,Uzeraan's Mansion,landmark
-836,641,Ver Lor Reg,landmark
-917,993,watchpost,landmark
-1336,1997,Britain Moongate,moongate
-1721,218,Chaos,moongate
-1215,467,Compassion,moongate
-3763,2771,Haven Moongate,moongate
-722,1366,Honesty,moongate
-744,724,Honor,moongate
-281,1016,Humility,moongate
-1500,3772,Jhelom Moongate,moongate
-987,1011,Justice,moongate
-1015,527,Luna,moongate
-3564,2140,Magincia Moongate,moongate
-2702,692,Minoc Moongate,moongate
-4468,1284,Moonglow Moongate,moongate
-1174,1286,Sacrifice,moongate
-645,2068,Skara Brae Moongate,moongate
-1532,1340,Spirituality,moongate
-5153,1760,StandardMoongate,moongate
-1829,2949,Trinsic Moongate,moongate
-1997,1386,Umbra,moongate
-528,216,Valor,moongate
-771,754,Yew Moongate,moongate
-1586,1004,abandoned building,ruins
-412,1363,abandoned tower,ruins
-1516,542,Ancient Citadel,ruins
-512,546,bandit town,ruins
-1249,955,BetLem Reg,ruins
-5219,3645,City of the Dead,ruins
-1825,1799,Forgotten Pyramid,ruins
-2192,327,Grimswind Ruins,ruins
-1200,1127,Lakeshire/Mireg,ruins
-292,1356,lizard man camp,ruins
-5765,2618,Ophidian Lair,ruins
-632,1484,Orc Fort,ruins
-2176,1372,Orc Fort,ruins
-5211,3611,Orc Fort,ruins
-1069,1151,ratman village,ruins
-1084,651,Ruined Castle,ruins
-653,933,ruined tower,ruins
-875,524,Ruined Villa,ruins
-337,864,ruins,ruins
-856,463,undead camp,ruins
-360,1140,undead fort,ruins
-1738,174,the Abyss,scenic
-1414,317,ancient wyrm's lair,scenic
-748,489,bandstand,scenic
-768,1284,campfire,scenic
-747,247,cyclopse garden,scenic
-2587,492,The East Mines,scenic
-1589,1190,flowstone,scenic
-596,946,a flowstone surrounded by runes,scenic
-1606,1265,forge,scenic
-1197,1034,giant yew tree,scenic
-2533,654,Gypsy Camp,scenic
-1675,965,harpy nest,scenic
-1201,762,Hay Fields,scenic
-1269,727,Hay Fields,scenic
-1146,2215,Hedge Maze,scenic
-753,493,memorial to Gwenno,scenic
-2452,79,The North Mines,scenic
-1183,1188,orchard,scenic
-1548,1192,pool,scenic
-1280,734,Reagent Garden,scenic
-1701,291,statue room,scenic
-728,475,stepping stones,scenic
-4708,1116,Telescope,scenic
-1038,701,Tribal Berry Orchard,scenic
-1211,763,Vegetable Patch,scenic
-1651,2890,Volcano Tunnel,scenic
-1712,3005,waterfall,scenic
-3359,2679,Ank of Sacrifice,shrine
-1749,234,Chaos,shrine
-1458,844,Chaos,shrine
-1210,477,Compassion,shrine
-1858,874,Compassion,shrine
-719,1351,Honesty,shrine
-4212,563,Honesty,shrine
-748,731,Honor,shrine
-1723,3527,Honor,shrine
-287,1013,Humility,shrine
-4274,3697,Humility,shrine
-985,1005,Justice,shrine
-1300,633,Justice,shrine
-1171,1288,Sacrifice,shrine
-3355,289,Sacrifice,shrine
-1106,404,Shrine of the Virtues,shrine
-976,510,Shrine of Wisdom,shrine
-1526,1340,Spirituality,shrine
-1595,2490,Spirituality,shrine
-529,212,Valor,shrine
-2491,3933,Valor,shrine
-2618,980,gate to Buccaneer's Den,teleporter
-2728,2133,gate to mainland,teleporter
-2494,3576,island temple portal,teleporter
-5905,4069,portal to island temple,teleporter
-5733,3190,portal to Moonglow (recsu),teleporter
-4540,845,portal to Papua (recdu),teleporter
-5173,1589,Starroom,teleporter
-4442,1122,teleporter park,teleporter
-1414,3829,teleporters,teleporter
-5506,814,to Ancient Wyrm's Lair (Destard lvl 3),teleporter
-5682,1437,to Ancient Wyrm's Lair (Destard lvl 3),teleporter
-5356,1540,to Deceit (lvl 4),teleporter
-5140,973,to Deceit (lvl 4),teleporter
-5199,71,to park,teleporter
-1516,879,to Reg Volom (the island),teleporter
-1363,1105,to spider dungeon,teleporter
-5217,18,to town,teleporter
-1460,448,Alexandrella's Bowl,Terrain
-5542,2999,Beggars Gorge,Terrain
-1148,1476,Broken Mountains,Terrain
-2172,1144,Corrupted Foresets,Terrain
-736,1180,Crumbling Mountains,Terrain
-1388,616,Crystal Fens,Terrain
-5139,2903,Cyclops Valley,Terrain
-5265,3270,Damwin Thicket,Terrain
-429,1433,dead forest,Terrain
-966,637,Desert,Terrain
-1372,892,Divide of the Abyss,Terrain
-2128,1668,Dry Highlands,Terrain
-312,1442,Elemental Canyon,Terrain
-1352,664,glacier,Terrain
-5978,3447,Hoppers Bog,Terrain
-5382,2343,Kos Heb,Terrain
-5954,2363,Kos Heb,Terrain
-480,882,lava vent,Terrain
-3690,2760,Mountain Pass,Terrain
-1580,384,Northern Crags,Terrain
-420,1196,Nox Tereg,Terrain
-5543,2618,oasis,Terrain
-1028,272,Pass of Karnaugh,Terrain
-5724,2923,Sak Teb,Terrain
-5470,3515,Serpents Cousins,Terrain
-1447,964,spider wood,Terrain
-1124,739,Swamp,Terrain
-6028,2933,Terra Sanctum,Terrain
-5604,2742,Y'Nah Teb,Terrain
-1546,1634,Britain,town
-2720,2110,Buccaneer's Den,town
-2263,1237,Cove,town
-5227,3978,Delucia,town
-1506,622,Desert Outpost,town
-1608,550,Desert Outpost,town
-1240,565,gypsy caravan,town
-1380,425,gypsy caravan,town
-3664,2558,Haven,town
-1359,3671,Jhelom,town
-985,481,Luna,town
-3735,2200,Magincia,town
-2502,522,Minoc,town
-4457,1117,Moonglow,town
-3600,1231,Nujel'm,town
-3664,2558,Ocllo,town
-5751,3231,Papua,town
-3025,3498,Serpent's Hold,town
-595,2263,Skara Brae,town
-1879,2766,Trinsic,town
-2020,1292,Umbra,town
-2884,839,Vesper,town
-5252,104,Wind,town
-504,942,Yew,town
-554,2145,Rangers'guild,archersguild
-3587,2601,Armoury,armourersguild
+﻿554,2145,Rangers' Guild,archersguild
 1437,3884,Hand of Death,armourersguild
-808,697,AngloInLem,arms
-808,586,AngraCharInLem,arms
-1497,614,an armourer,arms
 1637,1693,Artistic Armour,arms
 1475,3865,Call to Arms,arms
 1359,3763,Deadly Intentions,arms
 652,2160,Gore Galore,arms
-3632,2595,Hammer and Steel Smithy,arms
 1437,1647,Heavy Metal Armorer,arms
 2865,852,The Ironworks,arms
 1456,3850,Jhelom Armory,arms
@@ -294,72 +19,61 @@
 2533,576,Warrior's Battle Gear,arms
 2835,805,Warrior's Companion,arms
 2217,1170,The Warrior's Supplies,arms
-1514,611,,baker
 1880,2802,Baked Delights,baker
 3755,2227,Baker's Dozen,baker
 1364,3732,Baker's Dozen,baker
 3683,2171,The Bread Basket,baker
-2017,1354,Ghast Refectory,baker
 1450,1617,Good Eats,baker
 559,995,The Jolly Baker,baker
 5351,56,Mage's Appetite,baker
 4392,1068,Mage's Bread,baker
 5746,3200,Nature's Best Baked Goods,baker
-3610,2577,Now You're Cookin',baker
 2975,3358,Plenty O' Dough,baker
-3628,2540,The Shakin' Bakery,baker
 2998,760,The Twisted Oven,baker
 652,820,Abbey Banker,bank
-854,680,AtriAur,bank
-855,603,AtriAur,bank
-1226,554,a bank,bank
-1610,556,a bank,bank
-1813,2825,Bank of Britannia Trinsic Branch,bank
+1813,2825,Bank of Britannia: Trinsic Branch,bank
 3734,2149,Bank of Magincia,bank
 2503,552,Bank of Minoc,bank
 3764,1317,Bank of Nujel'm,bank
-3695,2511,Bank of Ocllo,bank
 587,2146,Bank of Skara Brae,bank
 1655,1606,East Britain Bank,bank
 1425,1690,The First Bank of Britain,bank
-4471,1156,First Bank of Moonglow and Tinker'sguild,bank
+4471,1156,First Bank of Moonglow and Tinker's Guild,bank
 1317,3773,Jhelom Bank and Jeweler,bank
-996,519,Luna Bank,bank
 2881,684,The Mint of Vesper,bank
 2731,2192,A Place Fer Yer Stuff,bank
-3620,2617,The Second Bank of Haven,bank
 2880,3472,Serpent's Hold Bank,bank
 1897,2684,Trinsic Royal Bank,bank
-2048,1345,Umbra Bank,bank
 5346,74,Wind Bank,bank
 5275,3977,Ye Olde Eleventh Bank,bank
 5669,3131,Ye Olde Loan and Savings,bank
 1455,1557,Lord British's Conservatory of Music,bard
 2424,555,The Mystical Lute,bard
-3740,1197,Bardicguild,bardicguild
-3666,2531,Bardicguild,bardicguild
-3665,2531,The Bardicguild,bardicguild
+3740,1197,Bardic Guild,bardicguild
 2957,705,The Busy Bees,beekeeper
-1984,1367,Armoury of Souls,blacksmith
 3007,3408,Blacksmith,blacksmith
-3594,2595,Blacksmith,blacksmith
 2637,2075,Cutlass Smithing,blacksmith
 1395,3705,First Defense,blacksmith
-1261,582,a forge,blacksmith
 2471,564,The Forgery,blacksmith
 1418,1547,The Hammer and Anvil,blacksmith
-3645,2617,The Haven Blacksmith,blacksmith
 1937,2771,Honorable Arms,blacksmith
 3546,1185,Nujel'm Blacksmith,blacksmith
 630,2194,On Guard Armoury,blacksmith
 3554,1202,Public Smithing,blacksmith
-981,510,Shining Blades,blacksmith
 1419,3859,Warrior's Bounty,blacksmith
-792,665,ZhelInLem,blacksmith
 5225,4000,Zoot's Hammer,blacksmith
-1348,1778,Britain's Blacksmithguild,blacksmithsguild
+1348,1778,Britain's Blacksmith Guild,blacksmithsguild
+5260,3737,Cibilo Creek,BodyofWater
+5804,3468,The Gentle River,BodyofWater
+5838,3766,The Gentle River,BodyofWater
+5274,2883,J'Fer Sok,BodyofWater
+5360,3396,The Ru,BodyofWater
+5457,3831,The Ru,BodyofWater
+5937,2660,Sea of Harmony,BodyofWater
+5902,3106,Shallow Sea,BodyofWater
+5789,2430,Sok' Gah,BodyofWater
+5771,4050,Tortoise Lagoon,BodyofWater
 590,2205,Bloody Bowman,bowyer
-3745,2585,Bowyers,bowyer
 624,1147,Great Oak Bowyer,bowyer
 3054,3369,Silver Serpent Bows,bowyer
 564,968,The Sturdy Bow,bowyer
@@ -373,39 +87,31 @@
 1512,1705,River's Gate Bridge,bridge
 1520,1628,Virtue's Pass,bridge
 582,2186,Bountiful Meats,butcher
-1400,434,a butcher,butcher
 2992,776,The Butcher's Knife,butcher
 1449,1723,The Cleaver,butcher
 4395,1137,The Fatted Calf,butcher
 1457,4028,Finest Cuts,butcher
 3555,1171,Nujel'm Butcher,butcher
-3714,2651,The Prime Cut Butcher Shop,butcher
 2912,3485,Serpent Hold Meats,butcher
 2438,410,The Slaughtered Cow,butcher
 5700,3279,The Southside Butchery,butcher
-3708,2649,Sweet Meat,butcher
 1991,2887,The Trinsic Cut,butcher
 529,1008,Yew's Finest Cuts,butcher
 570,1015,Bloody Thumb Woodworks,carpenter
 628,2160,Builder's Delight,carpenter
-3642,2504,Carpenters of Haven,carpenter
 5691,3209,The Carpentry House,carpenter
 1435,3820,From Tree to Yew,carpenter
 2917,798,The Hammer and Nail,carpenter
-1002,518,Hardwoods and More,carpenter
 4416,1085,The Mage's Seat,carpenter
 2513,477,The Oak Throne,carpenter
 1430,1597,The Saw Horse,carpenter
 2627,2100,Violente Woodworks,carpenter
-2066,1288,Warped Woodworks,carpenter
-1578,1558,Cavalryguild,cavalryguild
+1578,1558,Cavalry Guild,cavalryguild
 1476,1745,Customs,customs
-3717,1228,Seaborne Ships,customs
 2944,934,Vesper Customs,customs
 1470,1765,Britain Docks,docks
 2752,2155,Buccaneer's Den Docks,docks
 2256,1181,Cove Dock,docks
-3655,2665,Haven Docks,docks
 1512,3989,Jhelom Docks,docks
 1372,3908,Jhelom Docks,docks
 1504,3693,Jhelom Docks,docks
@@ -413,35 +119,40 @@
 3674,2293,Magincia Docks,docks
 4406,1038,Moonglow Docks,docks
 2940,3410,North Docks,docks
-3647,2681,Ocllo Docks,docks
 5839,3256,Papua dock,docks
 656,2235,Skara Brae Docks,docks
 3001,3466,South Dock,docks
 2072,2856,Trinsic Docks,docks
 3034,827,Vesper Docks,docks
-533,1532,central dungeon,exit
-155,1474,central dungeon,exit
-4,1267,central dungeon,exit
+2499,916,Covetous,dungeon
+4111,429,Deceit,dungeon
+1296,1082,Despise,dungeon
+1176,2635,Destard,dungeon
+2922,3402,Fire,dungeon
+5757,2909,Fire,dungeon
+4722,3814,Hythloth,dungeon
+5203,2328,Ice,dungeon
+1996,80,Ice,dungeon
+1014,1434,Orc Cave,dungeon
+6075,3330,passage to Britain,dungeon
+1628,3318,passage to Delucia,dungeon
+5150,4063,passage to Trinsic,dungeon
+5138,3665,passage to Trinsic,dungeon
+1492,1641,sewer entrance,dungeon
+512,1559,Shame,dungeon
+5426,3120,Terathan Keep,dungeon
+1361,890,Wind,dungeon
+2042,226,Wrong,dungeon
 5456,1863,Covetous,exit
-1014,1507,cyclopse dungeon,exit
 5188,638,Deceit,exit
 5588,632,Despise,exit
 5244,1007,Destard,exit
-20,1197,Elemental Arena,exit
-1982,1106,Etherial Tombs,exit
 5687,1424,Fire (B),exit
 5792,1415,Fire (LL),exit
 5904,16,Hythloth,exit
 5882,243,Ice (B),exit
 5875,147,Ice (LL),exit
-84,750,Ilshenar Central Area,exit
-1478,1495,mushroom caves,exit
-2188,319,ne dungeon,exit
-427,112,nw dungeon,exit
-1348,1510,ratman mine,exit
-2114,830,se dungeon,exit
 5396,129,Shame,exit
-1787,993,spider dungeon,exit
 5340,1599,Terathan Keep,exit
 6031,1500,to Britain,exit
 6026,1344,to City of the Dead,exit
@@ -450,8 +161,8 @@
 5191,152,to surface,exit
 5899,1410,to Trinsic forest,exit
 5825,632,Wrong,exit
-2963,813,The Fisherman'sguild,fishermansguild
-3685,2256,Fisherman'sguild and Supplies,fishermansguild
+2963,813,The Fisherman's Guild,fishermansguild
+3685,2256,Fisherman's Guild and Supplies,fishermansguild
 1437,3750,Ocean's Treasure,fishermansguild
 3546,1194,Nujel'm Bowry,fletcher
 1470,1578,Quality Fletching,fletcher
@@ -459,79 +170,59 @@
 1370,3868,City Gate,gate
 1475,3690,City Gate,gate
 3657,1202,City Gates,gate
-1200,704,Entrance,gate
-401,1251,lizzardman gate,gate
-367,1261,lizzardman gate,gate
 1477,1638,The Main Gate,gate
 1421,1633,Poor Gate,gate
 2003,2921,South Gate,gate
 2281,1210,town gate,gate
 5313,3970,Watch Gates,gate
 1831,2779,West Trinsic Gate,gate
-2948,3349,Counselor'sguild,guild
-3721,2177,Counselor'sguild,guild
-610,2128,Counselor'sguild,guild
-2434,438,Counselor'sguild,guild
-1498,1518,Counselor'sguild,guild
-3769,1190,Counselor'sguild,guild
-616,980,Counselor'sguild,guild
-4478,1126,Counselor'sguild,guild
-1418,3703,Counselor'sguild,guild
-2843,944,Counselor'sguild,guild
-1893,2838,Counselor'sguild,guild
-1628,1664,Counselor'sguild,guild
-3667,2502,Counselor'sguild Hall,guild
-872,686,LapInLem,guild
-792,617,LapInLem,guild
-894,673,TerAnEksPor,guild
-575,537,,healer
-682,297,,healer
-2084,1372,Bloodletter'sguild,healer
+1371,1482,Britain Cemetery,graveyard
+2437,1104,cemetery,graveyard
+5696,3660,cemetery passage,graveyard
+1283,3731,Jhelom Cemetery,graveyard
+4541,1319,Moonglow Cemetery,graveyard
+3529,1141,Nujel'm Cemetery,graveyard
+2753,867,Vesper Cemetery,graveyard
+722,1117,Yew Cemetery,graveyard
+2948,3349,Counselor's Guild,guild
+3721,2177,Counselor's Guild,guild
+610,2128,Counselor's Guild,guild
+2434,438,Counselor's Guild,guild
+1498,1518,Counselor's Guild,guild
+3769,1190,Counselor's Guild,guild
+616,980,Counselor's Guild,guild
+4478,1126,Counselor's Guild,guild
+1418,3703,Counselor's Guild,guild
+2843,944,Counselor's Guild,guild
+1893,2838,Counselor's Guild,guild
+1628,1664,Counselor's Guild,guild
 647,1087,Deep Forest Healing,healer
-1364,1051,etherial warrior castle healer,healer
 5191,3989,a Healer,healer
 1472,1607,Healer of Britain,healer
 2709,2130,Healer of Buccaneer's Den,healer
 3687,2227,Healer of Magincia,healer
-3629,2608,Healer of Ocllo,healer
 620,2218,Healer of Skara Brae,healer
 2920,856,Healer of Vesper,healer
 532,958,Healer of Yew,healer
-284,536,healer's hut,healer
-1235,543,healer's hut,healer
-1407,428,healer's hut,healer
-1628,548,healer's hut,healer
-1518,619,healer's hut,healer
-3665,2581,The Healers of Haven,healer
 2577,599,The Healing Hand,healer
 2245,1231,The Healing Hand,healer
 5737,3222,The Healing Hand,healer
-1093,955,a healing temple,healer
-872,586,InManiLem,healer
 1416,3779,Jhelom Healer,healer
 4392,1089,Moonglow Healer,healer
-369,1432,resurrection tree,healer
 2997,3428,Serpent's Hold Healer,healer
 1911,2805,Trinsic Healer,healer
 5263,129,Wind Healer,healer
 4626,1207,Masters of Illusion,illusionistsguild
 610,810,Abbey Innkeeper,inn
-3672,2654,The Albatross,inn
 5197,4060,The Barely Inn,inn
-3671,2615,The Bountiful Harvest,inn
-3673,2614,The Bountiful Harvest,inn
 2967,3408,The Broken Arrow Inn,inn
 5310,34,bunkhouse,inn
-665,665,The Deuce's Vinculum Inn,inn
 595,2248,The Falconer's Inn,inn
-1620,554,an inn,inn
 2782,969,The Ironwood Inn,inn
 5775,3161,The Just Inn,inn
-774,1144,Mistas Regsit,inn
 4484,1064,Moonglow Student Hostel,inn
 1360,3815,The Morning Star Inn,inn
 1458,1525,The North Side Inn,inn
-1005,522,Paladin's Stopover,inn
 2715,2098,The Peg Leg Inn,inn
 3732,1306,Restful Slumber,inn
 2033,2801,The Rusty Anchor,inn
@@ -540,153 +231,134 @@
 554,2178,The Shattered Skull,inn
 3695,2160,The Stag and Lion,inn
 1493,1619,Sweet Dreams,inn
-840,707,TerZu,inn
 1844,2735,The Traveler's Inn,inn
-1566,1049,Twin Oaks Tavern,inn
 2962,885,Vesper Youth Hostel,inn
-2039,1317,Wailing Banshee Inn,inn
 1585,1591,The Wayfarer's Inn,inn
 5218,175,Windy Inn,inn
+2122,2755,Barrier Isle,Island
 3661,2183,The Family Jewels,jeweler
 1655,1642,A Girl's Best Friend,jeweler
 3778,1172,Jewel of the Isle,jeweler
-1605,541,a jeweler,jeweler
-859,698,KlarLapInLem,jeweler
-2051,1398,Lich's Hoard,jeweler
 1447,3981,The Pearl of Jhelom,jeweler
 1895,2809,The Pearl of Trinsic,jeweler
 1451,1679,Premier Gems,jeweler
 2882,723,The Shimmering Jewel,jeweler
 5662,3150,Strange Rocks,jeweler
+295,764,Britannia Prison,landmark
+4511,1376,Britannia Royal Zoo,landmark
+370,899,Court of Truth,landmark
+635,851,Empath Abbey,landmark
+5165,246,entrance,landmark
+5291,1169,jail,landmark
+5671,2391,lighthouse passage,landmark
+1530,1428,Lord Blackthorn's Castle,landmark
+1323,1624,Lord British's Castle,landmark
+4312,1000,The Lyceaeum,landmark
+2590,532,Mining Camp,landmark
+2775,893,passage to Lost Cemetery,landmark
+2404,218,passage to Lost Lands,landmark
+6084,3674,passage to North Mines,landmark
+2986,2887,Serpent Pillar (doracron),landmark
+425,3279,Serpent Pillar (doracron),landmark
+5974,2694,Serpent Pillar (sueacron),landmark
+5266,2757,Serpent Pillar (sueacron),landmark
+318,789,to lighthouse,landmark
+1958,2068,to Lost Lands,landmark
+5126,3144,to Marble Building,landmark
+1256,865,Training Tower,landmark
 1409,1590,Britain Public Library,library
 1494,1715,The First Library of Britain,library
-3615,2476,Haven Public Library,library
 1387,3771,Jhelom Library,library
 5238,144,The Learned Mage,library
-868,657,Librum,library
-869,625,Librum,library
-3612,2466,Ocllo Public Library,library
 2003,2726,Paladin's Library,library
 5243,179,Seat of Knowledge,library
-5301,88,The Alchemist of Wind,magesguild
-2892,654,The Bubbling Brew,magesguild
-1843,2711,Encyclopedia Magicka,magesguild
-5296,3978,Hut of Magics,magesguild
-1590,1654,Incantations & Enchantments,magesguild
-1424,3975,Jhelom Mage,magesguild
-3632,2573,The Little Shop of Magic,magesguild
-1394,441,a mage,magesguild
-1505,611,a mage,magesguild
-602,2180,Mages' Menagerie,magesguild
-2918,672,The Magical Light,magesguild
-3704,2222,Magincia's Magicka,magesguild
-4448,1090,Moonglow's Finest Alchemy,magesguild
-659,2141,Mystic Treasures,magesguild
-2024,1383,Necromancer Ampitheater,magesguild
-1001,523,Sage's Refuge,magesguild
-3002,3350,Serpent's Spells,magesguild
-1485,1550,The Sorcerer's Delight,magesguild
-3628,2541,The Sorceror'sguild,magesguild
-840,571,TerOrtLem,magesguild
-5731,3183,Tricks of the Trade,magesguild
-5148,60,Wind Alchemy,magesguild
+5301,88,The Alchemist of Wind,mage
+2892,654,The Bubbling Brew,mage
+1843,2711,Encyclopedia Magicka,mage
+5296,3978,Hut of Magics,mage
+1590,1654,Incantations & Enchantments,mage
+1424,3975,Jhelom Mage,mage
+602,2180,Mages' Menagerie,mage
+2918,672,The Magical Light,mage
+3704,2222,Magincia's Magicka,mage
+4448,1090,Moonglow's Finest Alchemy,mage
+659,2141,Mystic Treasures,mage
+3002,3350,Serpent's Spells,mage
+1485,1550,The Sorcerer's Delight,mage
+5731,3183,Tricks of the Trade,mage
+5148,60,Wind Alchemy,mage
 4545,860,Encyclopedia Magicka,magesguild
 4481,1085,Farmer's Market,market
 1392,3824,Farmer's Market,market
 611,2157,Farmer's Market,market
 3019,766,Farmer's Market,market
 3018,785,Fisherman's Warf,market
-1474,1597,The Merchant'sguild,merchantsguild
-3703,2249,The Merchant'sguild,merchantsguild
+1474,1597,The Merchant's Guild,merchantsguild
+3703,2249,The Merchant's Guild,merchantsguild
 2505,432,The Golden Pick Axe,minersguild
-3665,2140,Magincia Miner'sguild,minersguild
+3665,2140,Magincia Miner's Guild,minersguild
 2455,487,The Matewan,minersguild
-1417,1578,The Miner'sguild,minersguild
-3754,2704,Miners,minersguild
+1417,1578,The Miner's Guild,minersguild
 2855,734,The Ore of Vesper,minersguild
-1288,769,Burning Corpse,point
-3708,2588,Farm,point
-3739,2563,Farm,point
-3731,2635,Farm,point
-1947,2677,Mess Hall,point
-2891,744,The Musician's Hall,point
+1336,1997,Britain Moongate,moongate
+1500,3772,Jhelom Moongate,moongate
+3564,2140,Magincia Moongate,moongate
+2702,692,Minoc Moongate,moongate
+4468,1284,Moonglow Moongate,moongate
+645,2068,Skara Brae Moongate,moongate
+1829,2949,Trinsic Moongate,moongate
+771,754,Yew Moongate,moongate
+1947,2677,Mess Hall,other
+2891,744,The Musician's Hall,other
 4525,1060,Academy of Arts,painter
 2906,710,The Colored Canvass,painter
-3638,2499,Paint and More,painter
-3746,2576,Archer Targets,interest
-1962,2691,Barracks,interest
-1937,2711,Barracks,interest
-1938,2688,Barracks,interest
-1507,1567,Britannia Animal Care,interest
-2667,2087,Buccaneer's Bath,interest
-1538,1597,The Chamber of Virtue,interest
-3727,1361,The Chessboard,interest
-3715,1383,Debtor's Prison,interest
-39,688,Dragon's Egg,interest
-1397,3744,The Dueling Pit,interest
-1608,1622,East Side Park,interest
-792,641,Fountain,interest
-3633,2597,Garden with Waterfall,interest
-1635,1561,Gazebo,interest
-1855,2769,Jail,interest
-3796,2259,Magincia Parliment,interest
-2429,528,Minoc Town Hall,interest
-3723,1396,Nujel'm Court,interest
-3690,1284,Nujel'm Palace,interest
-1893,2763,park,interest
-5251,58,park,interest
-1280,779,Ridgeback Pen,interest
-1541,1685,Senator Robin's House and Office,interest
-565,2213,Skara Brae Town Hall,interest
-2465,522,statues,interest
-1962,1339,training dumm,interest
-3732,2583,Training Dummies,interest
-1979,1307,training dummy,interest
-1972,2698,Training Ground,interest
-1895,2719,Trinsic Meeting Hall,interest
-2082,574,tunnel,interest
-2157,456,tunnel,interest
-1811,359,tunnel,interest
-1790,475,tunnel,interest
-1628,432,tunnel,interest
-1658,304,tunnel,interest
-1071,247,tunnel,interest
-1095,197,tunnel,interest
-1195,511,tunnel,interest
-3595,2588,Uzeraan Keeper of Quests,interest
-2743,980,Vesper Guard Tower,interest
-2923,981,Vesper Museum,interest
-948,492,Volcano,interest
-1619,1760,The Watch Tower,interest
-5265,3939,Watch Tower and Keep,interest
-2212,1115,watchtower,interest
-618,886,Ye Olde Winery,interest
-553,826,Yew Mill,interest
-5737,3262,Adventure Outfitters,provisionersguild
-535,867,The Adventurer's Friend,provisionersguild
-2992,638,The Adventurer's Supplies,provisionersguild
-826,679,BenInLem,provisionersguild
-824,602,BenInLem,provisionersguild
-1469,1668,Britain's Premier Provisioners and Fish Shoppe,provisionersguild
-1850,2796,Britannia Provisions,provisionersguild
-2216,1192,The Farmer's Market,provisionersguild
-2016,1328,Gravedigger's Aparatus,provisionersguild
-3673,2595,Last Chance Provisioners,provisionersguild
-3636,2565,Last Chance Provisioners,provisionersguild
-5154,97,Mage's Things,provisionersguild
-1444,3794,Needful Things,provisionersguild
-2453,425,The Old Miners' Supplies,provisionersguild
-994,510,Open Market,provisionersguild
-2735,2254,Pirate's Provisioners,provisionersguild
-1602,1712,Profuse Provisions,provisionersguild
-1598,539,a provisioner,provisionersguild
-1852,2831,Red's Curious Goods,provisionersguild
-4417,1064,The Scholar's Goods,provisionersguild
-1318,1328,sheep farm,provisionersguild
-578,2227,Sundry Supplies,provisionersguild
-3008,3389,Supplies,provisionersguild
-5219,4012,The Supply Depot,provisionersguild
-2532,548,The Survival Shop,provisionersguild
+1962,2691,Barracks,pointofinterest
+1937,2711,Barracks,pointofinterest
+1938,2688,Barracks,pointofinterest
+1507,1567,Britannia Animal Care,pointofinterest
+2667,2087,Buccaneer's Bath,pointofinterest
+1538,1597,The Chamber of Virtue,pointofinterest
+3727,1361,The Chessboard,pointofinterest
+3715,1383,Debtor's Prison,pointofinterest
+1397,3744,The Dueling Pit,pointofinterest
+1608,1622,East Side Park,pointofinterest
+1635,1561,Gazebo,pointofinterest
+1855,2769,Jail,pointofinterest
+3796,2259,Magincia Parliment,pointofinterest
+2429,528,Minoc Town Hall,pointofinterest
+3723,1396,Nujel'm Court,pointofinterest
+3690,1284,Nujel'm Palace,pointofinterest
+1893,2763,park,pointofinterest
+5251,58,park,pointofinterest
+1541,1685,Senator Robin's House and Office,pointofinterest
+565,2213,Skara Brae Town Hall,pointofinterest
+2465,522,statues,pointofinterest
+1972,2698,Training Ground,pointofinterest
+1895,2719,Trinsic Meeting Hall,pointofinterest
+2743,980,Vesper Guard Tower,pointofinterest
+2923,981,Vesper Museum,pointofinterest
+1619,1760,The Watch Tower,pointofinterest
+5265,3939,Watch Tower and Keep,pointofinterest
+2212,1115,watchtower,pointofinterest
+618,886,Ye Olde Winery,pointofinterest
+553,826,Yew Mill,pointofinterest
+5737,3262,Adventure Outfitters,provisioner
+535,867,The Adventurer's Friend,provisioner
+2992,638,The Adventurer's Supplies,provisioner
+1469,1668,Britain's Premier Provisioners and Fish Shoppe,provisioner
+1850,2796,Britannia Provisions,provisioner
+2216,1192,The Farmer's Market,provisioner
+5154,97,Mage's Things,provisioner
+1444,3794,Needful Things,provisioner
+2453,425,The Old Miners' Supplies,provisioner
+2735,2254,Pirate's Provisioners,provisioner
+1602,1712,Profuse Provisions,provisioner
+1852,2831,Red's Curious Goods,provisioner
+4417,1064,The Scholar's Goods,provisioner
+578,2227,Sundry Supplies,provisioner
+3008,3389,Supplies,provisioner
+5219,4012,The Supply Depot,provisioner
+2532,548,The Survival Shop,provisioner
 3013,3353,Britainian Herbs,reagents
 1498,1659,Ethereal Goods,reagents
 4416,1133,Herbal Splendor,reagents
@@ -694,39 +366,51 @@
 2992,844,The Magician's Friend,reagents
 4416,1112,Moonglow Reagent Shop,reagents
 5714,3202,The Reagent Shop,reagents
-1442,1662,Artists'guild,roguesguild
-3632,2640,Anchors Aweigh,shipwrightsguild
-3667,2252,The Furled Sail,shipwrightsguild
-634,1038,Great Oak Vessels,shipwrightsguild
-2997,819,The Majestic Boat,shipwrightsguild
-3636,2642,Mapmaker's of Haven,shipwrightsguild
-1416,1754,The Oaken Oar,shipwrightsguild
-5805,3270,Pier 39,shipwrightsguild
-1452,3747,Sailor's Keeper,shipwrightsguild
-3700,1214,Seaborne Ships,shipwrightsguild
-2026,2845,Sons Of The Sea,shipwrightsguild
-592,2277,Superior Ships,shipwrightsguild
-4684,1412,The Sorcerer'sguild,sorcerersguild
-1225,563,animal pen,stables
-1388,428,animal pen,stables
-571,2119,Beasts of Burden,stables
-1510,1543,The Bucking Horse Stables,stables
-1995,1318,Critter Pens,stables
-5297,4007,Delucia Stable,stables
-2010,2807,First Trinsic Stablery,stables
-3036,3464,Serpent's Hold Stablery,stables
-2905,3517,Serpents Hold Stablery,stables
-1296,1759,Sosarian Steeds,stables
-5671,3287,Southside Stables,stables
-1499,619,the stables,stables
-2526,375,Stables,stables
-1385,1658,The Stables,stables
-1822,2739,Trinsic Stablery,stables
-5170,1569,,stairs
+1442,1662,Artists' Guild,roguesguild
+5219,3645,City of the Dead,ruins
+5765,2618,Ophidian Lair,ruins
+632,1484,Orc Fort,ruins
+2176,1372,Orc Fort,ruins
+5211,3611,Orc Fort,ruins
+2587,492,The East Mines,scenic
+2533,654,Gypsy Camp,scenic
+1146,2215,Hedge Maze,scenic
+2452,79,The North Mines,scenic
+4708,1116,Telescope,scenic
+1651,2890,Volcano Tunnel,scenic
+1712,3005,waterfall,scenic
+3667,2252,The Furled Sail,shipwright
+634,1038,Great Oak Vessels,shipwright
+2997,819,The Majestic Boat,shipwright
+1416,1754,The Oaken Oar,shipwright
+5805,3270,Pier 39,shipwright
+1452,3747,Sailor's Keeper,shipwright
+3700,1214,Seaborne Ships,shipwright
+2026,2845,Sons Of The Sea,shipwright
+592,2277,Superior Ships,shipwright
+1458,844,Chaos,shrine
+1858,874,Compassion,shrine
+4212,563,Honesty,shrine
+1723,3527,Honor,shrine
+4274,3697,Humility,shrine
+1300,633,Justice,shrine
+3355,289,Sacrifice,shrine
+1595,2490,Spirituality,shrine
+2491,3933,Valor,shrine
+4684,1412,The Sorcerer's Guild,sorcerersguild
+571,2119,Beasts of Burden,stable
+1510,1543,The Bucking Horse Stables,stable
+5297,4007,Delucia Stable,stable
+2010,2807,First Trinsic Stablery,stable
+3036,3464,Serpent's Hold Stablery,stable
+2905,3517,Serpents Hold Stablery,stable
+1296,1759,Sosarian Steeds,stable
+5671,3287,Southside Stables,stable
+2526,375,Stables,stable
+1385,1658,The Stables,stable
+1822,2739,Trinsic Stablery,stable
 1981,2838,Adventurer's Clothing,tailor
 1359,3781,Adventurer's Needle,tailor
-981,527,Clothier's Colors,tailor
-2074,1334,Darkweave,tailor
 5234,4025,Delucia Tailor,tailor
 1455,4006,Jhelom's Fine Tailoring,tailor
 1385,1593,Lord British's Tailor,tailor
@@ -736,24 +420,18 @@
 4458,1060,Scholar's Cut,tailor
 650,2180,Shear Pleasure,tailor
 2881,3503,Silver Serpent Tailors,tailor
-896,610,SkisInLem,tailor
 2961,621,The Spinning Wheel,tailor
 2840,885,The Spinning Wheel,tailor
-3667,2586,A Stitch In Time,tailor
-3687,2477,A Stitch in Time Tailor Shop,tailor
 3666,2235,Stitchin' Time,tailor
-1600,552,a tailor,tailor
 3774,1265,Tailor of the Isle,tailor
 5203,86,Windy Clothes,tailor
 1431,1612,The Best Hides of Britain,tanner
-3602,2615,Better Leather Tannery,tanner
 2707,2178,Buccaneer's Den Leatherworks,tanner
 3545,1178,Nujel'm Tannery,tanner
 2524,524,The Stretched Hide,tanner
 517,986,The Tanned Hide,tanner
 2860,999,Tanner's Shop,tanner
 1991,2867,Trinsic Fine Skins,tanner
-3668,2652,The Albatross Bar and Grill,tavern
 2475,397,The Barnacle,tavern
 1498,1691,The Blue Boar,tavern
 1427,1716,The Cat's Lair,tavern
@@ -767,32 +445,61 @@
 2680,2238,The Pirate's Plunder,tavern
 1620,1586,The Salty Dog,tavern
 3736,1255,The Silver Bow,tavern
-2030,1350,Skeleton Swill,tavern
 1547,1768,The Unicorn's Horn,tavern
-3685,2477,First Academy of Music,theater
+2618,980,gate to Buccaneer's Den,teleporter
+2728,2133,gate to mainland,teleporter
+2494,3576,island temple portal,teleporter
+5905,4069,portal to island temple,teleporter
+5733,3190,portal to Moonglow (recsu),teleporter
+4540,845,portal to Papua (recdu),teleporter
+4442,1122,teleporter park,teleporter
+1414,3829,teleporters,teleporter
+5199,71,to park,teleporter
+5217,18,to town,teleporter
+5542,2999,Beggars Gorge,Terrain
+5139,2903,Cyclops Valley,Terrain
+5265,3270,Damwin Thicket,Terrain
+5978,3447,Hoppers Bog,Terrain
+5382,2343,Kos Heb,Terrain
+5954,2363,Kos Heb,Terrain
+5543,2618,oasis,Terrain
+5724,2923,Sak Teb,Terrain
+5470,3515,Serpents Cousins,Terrain
+6028,2933,Terra Sanctum,Terrain
+5604,2742,Y'Nah Teb,Terrain
 1449,1590,The King's Men Theater,theater
 3739,1231,Nujel'm Theater,theater
 1424,4016,Performing Arts Centre,theater
-3693,2509,The Haven Thieves'guild,thievesguild
 2659,2194,Pirate's Den,thievesguild
-766,641,AtriBenInAilem,tinker
 2899,790,The Gadget's Corner,tinker
 1404,3805,Gadgets and Things,tinker
 2461,457,Gears and Gadgets,tinker
-3667,2506,Haven Clockworks and Tinker Shop,tinker
-3720,2126,The TicToc Shop,tinker
-1253,588,a tinker,tinker
+3720,2126,The Tic-Toc Shop,tinker
 2940,3500,Tinker of the Isle,tinker
 5726,3243,Tinker's Paradise,tinker
-1422,1654,Tinker'sguild,tinkersguild
-1848,2680,Tinker'sguild,tinkersguild
+1422,1654,Tinker's Guild,tinkersguild
+1848,2680,Tinker's Guild,tinkersguild
+1546,1634,Britain,town
+2720,2110,Buccaneer's Den,town
+2263,1237,Cove,town
+5227,3978,Delucia,town
+1359,3671,Jhelom,town
+3735,2200,Magincia,town
+2502,522,Minoc,town
+4457,1117,Moonglow,town
+3600,1231,Nujel'm,town
+5751,3231,Papua,town
+3025,3498,Serpent's Hold,town
+595,2263,Skara Brae,town
+1879,2766,Trinsic,town
+2884,839,Vesper,town
+5252,104,Wind,town
+504,942,Yew,town
 1939,2739,The Brotherhood of Trinsic,warriorsguild
 2841,907,The Champion's of Light,warriorsguild
 2482,428,The New World Order,warriorsguild
-3740,2692,Rangers Cabin,warriorsguild
 3031,3350,Serpent Warriors,warriorsguild
 2019,2748,Trinsic Training Hall,warriorsguild
-3058,3400,The Warriors'guild,warriorsguild
-1341,1733,The Warriors'guild,warriorsguild
-1362,3700,Brothers In Arms,warriorsguild
-3731,2578,Weaponsmith,warriorsguild
+3058,3400,The Warriors' Guild,warriorsguild
+1341,1733,The Warriors' Guild,warriorsguild
+1362,3700,Brothers In Arms,weaponsguild
