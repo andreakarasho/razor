@@ -474,6 +474,9 @@
     <Content Include="JMap\Resources\Cursors\mapPin32A21.cur">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="JMap\Resources\Cursors\mapPin32A21_Gold.cur">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="UI\Lock.ico" />
     <Content Include="UI\UOPS.ico" />
   </ItemGroup>

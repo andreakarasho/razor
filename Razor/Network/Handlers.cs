@@ -2287,11 +2287,21 @@ namespace Assistant
 					break;
 				}
 				case 0x03: // text message
+
 				case 0x04: // 3 = private, 4 = public
 				{
-					//Serial from = p.ReadUInt32();
-					//string text = p.ReadUnicodeStringSafe();
-					break;
+                        
+                        Serial s = p.ReadUInt32();
+                        string text = p.ReadUnicodeStringSafe();
+                        string name = World.FindMobile(s).Name;
+
+                        if(text.StartsWith("Sent new marker at: "))
+                        {
+                            
+                        }
+
+                        //System.Diagnostics.Debug.WriteLine($"Party message from {name}: '{text}'");
+                        break;
 				}
 				case 0x07: // party invite
 				{

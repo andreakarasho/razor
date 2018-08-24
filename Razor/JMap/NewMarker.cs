@@ -17,11 +17,14 @@ namespace Assistant.JMap
         public int x;
         public int y;
         public string extra;
+        public CheckBox IsPublic;
+        public string MarkerOwner;
 
         public NewMarker(MapPanel mapPan)
         {
             InitializeComponent();
             mapPanel = mapPan;
+            IsPublic = this.IsPublicCheckbox;
 
             //this.Location = new Point(mapPanel.Left - (this.Width + 5), mapPanel.Top);
 
@@ -42,6 +45,9 @@ namespace Assistant.JMap
 
             this.newMarkerX.Text = x.ToString();
             this.newMarkerY.Text = y.ToString();
+            this.OwnerLabel.Text = mapPanel.FocusMobile.Name;
+
+            mapPanel.MarkerToEdit = null;
         }
 
         private void EditMarker(JMapButton markerToEdit)
@@ -53,24 +59,34 @@ namespace Assistant.JMap
             this.newMarkerX.Text = x.ToString();
             this.newMarkerY.Text = y.ToString();
             this.newMarkerExtra.Text = markerToEdit.extraText;
+            this.IsPublic.Checked = markerToEdit.IsPublic;
+            this.OwnerLabel.Text = markerToEdit.MarkerOwner;
+
+            
         }
 
         private void NewMarkerPoint(object sender, EventArgs e)
         {
             if(mapPanel.AddingMarker)
             {
-                mapPanel.AddMarker(new Point(x, y), this.newMarkerName.Text, this.newMarkerExtra.Text);
+                mapPanel.AddMarker(new Point(x, y), IsPublic.Checked, mapPanel.FocusMobile.Name, this.newMarkerName.Text, this.newMarkerExtra.Text);
             }
             if(mapPanel.EditingMarker)
             {
                 mapPanel.MarkerToEdit.mapLoc = new Point(x, y);
                 mapPanel.MarkerToEdit.displayText = this.newMarkerName.Text;
                 mapPanel.MarkerToEdit.extraText = this.newMarkerExtra.Text;
+                mapPanel.MarkerToEdit.MarkerOwner = this.OwnerLabel.Text;
+                mapPanel.MarkerToEdit.IsPublic = this.IsPublic.Checked;
+
+                mapPanel.MarkerToEdit.LoadButton();
             }
 
             mapPanel.EditingMarker = false;
             mapPanel.AddingMarker = false;
             mapPanel.MarkerToEdit = null;
+
+            mapPanel.UpdateAll();
 
             this.Dispose();
 
