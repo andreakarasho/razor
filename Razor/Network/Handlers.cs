@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Assistant.Core;
 using Assistant.Macros;
+using Assistant.JMap;
 
 namespace Assistant
 {
@@ -2289,19 +2290,33 @@ namespace Assistant
 				case 0x03: // text message
 
 				case 0x04: // 3 = private, 4 = public
-				{
-                        
-                        Serial s = p.ReadUInt32();
-                        string text = p.ReadUnicodeStringSafe();
+				{                        
+                    Serial s = p.ReadUInt32();
+                    string text = p.ReadUnicodeStringSafe();
+                    
+
+                    var data = new List<string[]>();
+            
+                    if (text.StartsWith("New marker: "))
+                    {
                         string name = World.FindMobile(s).Name;
+                        string trimmed = text.Substring(12);
+                        string[] message = trimmed.Split(',');
+                        data.Add(message);
 
-                        if(text.StartsWith("Sent new marker at: "))
+                        foreach (string[] line in data)
                         {
-                            
-                        }
+                            float x = float.Parse(line[0]);
+                            float y = float.Parse(line[1]);
+                            string displayText = line[2];
+                            string extraText = line[3];
 
-                        //System.Diagnostics.Debug.WriteLine($"Party message from {name}: '{text}'");
-                        break;
+                            string markerOwner = name;
+
+                            PublicMarkers.ReceivePublicMarker(new System.Drawing.PointF(x, y), name, true, "PublicLocations", displayText, extraText); 
+                        }
+                    }
+                    break;
 				}
 				case 0x07: // party invite
 				{

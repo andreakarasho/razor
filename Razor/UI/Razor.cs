@@ -277,6 +277,8 @@ namespace Assistant
         private CheckBox stealthOverhead;
         private CheckBox captureMibs;
         private CheckBox trackIncomingGold;
+        private ComboBox JMap_GuardlineDropdown;
+        private Label lblGuardlines;
         private CheckBox objectDelay;
         private TreeView _hotkeyTreeViewCache = new TreeView();
 
@@ -586,6 +588,8 @@ namespace Assistant
             this.label21 = new System.Windows.Forms.Label();
             this.aboutVer = new System.Windows.Forms.Label();
             this.timerTimer = new System.Windows.Forms.Timer(this.components);
+            this.JMap_GuardlineDropdown = new System.Windows.Forms.ComboBox();
+            this.lblGuardlines = new System.Windows.Forms.Label();
             this.objectDelay = new System.Windows.Forms.CheckBox();
             this.tabs.SuspendLayout();
             this.generalTab.SuspendLayout();
@@ -2501,6 +2505,8 @@ namespace Assistant
             // mapTab
             // 
             this.mapTab.BackColor = System.Drawing.SystemColors.Control;
+            this.mapTab.Controls.Add(this.lblGuardlines);
+            this.mapTab.Controls.Add(this.JMap_GuardlineDropdown);
             this.mapTab.Controls.Add(this.captureMibs);
             this.mapTab.Controls.Add(this.label25);
             this.mapTab.Controls.Add(this.boatControl);
@@ -3205,15 +3211,24 @@ namespace Assistant
             this.timerTimer.Interval = 5;
             this.timerTimer.Tick += new System.EventHandler(this.timerTimer_Tick);
             // 
-            // objectDelay
+            // JMap_GuardlineDropdown
             // 
-            this.objectDelay.Location = new System.Drawing.Point(8, 57);
-            this.objectDelay.Name = "objectDelay";
-            this.objectDelay.Size = new System.Drawing.Size(99, 21);
-            this.objectDelay.TabIndex = 77;
-            this.objectDelay.Text = "Object Delay:";
-            this.objectDelay.UseVisualStyleBackColor = true;
-            this.objectDelay.CheckedChanged += new System.EventHandler(this.objectDelay_CheckedChanged);
+            this.JMap_GuardlineDropdown.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.JMap_GuardlineDropdown.FormattingEnabled = true;
+            this.JMap_GuardlineDropdown.Location = new System.Drawing.Point(101, 115);
+            this.JMap_GuardlineDropdown.Name = "JMap_GuardlineDropdown";
+            this.JMap_GuardlineDropdown.Size = new System.Drawing.Size(144, 23);
+            this.JMap_GuardlineDropdown.TabIndex = 63;
+            this.JMap_GuardlineDropdown.SelectedIndexChanged += new System.EventHandler(this.JMap_GuardlineDropdown_SelectedIndexChanged);
+            // 
+            // lblGuardlines
+            // 
+            this.lblGuardlines.AutoSize = true;
+            this.lblGuardlines.Location = new System.Drawing.Point(8, 118);
+            this.lblGuardlines.Name = "lblGuardlines";
+            this.lblGuardlines.Size = new System.Drawing.Size(87, 15);
+            this.lblGuardlines.TabIndex = 64;
+            this.lblGuardlines.Text = "Guardlines File:";
             // 
             // MainForm
             // 
@@ -3352,11 +3367,45 @@ namespace Assistant
 	        m_Tip.SetToolTip(titleStr, Language.GetString(LocString.TitleBarTip));
 
 	        RefreshMapPins(null, null);
+            RefreshGuardLineList(null, null);
+            
 
-	        SplashScreen.End();
+
+            SplashScreen.End();
 	    }
-        
-	    private bool m_Initializing = false;
+
+	    private void RefreshMapPins(Object sender, System.EventArgs e)
+	    {
+	        mapPins.Items.Clear();
+
+             if (Directory.Exists(Config.GetInstallDirectory("JMap")))
+	        {
+	            foreach (string fullPath in Directory.GetFiles(Config.GetInstallDirectory("JMap"), "*.csv"))
+	            {
+	                string file = Path.GetFileNameWithoutExtension(fullPath);
+                     mapPins.Items.Add(file);
+	            }
+	        }
+	    }
+
+        private void RefreshGuardLineList(Object sender, System.EventArgs e)
+        {
+            JMap_GuardlineDropdown.Items.Clear();
+
+            foreach (string fullPath in Directory.GetFiles(Config.GetInstallDirectory(), "*guardlines*.def"))
+            {
+                string file = Path.GetFileNameWithoutExtension(fullPath);
+                JMap_GuardlineDropdown.Items.Add(file);
+            }
+
+            //Cannot set text programmatically after making the dropdownstyle "DropDownList" which is non editable text as we want.
+            //Putting this in the designer constructor for the form doesn't seem to have an effect, I figure Config is loaded after that.
+            //Feel free to move this if required or desired.
+            //If we want "live" guardline file changes, this needs to move to MainForm_Load(), just after RefreshGuardLineList()
+            this.JMap_GuardlineDropdown.SelectedIndex = this.JMap_GuardlineDropdown.FindString(Config.GetString("GuardLinesFile"));
+        }
+
+        private bool m_Initializing = false;
 
 	    public void InitConfig()
 	    {

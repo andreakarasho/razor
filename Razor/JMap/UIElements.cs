@@ -14,88 +14,126 @@ namespace Assistant.JMap
     public enum JMapButtonType
     {
         GenericButton = 0,
-        MapPin = 1
-        //More to add                                   //separate enum for UOTypes? Razor has them?
+        MapPin = 1,
+        UOPoint = 2,
+        PlayerHouse = 3,
+        Treasure = 4
     }
 
     public class UIElements
     {
-        public static JMapButton NewButton(MapPanel mapPanel, JMapButtonType type, float mapLocX, float mapLocY, string buttonId, string displayText = "", string extraText = "")
+        public static JMapButton NewButton(MapPanel mapPanel, JMapButtonType type, float mapLocX, float mapLocY, string markerOwner, bool IsPublic, string buttonId, string displayText = "", string extraText = "")
         {
-            /* When map is clicked in order to create a marker
-             * we need to have a prompt. A little pop up next to the 
-             * marker asking "Details?" could work.
-             * It should disappear if not clicked in X seconds or
-             * if another action occurs.
-             */
-
-            //Debug.WriteLine("NewButton Called");
-            try
+            switch (type)
             {
-                switch (type)
-                {
-                    case JMapButtonType.GenericButton: return GenericButton(mapPanel, type, mapLocX, mapLocY, buttonId, displayText, extraText);
-                    case JMapButtonType.MapPin: return MapPin(mapPanel, type, mapLocX, mapLocY, buttonId, displayText, extraText);
-                    default: return MapPin(mapPanel, type, mapLocX, mapLocY, buttonId, displayText, extraText);
-                }
+                case JMapButtonType.GenericButton: return GenericButton(mapPanel, type, mapLocX, mapLocY, buttonId, displayText);
+                case JMapButtonType.MapPin: return MapPin(mapPanel, type, mapLocX, mapLocY, markerOwner, IsPublic, buttonId, displayText, extraText);
+                case JMapButtonType.UOPoint: return UOPoint(mapPanel, type, mapLocX, mapLocY, buttonId, displayText, extraText);
+                case JMapButtonType.PlayerHouse: return PlayerHouse(mapPanel, type, mapLocX, mapLocY, buttonId, displayText, extraText);
+                case JMapButtonType.Treasure: return Treasure(mapPanel, type, mapLocX, mapLocY, buttonId, displayText);
+                default: return MapPin(mapPanel, type, mapLocX, mapLocY, markerOwner, IsPublic, buttonId, displayText, extraText);
             }
-            catch(Exception e)
-            {
-                Debug.WriteLine(e.ToString());
-                return MapPin(mapPanel, type, mapLocX, mapLocY, displayText, extraText);
-            }
-
         }
 
-        private static JMapButton MapPin(MapPanel mapPanel, JMapButtonType type, float mapLocX, float mapLocY, string buttonId, string displayText = "", string extraText = "")
+        private static JMapButton GenericButton(MapPanel mapPanel, JMapButtonType type, float mapLocX, float mapLocY, string buttonId, string displayText = "")
+        {
+            return new JMapButton()
+            {
+                type = JMapButtonType.GenericButton,
+                id = buttonId
+            };
+        }
+
+        private static JMapButton MapPin(MapPanel mapPanel, JMapButtonType type, float mapLocX, float mapLocY, string markerOwner, bool IsPublic, string buttonId, string displayText = "", string extraText = "")
         {
             try
             {
                 return new JMapButton()
                 {
-                    curPath = $"{Config.GetInstallDirectory()}\\JMap\\Resources\\Cursors\\mapPin32A21.cur",
-                    //Size = new Size(32, 32),
-
                     mapPanel = mapPanel,
                     type = JMapButtonType.MapPin,
                     mapLoc = new PointF(mapLocX, mapLocY),
+                    MarkerOwner = markerOwner,
+                    IsPublic = IsPublic,
                     displayText = displayText,
                     extraText = extraText,
                     id = buttonId
+                };
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine($"Button Creation Error: {e.ToString()}");
+                return MapPin(mapPanel, type, mapLocX, mapLocY, markerOwner, IsPublic, buttonId, displayText, extraText);
+            }
 
-                    //hasPane = hasPane,
-                    //hasText = hasText,
-                    //hasExtra = hasExtra,
-                    //Name = displayText + "_" + mapLocX.ToString() + "_" + mapLocY.ToString(),
-                    //Text = "",
+        }
 
+        private static JMapButton UOPoint(MapPanel mapPanel, JMapButtonType type, float mapLocX, float mapLocY, string buttonId, string displayText = "", string variant = "")
+        {
+            try
+            {
+                return new JMapButton()
+                {
+                    mapPanel = mapPanel,
+                    type = JMapButtonType.UOPoint,
+                    Variant = variant.ToUpper(),
+                    mapLoc = new PointF(mapLocX, mapLocY),
+                    displayText = displayText,
+                    id = buttonId
+                };
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine($"Button Creation Error: {e.ToString()}");
+                return GenericButton(mapPanel, type, mapLocX, mapLocY, buttonId, displayText);
+            }
 
+        }
+        private static JMapButton PlayerHouse(MapPanel mapPanel, JMapButtonType type, float mapLocX, float mapLocY, string buttonId, string displayText = "", string variant = "")
+        {
+            try
+            {
+                return new JMapButton()
+                {
+                    mapPanel = mapPanel,
+                    type = JMapButtonType.PlayerHouse,
+                    Variant = variant.ToUpper(),
+                    curPath = $"{Config.GetInstallDirectory()}\\JMap\\Resources\\Houses\\" + variant + ".cur",
+                    mapLoc = new PointF(mapLocX, mapLocY),
+                    displayText = displayText,
+                    id = buttonId
+                };
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine($"Button Creation Error: {e.ToString()}");
+                return GenericButton(mapPanel, type, mapLocX, mapLocY, buttonId, displayText);
+            }
 
-
+        }
+        private static JMapButton Treasure(MapPanel mapPanel, JMapButtonType type, float mapLocX, float mapLocY, string buttonId, string displayText = "")
+        {
+            try
+            {
+                return new JMapButton()
+                {
+                    mapPanel = mapPanel,
+                    type = JMapButtonType.Treasure,
+                    mapLoc = new PointF(mapLocX, mapLocY),
+                    displayText = displayText,
+                    id = buttonId
                 };
             }
             catch(Exception e)
             {
-                Debug.WriteLine("BUTTON CREATION ERROR: " + e.ToString());
-                return MapPin(mapPanel, type, mapLocX, mapLocY, displayText, extraText);
+                Debug.WriteLine($"Button Creation Error: {e.ToString()}");
+                return GenericButton(mapPanel, type, mapLocX, mapLocY, buttonId, displayText);
             }
-        }
-
-        private static JMapButton GenericButton(MapPanel mapPanel, JMapButtonType type, float mapLocX, float mapLocY, string buttonId, string displayText = "", string extraText = "") 
-        {
-            return new JMapButton()
-            {
-                type = JMapButtonType.GenericButton,
-                //hasPane = hasPane,
-                //hasText = hasText,
-                //hasExtra = hasExtra
-                id = buttonId
-            };
 
         }
     }
 
-    public partial class JMapButton //: Control, IButtonControl
+    public partial class JMapButton 
     {
         public MapPanel mapPanel;
 
@@ -103,6 +141,7 @@ namespace Assistant.JMap
         public JMapButtonType type { get; set; }
         public string id { get; set; }
         public Cursor cur { get; set; }
+        public Icon icon { get; set; }
         public string curPath { get; set; }
         public Bitmap img { get; set; }
         public ImageAttributes imgAttr { get; set; }
@@ -111,6 +150,9 @@ namespace Assistant.JMap
         public Point hotSpot { get; set; }
         public PointF renderPoint { get; set; }
         public PointF renderLoc { get; set; }
+
+        public Size renderSize { get; set; }
+
         public PointF offset;
         public PointF zeroPoint;
         public PointF bgRot;
@@ -123,9 +165,11 @@ namespace Assistant.JMap
         public Point mousePos { get; set; }
 
         // Options
-        //public bool hasPane { get; set; }
-        //public bool hasText { get; set; }
-        //public bool hasExtra { get; set; }
+        public string MarkerOwner { get; set; }
+        public bool IsPublic { get; set; }
+
+        //Variation for houses/signs
+        public string Variant { get; set; }
 
         // Data
         public string displayText { get { return _displayText != "" ? _displayText : ""; } set { _displayText = value; } }
@@ -159,164 +203,173 @@ namespace Assistant.JMap
         public void UpdateButton()
         {
             bgReg = mapPanel.bgReg;
-            bgTop = mapPanel.bgTop;
             bgRot = mapPanel.bgRot;
             offset = mapPanel.offset;
 
             if (mapPanel.mapRotated)
             {
-                zeroPoint.X = bgRot.X;
-                zeroPoint.Y = bgRot.Y;
+                zeroPoint.X = Convert.ToInt32(Math.Floor((double)bgRot.X));
+                zeroPoint.Y = Convert.ToInt32(Math.Floor((double)bgRot.Y));
             }
             else
             {
-                zeroPoint.X = bgReg.X;
-                zeroPoint.Y = bgReg.Y;
+                zeroPoint.X = Convert.ToInt32(Math.Floor((double)bgReg.X));
+                zeroPoint.Y = Convert.ToInt32(Math.Floor((double)bgReg.Y));
             }
-
 
             renderPoint = new PointF(
-                                    Convert.ToInt32((Math.Floor((double)((mapLoc.X * offset.X) + zeroPoint.X) - hotSpot.X))),
-                                    Convert.ToInt32((Math.Floor((double)(mapLoc.Y * offset.Y) + zeroPoint.Y) - hotSpot.Y)));
+                                    Convert.ToInt32((Math.Floor((double)((mapLoc.X * offset.X) + zeroPoint.X)))),
+                                    Convert.ToInt32((Math.Floor((double)(mapLoc.Y * offset.Y) + zeroPoint.Y))));
+
 
             renderLoc = renderPoint;
+
+            //Treasure type adjustments here simply make it look far prettier :)
+            if (type == JMapButtonType.Treasure)
+            {
+                this.hotSpot = new Point(this.renderSize.Width / 2,
+                                         this.renderSize.Height + (2 * Convert.ToInt32(Math.Floor((double)offset.Y))));
+            }
+                
+
             if (mapPanel.mapRotated)
             {
-                renderLoc = mapPanel.RotatePointF(renderPoint, mapPanel.zeroPoint, 45);
-                renderLoc = new PointF(Convert.ToInt32(Math.Floor((double)renderLoc.X)), Convert.ToInt32(Math.Floor((double)renderLoc.Y)));
+                renderLoc = mapPanel.RotatePointF(renderPoint, zeroPoint, 45);
+                renderLoc = new PointF(Convert.ToInt32(Math.Floor((double)(renderLoc.X))), Convert.ToInt32(Math.Floor((double)(renderLoc.Y))));
             }
+
+
+
+            renderLoc = new PointF(renderLoc.X - hotSpot.X, renderLoc.Y - hotSpot.Y);
         }
 
-        
-        /*protected override void OnPaint(PaintEventArgs pe)
-        {
-            
-            //if (!Active)
-            //    return;
-            pe.Graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
-            pe.Graphics.SmoothingMode = SmoothingMode.HighQuality;
-            pe.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
-            pe.Graphics.PageUnit = GraphicsUnit.Pixel;
-
-            offset = mapPanel.offset;
-            zeroPoint = mapPanel.zeroPoint;
-
-            renderPoint = new PointF(Convert.ToInt32(Math.Floor((double)((mapLoc.X * offset.X) + zeroPoint.X) - hotSpot.X)),
-                        Convert.ToInt32(Math.Floor((double)(mapLoc.Y * offset.Y) + zeroPoint.Y) - hotSpot.Y));
-
-            renderLoc = renderPoint;
-            if (mapPanel.mapRotated)
-            {
-                renderLoc = mapPanel.RotatePointF(renderPoint, mapPanel.pntPlayer, 45);
-            }
-
-            this.Left = Convert.ToInt32(Math.Floor((double)renderLoc.X));
-            this.Top = Convert.ToInt32(Math.Floor((double)renderLoc.Y));
-
-            //Rectangle rectF = this.DisplayRectangle; //Default size, 32,32 as it is a cursor
-
-            
-            //pe.Graphics.DrawImage(img, 0, 0, 24, 24);
-            
-            
-            //pe.Graphics.DrawImage(img, rectF);
-
-            
-            
-            //ResumeLayout();
-            //if (IsHovered)
-            //{
-            //    Debug.WriteLine("Should be highlighting");
-            //    pe.Graphics.FillPath(highlightBrush, highlightArea);
-            //}
-
-            // loc 0,0 + 13,3    8x8 elipse
-            //cur.DrawStretched(pe.Graphics, rectF);
-            //base.OnPaint(pe);
-            
-        }*/
-
-        private void OnMouseMove(object sender, MouseEventArgs e)
-        {
-            //if(IsHovered)
-            //{
-                //mousePos = e.Location;
-            //}
-            //RectangleF buttonRect = new RectangleF(Left, Top, Width, Height);
-
-            //if (buttonRect.Contains(mousePos) && img.GetPixel(mousePos.X, mousePos.Y).A > 11)
-            //{
-            //    IsHovered = true;
-            //    Debug.WriteLine("Mouse moved, but still within button");
-            //}
-            //Invalidate();
-            //Update();
-        }
-
-        /*private void OnMouseEnter(object sender, EventArgs e)
-        {
-            Debug.WriteLine("Mouse entered, mouse pos: " + mousePos);
-            RectangleF buttonRect = new RectangleF(Left, Top, Width, Height);
-
-            if (buttonRect.Contains(mousePos) && img.GetPixel(mousePos.X, mousePos.Y).A > 11)
-            {
-                IsHovered = true;
-                Debug.WriteLine("Opaque Hovered");
-            }
-            Invalidate();
-            Update();
-        }*/
-
-        /*private void OnMouseHover(object sender, EventArgs e)
-        {
-            
-            Debug.WriteLine("Hover triggered, mouse pos: " + mousePos);
-            RectangleF buttonRect = new RectangleF(Left, Top, Width, Height);
-
-            if (buttonRect.Contains(mousePos) && img.GetPixel(mousePos.X, mousePos.Y).A > 11)
-            {
-                IsHovered = true;
-                Debug.WriteLine("Opaque Hovered");
-            }
-            Invalidate();
-            Update();
-        }*/
-
-        /*private void OnMouseLeave(object sender, EventArgs e)
-        {
-            IsHovered = false;
-            Invalidate();
-            Update();
-        }*/
-
-        /*protected override void OnPaintBackground(PaintEventArgs pe)
-        {
-            //Prevent anything occurring.
-            //base.OnPaintBackground(pe);
-        }*/
-
-        public void LoadButton()//object sender, EventArgs e)
+        public void LoadButton()
         {
             try
             {
-                //MouseHover += new EventHandler(OnMouseHover);
-                //MouseMove += new MouseEventHandler(OnMouseMove);
-                //MouseEnter += new EventHandler(OnMouseEnter);
-
-                this.cur = Markers.LoadCursor(this.curPath);
-                Icon i = Icon.ExtractAssociatedIcon(this.curPath);
-                this.img = i.ToBitmap();
-                this.hotSpot = cur.HotSpot;
-
-                if(type == JMapButtonType.MapPin)
+                if (type == JMapButtonType.MapPin)
                 {
-                    this.hotSpot = new Point(this.hotSpot.X - 3, this.hotSpot.Y - 4);
-                }
-                //SetStyle(ControlStyles.SupportsTransparentBackColor, true);
-                //SetStyle(ControlStyles.Opaque, true);
-                //SetStyle(ControlStyles.ResizeRedraw, true);
+                    if (IsPublic)
+                    {
+                        curPath = $"{Config.GetInstallDirectory()}\\JMap\\Resources\\Markers\\mapPin32A21_Gold.cur";
+                        textColor = Color.Yellow;
+                    }
+                    else
+                    {
+                        curPath = $"{Config.GetInstallDirectory()}\\JMap\\Resources\\Markers\\mapPin32A21.cur";
+                        textColor = Color.Red;
+                    }
+                    this.renderSize = new Size(24, 24);
+                    this.hotSpot = new Point(this.hotSpot.X + 4, this.hotSpot.Y);
 
-                //this.BackColor = Color.Transparent;
+                    this.cur = Markers.LoadCursor(this.curPath);
+                    Icon i = Icon.ExtractAssociatedIcon(this.curPath);
+                    this.img = i.ToBitmap();
+                    this.hotSpot = cur.HotSpot;
+                }
+                else if (type == JMapButtonType.Treasure)
+                {
+                    curPath = $"{Config.GetInstallDirectory()}\\JMap\\Resources\\Markers\\treasureGold.cur";
+                    this.renderSize = new Size(20, 20);
+                    
+                    this.textColor = Color.GhostWhite;
+
+                    this.cur = Markers.LoadCursor(this.curPath);
+                    Icon i = Icon.ExtractAssociatedIcon(this.curPath);
+                    this.img = i.ToBitmap();
+                    //this.hotSpot = cur.HotSpot;
+                    this.hotSpot = new Point(this.renderSize.Width / 2, this.renderSize.Height + 10);
+                }
+                else if(type == JMapButtonType.UOPoint)
+                {
+                    curPath = $"{Config.GetInstallDirectory()}\\JMap\\Resources\\UOPoints\\" + Variant + ".cur";
+                    
+                    this.textColor = Color.GhostWhite;
+
+                    this.cur = Markers.LoadCursor(this.curPath);
+                    Icon i = Icon.ExtractAssociatedIcon(this.curPath);
+                    this.img = i.ToBitmap();
+                    //this.hotSpot = cur.HotSpot;
+                    this.renderSize = new Size(24, 16); //All signs
+
+                    switch (Variant)
+                    {
+                        case "BODYOFWATER":
+                            this.renderSize = new Size(20, 8);
+                            break;
+                        case "BRIDGE":
+                            this.renderSize = new Size(15, 7);
+                            break;
+                        case "DOCKS":
+                            this.renderSize = new Size(10, 10);
+                            break;
+                        case "DUNGEON":
+                            this.renderSize = new Size(19, 20);
+                            break;
+                        case "EXIT":
+                            this.renderSize = new Size(7, 6);
+                            break;
+                        case "GATE":
+                            this.renderSize = new Size(11, 10);
+                            break;
+                        case "GEM":
+                            this.renderSize = new Size(16, 16);
+                            break;
+                        case "GRAVEYARD":
+                            this.renderSize = new Size(7, 8);
+                            break;
+                        case "INTEREST":
+                            this.renderSize = new Size(14, 8);
+                            break;
+                        case "ISLAND":
+                            this.renderSize = new Size(19, 11);
+                            break;
+                        case "LANDMARK":
+                            this.renderSize = new Size(11, 8);
+                            break;
+                        case "MOONGATE":
+                            this.renderSize = new Size(9, 19);
+                            break;
+                        case "POINT":
+                            this.renderSize = new Size(5, 5);
+                            break;
+                        case "RUINS":
+                            this.renderSize = new Size(7, 7);
+                            break;
+                        case "SCENIC":
+                            this.renderSize = new Size(11, 6);
+                            break;
+                        case "SHIP":
+                            this.renderSize = new Size(32, 32);
+                            break;
+                        case "SHRINE":
+                            this.renderSize = new Size(11, 13);
+                            break;
+                        case "STAIRS":
+                            this.renderSize = new Size(10, 9);
+                            break;
+                        case "TELEPORTER":
+                            this.renderSize = new Size(8, 8);
+                            break;
+                        case "TERRAIN":
+                            this.renderSize = new Size(14, 6);
+                            break;
+                        case "TOWN":
+                            this.renderSize = new Size(19, 16);
+                            break;
+                        case "TREASURE":
+                            this.renderSize = new Size(32, 32);
+                            break;
+                    }
+
+                    this.hotSpot = new Point(this.renderSize.Width /2, this.renderSize.Height / 2);
+
+                }
+
+
+
+
+
 
                 highlightColor = Color.Silver;
                 highlightArea = new GraphicsPath();
@@ -327,32 +380,14 @@ namespace Assistant.JMap
                 highlightBrush.SurroundColors = colors;
                 highlightBrush.FocusScales = new PointF(0.785f, 0.785f);
 
-                //this.TabStop = false;
-                //this.Margin = new Padding(0);
-
-                //this.Name = displayText + "_" + mapLoc.X.ToString() + "_" + mapLoc.Y.ToString();
-                //this.Text = displayText;
-                //this.Active = true;
-                //this.Visible = false;
-                //this.Show();
                 
 
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("BUTTON LOAD ERROR: " + ex.ToString());
+                Debug.WriteLine($"Button Load Error:  {ex.ToString()}");
             }
         }
-
-        /*protected override CreateParams CreateParams
-        {
-            get
-            {
-                CreateParams cp = base.CreateParams;
-                cp.ExStyle |= 0x00000020; //WS_EX_TRANSPARENT
-                return cp;
-            }
-        }*/
 
         public void NotifyDefault(bool value)
         {

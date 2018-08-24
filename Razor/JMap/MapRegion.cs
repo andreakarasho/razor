@@ -40,7 +40,6 @@ namespace Assistant.JMap
             ArrayList list1 = new ArrayList();
             try
             {
-                Debug.WriteLine("Guard Def Found!");
                 using (StreamReader reader1 = new StreamReader(path))
                 {
                     string text1;
