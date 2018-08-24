@@ -10,6 +10,9 @@ namespace Assistant.JMap
 {
     static class Markers
     {
+        [DllImport("user32.dll")]
+        static extern IntPtr LoadIcon(IntPtr hInstance, string lpIconName);
+
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern IntPtr LoadCursorFromFile(string path);
         
@@ -43,8 +46,6 @@ namespace Assistant.JMap
             Bitmap dstBitmap = new Bitmap(bmData.Width, bmData.Height, bmData.Stride, PixelFormat.Format32bppArgb, bmData.Scan0);
             bmp.UnlockBits(bmData);
 
-
-
             return new Bitmap(dstBitmap);
         }
         
@@ -53,6 +54,17 @@ namespace Assistant.JMap
             IntPtr handle = LoadCursorFromFile(path);
             if (handle == IntPtr.Zero) throw new Win32Exception();
             var curs = new Cursor(handle);
+            // Note: force the cursor to own the handle so it gets released properly
+            var fi = typeof(Cursor).GetField("ownHandle", BindingFlags.NonPublic | BindingFlags.Instance);
+            fi.SetValue(curs, true);
+            return curs;
+        }
+
+        public static Icon LoadIcon(string path)
+        {
+            IntPtr handle = LoadIcon(IntPtr.Zero, path);
+            if (handle == IntPtr.Zero) throw new Win32Exception();
+            var curs = Icon.FromHandle(handle);
             // Note: force the cursor to own the handle so it gets released properly
             var fi = typeof(Cursor).GetField("ownHandle", BindingFlags.NonPublic | BindingFlags.Instance);
             fi.SetValue(curs, true);

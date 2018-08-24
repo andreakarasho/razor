@@ -180,6 +180,9 @@ namespace Assistant
 
 	        AddProperty("MapTilt", true);
 
+            AddProperty("DisplayMarkerNames", true);
+            AddProperty("DisplayMarkerCoords", true);
+
             Counter.Default();
 	        Filter.DisableAll();
 	        DressList.ClearAll();

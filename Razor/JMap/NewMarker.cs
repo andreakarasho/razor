@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -19,6 +20,7 @@ namespace Assistant.JMap
         public string extra;
         public CheckBox IsPublic;
         public string MarkerOwner;
+        public string id;
 
         public NewMarker(MapPanel mapPan)
         {
@@ -26,15 +28,11 @@ namespace Assistant.JMap
             mapPanel = mapPan;
             IsPublic = this.IsPublicCheckbox;
 
-            //this.Location = new Point(mapPanel.Left - (this.Width + 5), mapPanel.Top);
-
             if (mapPanel.AddingMarker)
                 CreateMarker();
 
             if (mapPanel.EditingMarker)
                 EditMarker(mapPanel.MarkerToEdit);
-
-            //this.ActiveControl = newMarkerName;
         }
 
         private void CreateMarker()
@@ -46,6 +44,12 @@ namespace Assistant.JMap
             this.newMarkerX.Text = x.ToString();
             this.newMarkerY.Text = y.ToString();
             this.OwnerLabel.Text = mapPanel.FocusMobile.Name;
+
+            if (this.IsPublic.Checked)
+                this.id = "PublicLocations";
+            else
+                this.id = "MarkedLocations";
+
 
             mapPanel.MarkerToEdit = null;
         }
@@ -62,17 +66,31 @@ namespace Assistant.JMap
             this.IsPublic.Checked = markerToEdit.IsPublic;
             this.OwnerLabel.Text = markerToEdit.MarkerOwner;
 
-            
+            if (this.IsPublic.Checked)
+                this.id = "PublicLocations";
+            else
+                this.id = "MarkedLocations";
+
         }
 
         private void NewMarkerPoint(object sender, EventArgs e)
         {
-            if(mapPanel.AddingMarker)
+            if (mapPanel.AddingMarker)
             {
-                mapPanel.AddMarker(new Point(x, y), IsPublic.Checked, mapPanel.FocusMobile.Name, this.newMarkerName.Text, this.newMarkerExtra.Text);
+                if (this.IsPublic.Checked)
+                    this.id = "PublicLocations";
+                else
+                    this.id = "MarkedLocations";
+
+                mapPanel.AddMarker(new Point(x, y), mapPanel.FocusMobile.Name, IsPublic.Checked, this.id, this.newMarkerName.Text, this.newMarkerExtra.Text);
             }
             if(mapPanel.EditingMarker)
             {
+                if (this.IsPublic.Checked)
+                    mapPanel.MarkerToEdit.id = "PublicLocations";
+                else
+                    mapPanel.MarkerToEdit.id = "MarkedLocations";
+
                 mapPanel.MarkerToEdit.mapLoc = new Point(x, y);
                 mapPanel.MarkerToEdit.displayText = this.newMarkerName.Text;
                 mapPanel.MarkerToEdit.extraText = this.newMarkerExtra.Text;
@@ -81,6 +99,11 @@ namespace Assistant.JMap
 
                 mapPanel.MarkerToEdit.LoadButton();
             }
+            if (this.IsPublic.Checked)
+            {
+                mapPanel.SendPublicMarker(new Point(x, y), this.MarkerOwner, this.IsPublic.Checked, this.newMarkerName.Text, this.newMarkerExtra.Text);
+            }
+
 
             mapPanel.EditingMarker = false;
             mapPanel.AddingMarker = false;

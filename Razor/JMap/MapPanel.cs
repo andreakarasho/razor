@@ -8,14 +8,9 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Assistant;
-using Assistant.Properties;
 using Ultima;
 
 namespace Assistant.JMap
@@ -27,7 +22,7 @@ namespace Assistant.JMap
 
         public delegate void InvokeDelegate();
 
-        public JimmyMap main;
+        public JimmyMap jMapMain;
 
         public TileDisplay tileDisplay;
         public Tile[] lTiles = new Tile[64];
@@ -35,18 +30,10 @@ namespace Assistant.JMap
         public Ultima.Map map;
 
         private Point mouseDown;
-        private float _zoom = 1;
 
         private bool m_Active;
         private MapRegion[] m_Regions;
-        //private ArrayList m_MapButtons;
-        private Point prevPoint;
         private Mobile m_Focus;
-        private const double RotateAngle = Math.PI / 4 + Math.PI;
-        private DateTime LastRefresh;
-
-        protected Point clickPosition;
-        protected Point lastPosition;
 
         public SizeF zoom;
 
@@ -55,8 +42,6 @@ namespace Assistant.JMap
         public bool drawTiles = true;
         public bool tilesDrawing = false;
         public Bitmap TileMap;
-
-        public Bitmap mapBuffer;
 
         public Bitmap _mapRegular_1;
         public Bitmap _mapRegular_2;
@@ -68,19 +53,7 @@ namespace Assistant.JMap
         public Bitmap _mapRotated_4;
         public Bitmap _mapRotated_8;
 
-        //public Bitmap _mapHeight_1;
-
         public Size _mapSize;
-
-        public Image _oldBackground;
-
-        public float bgLeft = 0;
-        public float bgTop = 0;
-        public float bgWidth = 0;
-        public float bgHeight = 0;
-
-        public float bgLeftBuf = 0;
-        public float bgTopBuf = 0;
 
         public PointF bgReg;
         public PointF bgRot;
@@ -89,21 +62,13 @@ namespace Assistant.JMap
         public bool mapRotated = false;
         public PointF zeroPoint;
 
-        //Tilt
         public Point mouseLastPos;
         public PointF mouseLastPosOnMap;
-        public bool tiltChanged = false;
-
-        //Mouse Pos, multiple uses
         public Point mousePosNow;
-
+        public bool tiltChanged = false;
 
         public float mapWidth;
         public float mapHeight;
-
-        public GraphicsState primaryState;
-        public GraphicsState tileUprightState;
-        public GraphicsState tileRotatedState;
 
         public RectangleF renderingBounds;
 
@@ -115,21 +80,11 @@ namespace Assistant.JMap
 
         // UO Styled Art
         static Bitmap borderH = new Bitmap($"{Config.GetInstallDirectory()}\\JMap\\Resources\\Art\\borderH.bmp");
-        //TextureBrush borderHBrush = new TextureBrush(borderH, WrapMode.Tile, new Rectangle(0, 0, borderH.Width, borderH.Height));
         static Bitmap borderV = new Bitmap($"{Config.GetInstallDirectory()}\\JMap\\Resources\\Art\\borderV.bmp");
-        //TextureBrush borderVBrush = new TextureBrush(borderV, WrapMode.Tile, new Rectangle(0, 0, borderV.Width, borderV.Height));
-
-        //Cursor mapPin = Markers.LoadCursor(@"F:\UOStuff\UOArt\Maps\Resources\Markers\mapPin3.cur");
-
-        //Bitmap mapPinBmp = new Bitmap(@"F:\UOStuff\UOArt\Maps\Resources\Markers\mapPinA.png");
-
-
-
 
 
 
         ArrayList markedLocations = new ArrayList();
-
 
         public List<JMapButton> mapButtons = new List<JMapButton>();
         ArrayList bufferingMapButtons = new ArrayList();
@@ -196,7 +151,6 @@ namespace Assistant.JMap
         public RectangleF borderBottomRight { get { return new RectangleF(renderingBounds.Right - 5, renderingBounds.Bottom - 4, 5, 4); } }
 
 
-
         #endregion
 
         #region ONPAINT VARIABLES
@@ -210,9 +164,6 @@ namespace Assistant.JMap
         PointF compassLoc;
 
         ArrayList regions = new ArrayList();
-        ArrayList mButtons = new ArrayList();
-
-        Pen linePen = new Pen(Brushes.Silver, 2);
 
         SizeF coordTopSize;
         string coordTopString;
@@ -250,6 +201,9 @@ namespace Assistant.JMap
         public ToolStripMenuItem Menu_EditMarker;
         public ToolStripMenuItem Menu_DeleteMarker;
         public ProgressBar MapGenProgressBar;
+        private ToolStripMenuItem OptionMarkers;
+        private ToolStripMenuItem Menu_MarkerNames;
+        private ToolStripMenuItem Menu_MarkerCoords;
         public ToolStripSeparator SeperatorOptions2;
 
         public bool HasAllOverlays { get; set; }
@@ -262,6 +216,9 @@ namespace Assistant.JMap
         public bool IsShowPartyPositions { get; set; }
         public bool IsTrackPlayerPosition { get; set; }
 
+        public bool DisplayMarkerNames { get; set; }
+        public bool DisplayMarkerCoords { get; set; }
+
         #endregion
 
         [DllImport("user32.dll")]
@@ -270,24 +227,14 @@ namespace Assistant.JMap
 
         public MapPanel()
         {
-            
-
             zoom.Width = 1;
             zoom.Height = 1;
 
             Debug.WriteLine("MapPanel Loaded!");
 
-            //SET SOME THINGS UP
-            //typeof(Panel).InvokeMember("DoubleBuffered", BindingFlags.SetProperty
-            //| BindingFlags.Instance | BindingFlags.NonPublic, null,
-            //this, new object[] { true });
-
-
             ContextMenuStrip = ContextOptions;
 
             DoubleBuffered = true;
-
-            //SetStyle(ControlStyles.ContainerControl, false);
 
             SetStyle(
                     ControlStyles.ResizeRedraw |
@@ -297,26 +244,18 @@ namespace Assistant.JMap
                     ControlStyles.SupportsTransparentBackColor,
                     true);
 
-
-
             HorizontalScroll.Visible = false;
             VerticalScroll.Visible = false;
 
             this.MouseEnter += new EventHandler(mapPanel_MouseEnter);
-            this.MouseLeave += new EventHandler(mapPanel_MouseLeave); //not working as intended
+            this.MouseLeave += new EventHandler(mapPanel_MouseLeave);
             this.MouseDown += new MouseEventHandler(mapPanel_MouseDown);
             this.MouseUp += new MouseEventHandler(mapPanel_MouseUp);
             this.MouseMove += new MouseEventHandler(mapPanel_MouseMove);
             this.MouseDoubleClick += new MouseEventHandler(mapPanel_DoubleClick);
             this.MouseWheel += new MouseEventHandler(mapPanel_OnMouseWheel);
-            
 
-            //Paint += new PaintEventHandler(mapPanel_Paint);
-            //Paint += new PaintEventHandler(mapPanel_OnPaintBackground);
-
-
-
-            //LOAD UP THE MAP
+            PublicMarkers.mapPanel = this;
 
         }
 
@@ -336,25 +275,11 @@ namespace Assistant.JMap
             m_Regions = JMap.MapRegion.Load($"{Config.GetInstallDirectory()}\\guardlines.def");
             Debug.WriteLine("MapPanel Loaded Guardlines!");
 
-            if (!File.Exists($"{Config.GetInstallDirectory()}\\JMap\\MarkedLocations.csv"))
-            {
-                File.Create($"{Config.GetInstallDirectory()}\\JMap\\MarkedLocations.csv");
-            }
-            else
-            {
-                Debug.WriteLine("Marked Locations Found!");
-                //ReadMarkers($"{Config.GetInstallDirectory()}\\JMap\\MarkedLocations.csv");
-            }
-
             InitializeComponent();
             Active = true;
 
             MouseHoverWorker();
 
-            //LoadMapButtons();   //taken care of in ReadMarkers
-
-
-            //DEFAULTS
             HasGuardLines = Config.GetBool("MapGuardLines");
             HasGridLines = Config.GetBool("MapGridLines");
 
@@ -365,11 +290,15 @@ namespace Assistant.JMap
             IsShowPartyPositions = Config.GetBool("MapShowPartyPositions");
             IsTrackPlayerPosition = Config.GetBool("MapTrackPlayerPosition");
 
+
+
             IsShowAllPositions = IsShowPlayerPosition && IsShowPetPositions && IsShowPlayerPosition &&
                                  IsTrackPlayerPosition;
 
             mapRotated = Config.GetBool("MapTilt");
-            //END DEFAULTS
+
+            DisplayMarkerNames = Config.GetBool("DisplayMarkerNames");
+            DisplayMarkerCoords = Config.GetBool("DisplayMarkerCoords");
 
             TiltMap45.Checked = mapRotated;
 
@@ -394,7 +323,7 @@ namespace Assistant.JMap
             else
                 UpdateAll();
 
-            main.Text = $"UO Map - {this.FocusMobile.Name}";
+            jMapMain.Text = $"UO Map - {this.FocusMobile.Name}";
             UpdateAll();//additional one to fire off rendering again, because it's gay
         }
 
@@ -442,8 +371,6 @@ namespace Assistant.JMap
 
         #endregion
 
-
-
         #region MOUSE HOVER WORKER
         public void MouseHoverWorker()
         {
@@ -481,39 +408,87 @@ namespace Assistant.JMap
                         }
                         if (btn.IsHovered)
                         {
+                            Brush btnColorBrush = new SolidBrush(btn.textColor);
+                            Pen btnColorPen = new Pen(btnColorBrush);
+
+                            Brush treasureFill = new SolidBrush(Color.FromArgb(8, 156, 125, 17));
+                            Pen treasurePen = new Pen(Color.Gold);
+
                             MarkerToEdit = btn;
                             Graphics gfx = CreateGraphics();
-                            //if (mapRotated)
-                            //{
-                            //    gfx.TranslateTransform(btn.renderLoc.X, btn.renderLoc.Y);
-                            //    gfx.RotateTransform(45);
-                            //    gfx.TranslateTransform(-btn.renderLoc.X, -btn.renderLoc.Y);
-                            //}
-                            RectangleF highlightRect = new RectangleF((btn.renderLoc.X + btn.hotSpot.X) - 3, (btn.renderLoc.Y + btn.hotSpot.Y) - 3, 6, 6);
-                            gfx.DrawRectangle(Pens.Orange, Rectangle.Round(highlightRect));
 
-                            //gfx.ResetTransform();
+                            if (btn.type == JMapButtonType.Treasure)
+                            {
+                                RectangleF highlightRect = new RectangleF((btn.renderLoc.X + btn.hotSpot.X) - ( offset.X / 2), 
+                                                                          (btn.renderLoc.Y + btn.hotSpot.Y) - ( offset.Y / 2),
+                                                                          1 * offset.X, 
+                                                                          1 * offset.Y);
 
+                                PointF rotPoint = new PointF((btn.renderLoc.X + btn.hotSpot.X),
+                                                             (btn.renderLoc.Y + btn.hotSpot.Y));
+
+                                PointF tl = new PointF(Convert.ToInt32(Math.Floor((double)(highlightRect.X))), Convert.ToInt32(Math.Floor((double)highlightRect.Y)));
+                                PointF tr = new PointF(Convert.ToInt32(Math.Floor((double)(highlightRect.X + highlightRect.Width))), Convert.ToInt32(Math.Floor((double)highlightRect.Y)));
+                                PointF bl = new PointF(Convert.ToInt32(Math.Floor((double)(highlightRect.X))), Convert.ToInt32(Math.Floor((double)highlightRect.Y + highlightRect.Height)));
+                                PointF br = new PointF(Convert.ToInt32(Math.Floor((double)(highlightRect.X + highlightRect.Width))), Convert.ToInt32(Math.Floor((double)highlightRect.Y + highlightRect.Height)));
+
+                                if (mapRotated)
+                                {
+                                    tl = RotatePointF(tl, rotPoint, 45);
+                                    tr = RotatePointF(tr, rotPoint, 45);
+                                    bl = RotatePointF(bl, rotPoint, 45);
+                                    br = RotatePointF(br, rotPoint, 45);
+                                }
+
+                                PointF[] rgn = new PointF[] { tl, tr, br, bl };
+
+                                gfx.FillPolygon(treasureFill, rgn);
+                                gfx.DrawPolygon(treasurePen, rgn);
+                                
+
+                                gfx.ResetTransform();
+                            }
+                            if (btn.type != JMapButtonType.UOPoint && btn.type != JMapButtonType.Treasure)
+                            {
+                                RectangleF highlightRect = new RectangleF((btn.renderLoc.X + btn.hotSpot.X) - 4, (btn.renderLoc.Y + btn.hotSpot.Y), 6, 6);
+                                gfx.DrawRectangle(btnColorPen, Rectangle.Round(highlightRect));
+                            }
+
+                            
                             SizeF strLength = gfx.MeasureString(btn.displayText, m_RegFont);
                             gfx.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
 
                             string displayString = "";
 
-                            if (btn.displayText.Length > 0)
-                                displayString = btn.displayText + "\n" + btn.mapLoc.X + "," + btn.mapLoc.Y; 
-                            else
-                                displayString = btn.mapLoc.X + "," + btn.mapLoc.Y;
+                            if (DisplayMarkerNames)
+                            {
+                                if (btn.displayText.Length > 0)
+                                    displayString = btn.displayText;
+                            }
+                            if (DisplayMarkerCoords)
+                            {
+                                if (btn.displayText.Length > 0)
+                                    displayString += "\n" + btn.mapLoc.X + "," + btn.mapLoc.Y;
+                                else
+                                    displayString = btn.mapLoc.X + "," + btn.mapLoc.Y;
+                            }
+                            if(displayString != "")
+                            {
+                                gfx.DrawString(displayString, m_RegFont, btnColorBrush, btn.renderLoc.X + btn.hotSpot.X, (btn.renderLoc.Y - 5) - (strLength.Height / 2), stringFormat);
+                            }
 
-
-                            gfx.DrawString(displayString, m_RegFont, Brushes.Red, btn.renderLoc.X + (strLength.Width / 2), (btn.renderLoc.Y - 5) - (strLength.Height / 2), stringFormat);
-
-
+                            treasurePen.Dispose();
+                            btnColorPen.Dispose();
+                            btnColorBrush.Dispose();
                             gfx.Dispose();
                         }
                         if (!btnRef.Item1.Contains(mousePosNow) && btn.IsHovered)
                         {
+                            if(!AddingMarker && !EditingMarker)
+                            {
+                                MarkerToEdit = null;
+                            }
                             btn.IsHovered = false;
-                            //MarkerToEdit = null;
                             Invalidate();
                         }
                     }
@@ -569,7 +544,6 @@ namespace Assistant.JMap
         }
         #endregion
 
-        // IMPORT MAPS
         public Bitmap ImportMaps(int zLevel)
         {
             //Debug.WriteLine("IMPORTING");
@@ -618,15 +592,6 @@ namespace Assistant.JMap
             return rect;
         }
 
-        /*public override void Refresh()
-        {
-            TimeSpan now = DateTime.UtcNow - LastRefresh;
-            if (now.TotalMilliseconds <= 100 && !IsPanning && !IsZooming)
-                return;
-            LastRefresh = DateTime.UtcNow;
-            base.Refresh();
-        }*/
-
         private static Font m_BoldFont = new Font("Courier New", 10, FontStyle.Bold);
         private static Font m_SmallFont = new Font("Arial", 6);
         private static Font m_RegFont = new Font("Arial", 8);
@@ -661,7 +626,6 @@ namespace Assistant.JMap
 
         protected override void OnPaint(PaintEventArgs pe)
         {
-            //Debug.WriteLine("OnPaint");
             try
             {
                 if (Active)
@@ -675,8 +639,6 @@ namespace Assistant.JMap
                     pe.Graphics.SmoothingMode = SmoothingMode.None;
                     pe.Graphics.PageUnit = GraphicsUnit.Pixel;
                     pe.Graphics.PageScale = 1f;
-
-
 
                     /*if (gridWorkerStates != GridWorkerStates.UpdatingVisible)
                     {
@@ -709,16 +671,11 @@ namespace Assistant.JMap
                         }
                         else
                         {
-                            //pntPlayer = RotatePointF(pntPlayer, pntPlayer, -45);
                             pe.Graphics.DrawEllipse(Pens.Silver, pntPlayer.X - 4, pntPlayer.Y - 4, 8, 8);
                             pe.Graphics.FillRectangle(Brushes.Silver, pntPlayer.X, pntPlayer.Y, 0.5f, 0.5f);
                         }
                     }
                     pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-
-
-
-
 
                     // Crosshair
                     //pe.Graphics.DrawLine(Pens.Silver, pntPlayer.X - 4, pntPlayer.Y, pntPlayer.X + 4, pntPlayer.Y);
@@ -727,8 +684,6 @@ namespace Assistant.JMap
 
                     if (mapRotated)
                     {
-                        //bgRot = new PointF(bgReg.X, bgReg.Y);
-                        //bgRot = RotatePointF(bgRot, bgRot, 45);
                         zeroPoint.X = Convert.ToInt32(Math.Floor((double)bgRot.X));
                         zeroPoint.Y = Convert.ToInt32(Math.Floor((double)bgRot.Y));
                     }
@@ -736,33 +691,7 @@ namespace Assistant.JMap
                     {
                         zeroPoint.X = Convert.ToInt32(Math.Floor((double)bgReg.X));
                         zeroPoint.Y = Convert.ToInt32(Math.Floor((double)bgReg.Y));
-                        //zeroPoint.X = bgReg.X;
-                        //zeroPoint.Y = bgReg.Y;
                     }
-
-                    /* // COMPASS - NO TRANSFORM
-                    PointF north = new PointF(compassLoc.X, compassLoc.Y - 6);
-                    PointF south = new PointF(compassLoc.X, compassLoc.Y + 6);
-                    PointF east = new PointF(compassLoc.X + 6, compassLoc.Y);
-                    PointF west = new PointF(compassLoc.X - 6, compassLoc.Y);
-
-                    if (mapRotated)
-                    {
-                        north = RotatePointF(north, compassLoc, 45);
-                        south = RotatePointF(south, compassLoc, 45);
-                        east = RotatePointF(east, compassLoc, 45);
-                        west = RotatePointF(west, compassLoc, 45);
-                    }
-
-                    pe.Graphics.DrawLine(Pens.Silver, north, south);
-                    pe.Graphics.DrawLine(Pens.Silver, east, west);
-                    pe.Graphics.DrawString("W", m_BoldFont, Brushes.Red, RotatePointF(new PointF(west.X - 6, west.Y), new PointF(west.X - 6, west.Y), 45), stringFormat);
-                    pe.Graphics.DrawString("E", m_BoldFont, Brushes.Red, RotatePointF(new PointF(east.X + 6, east.Y), new PointF(east.X + 6, east.Y), 45), stringFormat);
-                    pe.Graphics.DrawString("N", m_BoldFont, Brushes.Red, RotatePointF(new PointF(north.X, north.Y - 6), new PointF(north.X, north.Y - 6), 45), stringFormat);
-                    pe.Graphics.DrawString("S", m_BoldFont, Brushes.Red, RotatePointF(new PointF(south.X, south.Y + 6), new PointF(south.X, south.Y + 6), 45), stringFormat);
-                    */ // END COMPASS - NO TRANSFORM
-
-
 
                     /*Debug.WriteLine(
                     $"--------------------PLAYER CHAR--------------------\n" +
@@ -792,22 +721,6 @@ namespace Assistant.JMap
                         $"------------------END PLAYER CHAR------------------\n\n");
                     */
 
-
-
-                    /*foreach (KeyValuePair<Serial, Mobile> m in World.Mobiles)
-                    {
-                        Mobile mob = World.FindMobile(m.Key);
-                        if (mob.CanRename && !PetList.Contains(mob.Serial))
-                            PetList.Add(mob.Serial);
-                    }
-                    foreach (Serial s in PacketHandlers.Party)
-                    {
-                        Mobile mob = World.FindMobile(s);
-                    }*/
-
-
-
-                    //TrackableMobs = (List<Serial>)PetList.Zip(PacketHandlers.Party, (pets, party) => new List<Serial> { pets, party });
 
                     foreach (KeyValuePair<Serial, Mobile> m in TrackableMobs)
                     {
@@ -926,37 +839,22 @@ namespace Assistant.JMap
                         }
                         else
                         {
-                            pe.Graphics.FillRectangle(mobBrush, pointDisplay.X, pointDisplay.Y, 4f, 4f); // Location
+                            pe.Graphics.FillRectangle(mobBrush, pointDisplay.X, pointDisplay.Y, 4f, 4f);
 
                             SizeF nameSize = pe.Graphics.MeasureString(name, m_RegFont);
                             using (SolidBrush nb = new SolidBrush(Color.FromArgb(96, 0, 0, 128))) // Transparent background box
                             {
                                 pe.Graphics.FillRectangle(nb, (stringDisplay.X - 2) - (nameSize.Width / 2), (stringDisplay.Y - 12f) - (nameSize.Height / 2), nameSize.Width + 4, nameSize.Height + 4);
                                 //pe.Graphics.DrawRectangle(Pens.Black, 6, 6, coordTopSize.Width + 2, coordTopSize.Height + 2);
-
-
                             }
 
                             pe.Graphics.DrawString(name, m_RegFont, mobBrush, stringDisplay.X, stringDisplay.Y - 10f, stringFormat); // Name
                         }
                     }
 
-                    /*
-                    if(mapRotated)
-                    {
-                        Matrix mtx = new Matrix();
-                        mtx.RotateAt(45, pntPlayer, MatrixOrder.Append);
-                        pe.Graphics.MultiplyTransform(mtx);
-
-                        mtx.Dispose();
-                    }
-                    */
-
                     //DEBUG CENTER LINE
                     //pe.Graphics.DrawLine(Pens.Green, renderArea.Width / 2, renderArea.Top, renderArea.Width / 2, renderArea.Bottom);
                     //pe.Graphics.DrawLine(Pens.Green, renderArea.Left, renderArea.Height / 2, renderArea.Right, renderArea.Height / 2);
-
-
 
                     if(HasGuardLines)
                     {
@@ -986,28 +884,22 @@ namespace Assistant.JMap
                     {
                         btn.UpdateButton();
 
-                        RectangleF rectF = new RectangleF(btn.renderLoc.X, btn.renderLoc.Y, 24, 24);
+                        RectangleF rectF = new RectangleF(btn.renderLoc.X, btn.renderLoc.Y, btn.renderSize.Width, btn.renderSize.Height);
                         Rectangle pinRect = Rectangle.Round(rectF);
+
+
 
                         pe.Graphics.DrawImage(btn.img, pinRect);
                     }
 
 
-
-                    //if (mapRotated)
-                    //{
-                    //    mtl = RotatePointF(mtl, pntPlayer, 45);
-                    //    mtr = RotatePointF(mtr, pntPlayer, 45);
-                    //    mbr = RotatePointF(mbr, pntPlayer, 45);
-                    //    mbl = RotatePointF(mbl, pntPlayer, 45);
-                    //}
-
-                    // COMPASS AT PLAYER LOCATION (UOPS Style)
+                    // UOPS STYLE: COMPASS AT PLAYER LOCATION
                     //pe.Graphics.DrawString("W", m_BoldFont, Brushes.Red, pntPlayer.X - 35, pntPlayer.Y);
                     //pe.Graphics.DrawString("E", m_BoldFont, Brushes.Red, pntPlayer.X + 35, pntPlayer.Y);
                     //pe.Graphics.DrawString("N", m_BoldFont, Brushes.Red, pntPlayer.X, pntPlayer.Y - 35);
                     //pe.Graphics.DrawString("S", m_BoldFont, Brushes.Red, pntPlayer.X, pntPlayer.Y + 35);
-                    // CROSSHAIR ROTATED AT PLAYER LOCATION (UOPS Style)
+                    
+                    // UOPS STYLE: CROSSHAIR ROTATED AT PLAYER LOCATION
                     //pe.Graphics.DrawLine(Pens.Silver, pntPlayer.X - 4, pntPlayer.Y, pntPlayer.X + 4, pntPlayer.Y);
                     //pe.Graphics.DrawLine(Pens.Silver, pntPlayer.X, pntPlayer.Y - 4, pntPlayer.X, pntPlayer.Y + 4);
 
@@ -1020,25 +912,8 @@ namespace Assistant.JMap
                     //pe.Graphics.FillRectangle(Brushes.LimeGreen, pntTest2F.X, pntTest2F.Y, 4, 4);
 
                     //pe.Graphics.ResetTransform();
+                    // END UOPS STYLE
 
-                    /*
-                    if (World.Player != null)
-                    {
-                        if (World.Player != this.FocusMobile)
-                        {
-                            Mobile mob = World.Player;
-                            PointF drawPoint = new PointF(((mob.Position.X * offset.X) + zeroPoint.X), (mob.Position.Y * offset.Y) + zeroPoint.Y);
-                            pe.Graphics.FillRectangle(Brushes.Red, drawPoint.X, drawPoint.Y, 2f, 2f);
-                            drawPoint = new PointF(((mob.Position.X * offset.X) + zeroPoint.X), ((mob.Position.Y * offset.Y) + zeroPoint.Y));
-                            string name = mob.Name;
-                            if (name != null && name.Length > 20)
-                                name = name.Substring(0, 20);
-
-                            PointF drawString = new PointF(drawPoint.X, drawPoint.Y);
-                            pe.Graphics.DrawString(name, m_RegFont, Brushes.Red, drawString.X, drawString.Y - 10f, stringFormat);
-                        }
-                    }
-                    */
 
                     // COORDINATE BARS
                     //      PLAYER POS
@@ -1046,19 +921,16 @@ namespace Assistant.JMap
                     pe.Graphics.DrawRectangle(Pens.Black, 6, 6, coordTopSize.Width + 2, coordTopSize.Height + 2);
                     pe.Graphics.DrawString(coordTopString, m_RegFont, Brushes.Black, 6, 6);
                     //      MOUSE POS
-                    //MouseToMap(mousePosNow);
                     if(!mouseOnMap || IsMouseDown)
                     {
                         pe.Graphics.FillRectangle(Brushes.AliceBlue, 6, renderArea.Bottom - (6 + coordBottomSize.Height + 2), coordBottomSize.Width + 2, coordBottomSize.Height + 2);
                         pe.Graphics.DrawRectangle(Pens.Black, 6, renderArea.Bottom - -(6 + coordBottomSize.Height + 2), coordBottomSize.Width + 2, coordBottomSize.Height + 2);
                         pe.Graphics.DrawString(coordBottomString, m_RegFont, Brushes.Black, 6, renderArea.Bottom - (6 + coordBottomSize.Height + 2));
                     }
-
                     // COORDINATE BARS END
 
-                    pe.Graphics.SmoothingMode = SmoothingMode.HighSpeed;
-
                     // MAP BORDER
+                    pe.Graphics.SmoothingMode = SmoothingMode.HighSpeed;
                     using (TextureBrush borderVBrush = new TextureBrush(borderV, WrapMode.Tile))
                     {
                         borderVBrush.TranslateTransform(borderLeft.X, borderLeft.Y);
@@ -1077,26 +949,6 @@ namespace Assistant.JMap
                         pe.Graphics.FillRectangle(borderHBrush, borderBottom);
                         borderHBrush.ResetTransform();
                     }
-
-
-                    /*
-                    PointF mtl = new PointF(renderingBounds.X + 1.5f, renderingBounds.Y + 1.5f);
-                    PointF mtr = new PointF((renderingBounds.X + renderingBounds.Right - 1.5f), renderingBounds.Y + 1.5f);
-                    PointF mbl = new PointF(renderingBounds.X + 1.5f, (renderingBounds.Y + (renderingBounds.Bottom - 1.5f)));
-                    PointF mbr = new PointF((renderingBounds.X + (renderingBounds.Width - 1.5f)), (renderingBounds.Y + (renderingBounds.Bottom - 1.5f)));
-
-                    PointF[] mapRgn = new PointF[] { mtl, mtr, mbr, mbl };
-                    
-                    Pen pn = new Pen(borderVBrush, 5);
-                    pe.Graphics.DrawLine(pn, mtl, mbl);
-                    pe.Graphics.DrawLine(pn, mtr, mbr);
-
-                    pn = new Pen(borderHBrush, 5);
-                    pe.Graphics.DrawLine(pn, mtl, mtr);
-                    pe.Graphics.DrawLine(pn, mbl, mbr);
-                    */
-
-
                     // MAP BORDER END
 
                     // COMPASS
@@ -1123,6 +975,106 @@ namespace Assistant.JMap
             catch { }
             base.OnPaint(pe);
         }
+
+        protected override void OnPaintBackground(PaintEventArgs pe)
+        {
+            pe.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+            pe.Graphics.CompositingQuality = CompositingQuality.HighQuality;
+            pe.Graphics.PixelOffsetMode = PixelOffsetMode.None;
+            pe.Graphics.SmoothingMode = SmoothingMode.None;
+            pe.Graphics.PageUnit = GraphicsUnit.Pixel;
+            pe.Graphics.PageScale = 1f;
+
+            pe.Graphics.Clear(Color.Black);
+
+            if (tiltChanged)
+            {
+                if (mapRotated)
+                {
+                    bgRot = bgReg;
+                    bgRot = RotatePointF(bgReg, bgReg, 45);
+                }
+
+                tiltChanged = false;
+            }
+
+            Matrix mtx = new Matrix();
+
+            if (mapRotated)
+            {
+                zeroPoint.X = Convert.ToInt32(Math.Floor((double)bgRot.X));
+                zeroPoint.Y = Convert.ToInt32(Math.Floor((double)bgRot.Y));
+
+                mtx.RotateAt(45, zeroPoint);
+                pe.Graphics.MultiplyTransform(mtx);
+
+                pe.Graphics.DrawImage(_mapRegular_1, zeroPoint.X, zeroPoint.Y, mapWidth, mapHeight);
+            }
+            else
+            {
+                zeroPoint.X = Convert.ToInt32(Math.Floor((double)bgReg.X));
+                zeroPoint.Y = Convert.ToInt32(Math.Floor((double)bgReg.Y));
+
+                pe.Graphics.DrawImage(_mapRegular_1, zeroPoint.X, zeroPoint.Y, mapWidth, mapHeight);
+            }
+
+            #region GRID LINE RENDERING
+            if(HasGridLines)
+            {
+                if (offset.X >= 0.75f)
+                {
+                    GridOpacity = 5;
+                    Brush gridBrush = new SolidBrush(Color.FromArgb(GridOpacity, 153, 214, 255));
+                    Pen gridPen = new Pen(gridBrush, 1 * offset.X);
+
+                    for (int bY = 0; bY < map.Height; bY += 8)
+                    {
+                        PointF pt1 = new PointF(Convert.ToInt32(Math.Floor((double)((0 * offset.X) + zeroPoint.X))),
+                                                Convert.ToInt32(Math.Floor((double)(bY * offset.Y) + zeroPoint.Y)));
+                        PointF pt2 = new PointF(Convert.ToInt32(Math.Floor((double)((mapWidth * offset.X) + zeroPoint.X))),
+                                                Convert.ToInt32(Math.Floor((double)(bY * offset.Y) + zeroPoint.Y)));
+
+                        pe.Graphics.DrawLine(gridPen, pt1, pt2);
+                    }
+
+                    for (int bX = 0; bX < map.Width; bX += 8)
+                    {
+                        PointF pt1 = new PointF(Convert.ToInt32(Math.Floor((double)((bX * offset.X) + zeroPoint.X))),
+                                                Convert.ToInt32(Math.Floor((double)(0 * offset.Y) + zeroPoint.Y)));
+                        PointF pt2 = new PointF(Convert.ToInt32(Math.Floor((double)((bX * offset.X) + zeroPoint.X))),
+                                                Convert.ToInt32(Math.Floor((double)(mapHeight * offset.Y) + zeroPoint.Y)));
+
+                        pe.Graphics.DrawLine(gridPen, pt1, pt2);
+                    }
+
+                    gridBrush.Dispose();
+                    gridPen.Dispose();
+                }
+            }
+            #endregion
+
+            mtx.Dispose();
+
+            #region TILE DRAWING BITBLT
+            /* 
+            if (drawTiles && !tilesDrawing)
+            {
+                DrawTiles(ref pe);
+
+                //Thread tileThread = new Thread(DrawTiles);
+                //tileThread.Start();
+
+                //var t = Task.Factory.StartNew(() => DrawTiles());
+            }
+            //if(mapBuffer != null)
+            //    DrawToBitmap(mapBuffer, this.Bounds);
+            */
+            #endregion
+
+        }
+
+
+        #region TILE DRAWING & TEST FUNCTIONS
 
         public void CreateChunk(ref PaintEventArgs pe, int bX, int bY, ushort[,] BlockCache)// ushort[,] StaticCache, Graphics gfx)          
         {
@@ -1492,7 +1444,7 @@ namespace Assistant.JMap
 
         }
 
-        /*JUST A TEST FUNCTION  private void Draw(ref PaintEventArgs pe)
+        private void Draw(ref PaintEventArgs pe)
         {
             Graphics g = pe.Graphics;
 
@@ -1526,210 +1478,6 @@ namespace Assistant.JMap
                     if (hdcSrc != IntPtr.Zero) grSrc.ReleaseHdc(hdcSrc);
                 }
             }
-        }*/
-
-        [DllImport("gdi32.dll", EntryPoint = "SelectObject")]
-        public static extern System.IntPtr SelectObject(
-            [In()] System.IntPtr hdc,
-            [In()] System.IntPtr h);
-
-        [DllImport("gdi32.dll", EntryPoint = "DeleteObject")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool DeleteObject(
-            [In()] System.IntPtr ho);
-
-        [DllImport("gdi32.dll", EntryPoint = "BitBlt")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool BitBlt(
-            [In()] System.IntPtr hdc, int x, int y, int cx, int cy,
-            [In()] System.IntPtr hdcSrc, int x1, int y1, uint rop);
-
-        [DllImport("gdi32.dll", EntryPoint = "PlgBlt")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool PlgBlt(
-            [In()] System.IntPtr hdc, int x, int y, int cx, int cy,
-            [In()] System.IntPtr hdcSrc, int x1, int y1, uint rop);
-
-        protected override void OnPaintBackground(PaintEventArgs pe)
-        {
-            pe.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
-            pe.Graphics.CompositingQuality = CompositingQuality.HighQuality;
-            pe.Graphics.PixelOffsetMode = PixelOffsetMode.None;
-            pe.Graphics.SmoothingMode = SmoothingMode.None;
-            pe.Graphics.PageUnit = GraphicsUnit.Pixel;
-            pe.Graphics.PageScale = 1f;
-
-            pe.Graphics.Clear(Color.Black);
-
-            if (tiltChanged)
-            {
-                if (mapRotated)
-                {
-                    bgRot = bgReg;
-                    bgRot = RotatePointF(bgReg, bgReg, 45);
-                }
-
-                tiltChanged = false;
-            }
-
-            Matrix mtx = new Matrix();
-
-            if (mapRotated)
-            {
-                // COMMENT THIS AND UNCOMMENT EXPERIMENT REGION TO MAKE IT USE TEXTURE BRUSH EXPERIMENT
-                // WARNING - NON FUNCTIONAL
-                zeroPoint.X = Convert.ToInt32(Math.Floor((double)bgRot.X));
-                zeroPoint.Y = Convert.ToInt32(Math.Floor((double)bgRot.Y));
-
-
-                //ORIGINAL AND WORKING WELL   EXCEPT FOR RETARDED 1 PIXEL OFFSET BULLSHIT
-                mtx.RotateAt(45, zeroPoint);
-                pe.Graphics.MultiplyTransform(mtx);
-
-
-
-                //pe.Graphics.TranslateTransform(zeroPoint.X, zeroPoint.Y);
-                //pe.Graphics.RotateTransform(45);
-                //pe.Graphics.TranslateTransform(-zeroPoint.X, -zeroPoint.Y);
-
-                pe.Graphics.DrawImage(_mapRegular_1, zeroPoint.X, zeroPoint.Y, mapWidth, mapHeight);
-                //END ORIGINAL
-            }
-            else
-            {
-                zeroPoint.X = Convert.ToInt32(Math.Floor((double)bgReg.X));
-                zeroPoint.Y = Convert.ToInt32(Math.Floor((double)bgReg.Y));
-
-                // COMMENT THIS AND UNCOMMENT EXPERIMENT REGION TO MAKE IT USE TEXTURE BRUSH EXPERIMENT
-                // WARNING - NON FUNCTIONAL
-
-                //ORIGINAL AND WORKING WELL 
-                pe.Graphics.DrawImage(_mapRegular_1, zeroPoint.X, zeroPoint.Y, mapWidth, mapHeight);
-            }
-
-            if(HasGridLines)
-            {
-                if (offset.X >= 0.75f)
-                {
-                    GridOpacity = 5;
-                    Brush gridBrush = new SolidBrush(Color.FromArgb(GridOpacity, 153, 214, 255));
-                    Pen gridPen = new Pen(gridBrush, 1 * offset.X);
-
-                    for (int bY = 0; bY < map.Height; bY += 8)
-                    {
-                        PointF pt1 = new PointF(Convert.ToInt32(Math.Floor((double)((0 * offset.X) + zeroPoint.X))),
-                                                Convert.ToInt32(Math.Floor((double)(bY * offset.Y) + zeroPoint.Y)));
-                        PointF pt2 = new PointF(Convert.ToInt32(Math.Floor((double)((mapWidth * offset.X) + zeroPoint.X))),
-                                                Convert.ToInt32(Math.Floor((double)(bY * offset.Y) + zeroPoint.Y)));
-
-                        pe.Graphics.DrawLine(gridPen, pt1, pt2);
-                    }
-
-                    for (int bX = 0; bX < map.Width; bX += 8)
-                    {
-                        PointF pt1 = new PointF(Convert.ToInt32(Math.Floor((double)((bX * offset.X) + zeroPoint.X))),
-                                                Convert.ToInt32(Math.Floor((double)(0 * offset.Y) + zeroPoint.Y)));
-                        PointF pt2 = new PointF(Convert.ToInt32(Math.Floor((double)((bX * offset.X) + zeroPoint.X))),
-                                                Convert.ToInt32(Math.Floor((double)(mapHeight * offset.Y) + zeroPoint.Y)));
-
-                        pe.Graphics.DrawLine(gridPen, pt1, pt2);
-                    }
-
-                    gridBrush.Dispose();
-                    gridPen.Dispose();
-                }
-            }
-            
-
-            mtx.Dispose();
-
-            #region BITBLT
-            /* 
-            if (drawTiles && !tilesDrawing)
-            {
-                DrawTiles(ref pe);
-
-                //Thread tileThread = new Thread(DrawTiles);
-                //tileThread.Start();
-
-                //var t = Task.Factory.StartNew(() => DrawTiles());
-            }
-            //if(mapBuffer != null)
-            //    DrawToBitmap(mapBuffer, this.Bounds);
-            */
-            #endregion
-            #region TEXTURE BRUSH EXPERIMENT
-            /*  // TEXTURE BRUSH EXPERIMENT
-
-            //PointF tl = new PointF(bgReg.X, bgReg.Y);
-            //PointF tr = new PointF((bgReg.X + mapWidth), bgReg.Y);
-            //PointF bl = new PointF(bgReg.X, (bgReg.Y + mapHeight));
-            //PointF br = new PointF((bgReg.X + mapWidth), (bgReg.Y + mapHeight));
-
-            PointF tl = new PointF(renderingBounds.Left, renderingBounds.Top);
-            PointF tr = new PointF((renderingBounds.Left + renderingBounds.Right), renderingBounds.Top);
-            PointF bl = new PointF(renderingBounds.Left, (renderingBounds.Top + renderingBounds.Bottom));
-            PointF br = new PointF((renderingBounds.Left + renderingBounds.Right), (renderingBounds.Top + renderingBounds.Bottom));
-
-            PointF mtl = new PointF(zeroPoint.X, zeroPoint.Y);
-            PointF mtr = new PointF((zeroPoint.X + mapWidth), zeroPoint.Y);
-            PointF mbl = new PointF(zeroPoint.X, (zeroPoint.Y + mapHeight));
-            PointF mbr = new PointF((zeroPoint.X + mapWidth), (zeroPoint.Y + mapHeight));
-
-            if (mapRotated)
-            {
-                tl = RotatePointF(tl, pntPlayer, 45);
-                tr = RotatePointF(tr, pntPlayer, 45);
-                br = RotatePointF(br, pntPlayer, 45);
-                bl = RotatePointF(bl, pntPlayer, 45);
-
-                mtl = RotatePointF(tl, pntPlayer, 45);
-                mtr = RotatePointF(tr, pntPlayer, 45);
-                mbr = RotatePointF(br, pntPlayer, 45);
-                mbl = RotatePointF(bl, pntPlayer, 45);
-            }
-
-            PointF[] renderRgn = new PointF[] { tl, tr, br, bl };
-            PointF[] mapRgn = new PointF[] { mtl, mtr, mbr, mbl };
-
-            Pen pn = new Pen(Brushes.Green, 1);
-
-            RectangleF mapPart = new RectangleF((Math.Max(0, pntPlayer.X - renderingBounds.Right / 2)),
-                                                (Math.Max(0, pntPlayer.Y - renderingBounds.Bottom / 2)),
-                                                (Math.Min(pntPlayer.X + renderingBounds.Right / 2, renderingBounds.Right)),
-                                                (Math.Min(pntPlayer.Y + renderingBounds.Bottom / 2, renderingBounds.Bottom))
-                                                );
-
-            if (mapPart.Width < 50)
-                mapPart.Width = 50;
-
-            if (mapPart.Height < 50)
-                mapPart.Height = 50;
-
-            //Bitmap b = new Bitmap(, mapWidth, mapHeight);
-            using (Bitmap c = _mapRegular_1.Clone(mapPart, PixelFormat.Format8bppIndexed))
-            {
-                using (TextureBrush mapBrush = new TextureBrush(c, WrapMode.Tile))
-                {
-                    ImageAttributes imageAttributes = new ImageAttributes();
-
-                    mapBrush.TranslateTransform(pntPlayer.X, pntPlayer.Y, MatrixOrder.Append);
-                    mapBrush.ScaleTransform(offset.X, offset.Y);
-                    pe.Graphics.FillPolygon(mapBrush, renderRgn, FillMode.Winding);
-                }
-            }
-
-            pe.Graphics.DrawPolygon(pn, mapRgn);
-
-            pn.Dispose();
-
-            */ // END EXPERIMENT
-            #endregion
-
-            bgLeftBuf = bgReg.X;
-            bgTopBuf = bgReg.Y;
-
-
         }
 
         public int RGB(int r, int g, int b)
@@ -1770,26 +1518,48 @@ namespace Assistant.JMap
             g.Dispose();
         }
 
+        [DllImport("gdi32.dll", EntryPoint = "SelectObject")]
+        public static extern System.IntPtr SelectObject(
+            [In()] System.IntPtr hdc,
+            [In()] System.IntPtr h);
+
+        [DllImport("gdi32.dll", EntryPoint = "DeleteObject")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool DeleteObject(
+            [In()] System.IntPtr ho);
+
+        [DllImport("gdi32.dll", EntryPoint = "BitBlt")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool BitBlt(
+            [In()] System.IntPtr hdc, int x, int y, int cx, int cy,
+            [In()] System.IntPtr hdcSrc, int x1, int y1, uint rop);
+
+        [DllImport("gdi32.dll", EntryPoint = "PlgBlt")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool PlgBlt(
+            [In()] System.IntPtr hdc, int x, int y, int cx, int cy,
+            [In()] System.IntPtr hdcSrc, int x1, int y1, uint rop);
+
+
+        #endregion
+
+
         public void UpdateAll()
         {
             if (!Active)
                 return;
 
-
-
-
             TrackPetsParty();
 
             Graphics gfx = CreateGraphics();
 
-            renderArea = main.ClientRectangle;
+            renderArea = jMapMain.ClientRectangle;
 
             // PLAYER POSITION
             mfocus = this.FocusMobile.Position;
 
             if (mapRotated)
             {
-                //bgRot = new PointF(bgReg.X, bgReg.Y);
                 bgRot = RotatePointF(bgReg, bgReg, 45);
 
                 zeroPoint.X = Convert.ToInt32(Math.Floor((double)bgRot.X));
@@ -1807,29 +1577,6 @@ namespace Assistant.JMap
             }
 
             compassLoc = new PointF(renderArea.Right - 30, renderArea.Top + 30);
-            //foreach (JMapButton btn in mapButtons)
-            //{
-            //btn.Invalidate();
-            //btn.Update();
-            //Debug.WriteLine("Invalidating: " + btn.Name);
-            //}
-
-            //ArrayList mobArray = new ArrayList();
-            /*foreach (KeyValuePair<Serial, Mobile> m in World.Mobiles)
-            //foreach (Serial s in PacketHandlers.Party)
-            {
-                Mobile mob = World.FindMobile(m.Key);
-                if (mob == null)
-                    continue;
-
-                if (mob == this.FocusMobile && mob == World.Player)
-                    continue;
-
-                mobArray.Add(mob);
-
-            }*/
-
-
 
             // GUARDLINES & OTHER REGIONS
             regions = RegionList(0, 0, _mapSize.Width);
@@ -1848,7 +1595,6 @@ namespace Assistant.JMap
                 coordBottomSize = gfx.MeasureString(coordBottomString, m_RegFont);
             }
 
-
             gfx.Dispose();
 
             Invalidate();
@@ -1857,30 +1603,26 @@ namespace Assistant.JMap
             {
                 MarkerUpdateWorker();
             }
-            //if (gridWorkerStates == GridWorkerStates.IdleNoWork)
-            //{
-            //    GridWorker();
-            //}
         }
 
         public void TrackPetsParty()
         {
             TrackableMobs.Clear();
 
-            foreach (KeyValuePair<Serial, Mobile> m in World.Mobiles)
+            if (IsShowPetPositions)
             {
-                Mobile mob = World.FindMobile(m.Key);
+                foreach (KeyValuePair<Serial, Mobile> m in World.Mobiles)
+                {
+                    Mobile mob = World.FindMobile(m.Key);
 
-                //Mob is owned by the player but is not yet in the Pet List.
-                //Add it.
-                if (mob.CanRename && !PetList.ContainsKey(mob.Serial))
-                {
-                    PetList.Add(mob.Serial, mob);
-                    //Debug.WriteLine($"Pet '{mob.Name}' added to PetList");
-                }
-                
-                if(IsShowPetPositions)
-                {
+                    //Mob is owned by the player but is not yet in the Pet List.
+                    //Add it.
+                    if (mob.CanRename && !PetList.ContainsKey(mob.Serial))
+                    {
+                        PetList.Add(mob.Serial, mob);
+                        //Debug.WriteLine($"Pet '{mob.Name}' added to PetList");
+                    }
+
                     //Mob is owned by player, is in Pet List (stabled after perhaps), but is not in the TrackableMobs list yet.
                     //Add it.
                     if (PetList.ContainsKey(mob.Serial) && !TrackableMobs.ContainsKey(mob.Serial))
@@ -1900,18 +1642,18 @@ namespace Assistant.JMap
                 
             }
 
-            foreach (Serial s in PacketHandlers.Party)
+            if (IsShowPartyPositions)
             {
-                Mobile mob = World.FindMobile(s);
-                if(IsShowPartyPositions)
+                foreach (Serial s in PacketHandlers.Party)
                 {
+                    Mobile mob = World.FindMobile(s);
+
                     //Party member not yet in TrackedMobs list, add them! For honor and glory!
                     if (!TrackableMobs.ContainsKey(mob.Serial))
                         TrackableMobs.Add(mob.Serial, mob);
 
                     //Debug.WriteLine($"Character '{mob.Name}' added to TrackableMobs");
                 }
-
             }
         }
 
@@ -1919,7 +1661,6 @@ namespace Assistant.JMap
         {
             if (mapRotated)
             {
-                //bgRot = new PointF(bgReg.X, bgReg.Y);
                 bgRot = RotatePointF(bgReg, bgReg, 45);
 
                 zeroPoint.X = Convert.ToInt32(Math.Floor((double)bgRot.X));
@@ -1941,9 +1682,9 @@ namespace Assistant.JMap
 
             bufferingGrid.Clear();
 
-            for (int bY = 0; bY < map.Height; bY += 8)                             //Iterate through each row
+            for (int bY = 0; bY < map.Height; bY += 8)
             {
-                for (int bX = 0; bX < map.Width; bX += 8)                          //Iterate through each colum position per row 0-64 
+                for (int bX = 0; bX < map.Width; bX += 8)
                 {
                     RectangleF gridTest = new RectangleF(
                             (((bX) * offset.X) + zeroPoint.X),
@@ -1989,31 +1730,6 @@ namespace Assistant.JMap
             }
         }
 
-        /*public void UpdateNoDrawButtons()
-        {
-            RectangleF extendedBounds = new RectangleF(renderingBounds.Left - 100, renderingBounds.Top - 100, renderingBounds.Right + 100, renderingBounds.Bottom + 100);
-
-            foreach (JMapButton btn in mapButtons)
-            {
-                if (!extendedBounds.Contains(btn.renderLoc.X, btn.renderLoc.Y))
-                {
-                    btn.UpdateButton();
-                }
-            }
-        }*/
-
-        /*public void DrawMarkers()
-        {
-            if(markerWorkerState != MarkerWorkerStates.UpdatingVisible)
-            {
-                foreach (JMapButton btn in visibleMapButtons)
-                {
-                    //btn.Invalidate();
-                    //btn.Update();
-                }
-            }
-        }*/
-
         public void UpdatePlayerPos()
         {
             // PLAYER POSITION
@@ -2021,7 +1737,6 @@ namespace Assistant.JMap
 
             if (mapRotated)
             {
-                //bgRot = new PointF(bgReg.X, bgReg.Y);
                 bgRot = RotatePointF(bgReg, bgReg, 45);
 
                 zeroPoint.X = Convert.ToInt32(Math.Floor((double)bgRot.X));
@@ -2043,8 +1758,6 @@ namespace Assistant.JMap
 
         public void TrackPlayer()
         {
-            //Debug.WriteLine("TrackPlayerStart pntPlayer{0}", pntPlayer);
-
             float targetX = mapWidth + (pntPlayer.X - mapWidth);
             float targetY = mapHeight + (pntPlayer.Y - mapHeight);
 
@@ -2072,36 +1785,9 @@ namespace Assistant.JMap
                 else
                 {
                     UpdateAll();
-                    //Invalidate();
-                    //Refresh();
                 }
             }
             catch { }
-        }
-
-        /*public void MapClick(MouseEventArgs e)
-        {
-            if (Active)
-            {
-                PointF clickedbox = MousePointToMapPoint(new PointF(e.X, e.Y));
-                //UOMapRuneButton button = ButtonCheck(new Rectangle(clickedbox.X - 2, clickedbox.Y - 2, 5, 5));
-                //if (button != null)
-                //    button.OnClick(e);
-            }
-        }*/
-
-        private PointF MousePointToMapPoint(PointF p)
-        {
-            double rad = (Math.PI / 180) * 45;
-            int w = (Width) >> 3;
-            int h = (Height) >> 3;
-            Point3D focus = this.FocusMobile.Position;
-
-            PointF mapOrigin = new PointF((focus.X) - (w / 2), (focus.Y) - (h / 2));
-            PointF pnt1 = new PointF((mapOrigin.X) + (p.X), (mapOrigin.Y) + (p.Y));
-            PointF check = new PointF(pnt1.X - focus.X, pnt1.Y - focus.Y);
-            check = RotatePoint(new PointF((int)(check.X * 0.695), (int)(check.Y * 0.68)), rad, 1);
-            return new PointF(check.X + focus.X, check.Y + focus.Y);
         }
 
         public void MouseLastPosToMap(PointF p)
@@ -2141,7 +1827,7 @@ namespace Assistant.JMap
                     newY = Math.Abs(zeroPoint.X - targetX);
             }
 
-            PointF pnt1 = new PointF(newX, newY);
+            PointF pnt1 = new PointF(newX + 0.5f, newY + 0.5f);
 
             mouseLastPosOnMap = new Point(Convert.ToInt32(Math.Floor(pnt1.X / offset.X)), Convert.ToInt32(Math.Floor(pnt1.Y / offset.Y)));
         }
@@ -2183,12 +1869,10 @@ namespace Assistant.JMap
                     newY = Math.Abs(zeroPoint.X - targetX);
             }
 
-            PointF pnt1 = new PointF(newX, newY);
+            PointF pnt1 = new PointF(newX + 0.5f, newY + 0.5f);
 
             mouseMapCoord = new Point(Convert.ToInt32(Math.Floor(pnt1.X / offset.X)), Convert.ToInt32(Math.Floor(pnt1.Y / offset.Y)));
         }
-
-
 
         public void RenderMouseCoord()
         {
@@ -2226,54 +1910,6 @@ namespace Assistant.JMap
             };
         }
 
-        private PointF RotatePoint(PointF p, double angle, double dist)
-        {
-            int x = (int)((p.X * Math.Cos(angle) + p.Y * Math.Sin(angle)) * dist);
-            int y = (int)((-p.X * Math.Sin(angle) + p.Y * Math.Cos(angle)) * dist);
-
-            return new Point(x, y);
-        }
-
-        private PointF RotatePoint(PointF center, PointF pos)
-        {
-            PointF newp = new PointF(center.X - pos.X, center.Y - pos.Y);
-            double x = newp.X * Math.Cos(RotateAngle) - newp.Y * Math.Sin(RotateAngle);
-            double y = newp.X * Math.Sin(RotateAngle) + newp.Y * Math.Sin(RotateAngle);
-            return AdjustPoint(center, new PointF((float)(x) + center.X, (float)(y) + center.Y));
-        }
-
-        private PointF AdjustPoint(PointF center, PointF pos)
-        {
-            PointF newp = new PointF(center.X - pos.X, center.Y - pos.Y);
-            float dis = (float)Distance(center, pos);
-            dis += dis * 0.50f;
-            float slope = 0;
-            if (newp.X != 0)
-                slope = (float)newp.Y / (float)newp.X;
-            else
-                return new PointF(0 + center.X, -1f * (newp.Y + (newp.Y * 0.25f)) + center.Y);
-            slope *= -1;
-            //Both of these algorithms oddly produce the same results.
-            //float x = dis / (float)(Math.Sqrt(1f + Math.Pow(slope, 2)));
-            float x = newp.X + (newp.X * 0.5f);
-            // if (newp.X > 0)
-            x *= -1;
-            float y = (-1) * slope * x;
-
-            PointF def = new PointF(x + center.X, y + center.Y);
-
-            return def;
-        }
-
-        public double Distance(PointF center, PointF pos)
-        {
-
-            PointF newp = new PointF(center.X - pos.X, center.Y - pos.Y);
-            double distX = Math.Pow(newp.X, 2);
-            double distY = Math.Pow(newp.Y, 2);
-            return Math.Sqrt(distX + distY);
-        }
-
         private ArrayList RegionList(int x, int y, int maxDist)
         {
 
@@ -2290,48 +1926,24 @@ namespace Assistant.JMap
             return aList;
         }
 
-        /*        private ArrayList ButtonList(int x, int y, int maxDist)
-                {
-                    if (this.m_MapButtons == null)
-                        return null;
-                    int count = this.m_MapButtons.Count;
-                    ArrayList aList = new ArrayList();
-                    for (int i = 0; i < count; ++i)
-                    {
-                        UOMapRuneButton btn = (UOMapRuneButton)this.m_MapButtons[i];
-                        if (Utility.Distance(btn.X, btn.Y, x, y) <= maxDist * 2)
-                        {
-                            aList.Add(btn);
-                        }
-                    }
-                    return aList;
-                }
-        */
-
         public void DeleteMarker(JMapButton btnToDelete)
         {
-            Debug.WriteLine($"Deleting Marker: {btnToDelete.displayText} from {btnToDelete.mapLoc}");
-
-
             mapButtons.Remove(btnToDelete);
             visibleMapButtons.Remove(btnToDelete);
-
-            //mapButtons.TrimToSize();
-
+            MarkerToEdit = null;
         }
 
         public void WriteUpdatedCSV()
         {
-            //Blow away the old entries, then we can append per button
-            //File.WriteAllText($"{Config.GetInstallDirectory()}\\JMap\\MarkedLocations.csv", "");
-
             bool firstLine = true;
 
             foreach (JMapButton btn in mapButtons)
             {
                 // Dont save other pins to this file that were from other files
-                if (!btn.id.Equals("MarkedLocations")) 
-                    continue;
+                //if (!btn.id.Equals("MarkedLocations") || !btn.id.Equals("PublicLocations")) 
+                //    continue;
+
+                string fileName = btn.id;
                 
                 float x = btn.mapLoc.X;
                 float y = btn.mapLoc.Y;
@@ -2341,23 +1953,34 @@ namespace Assistant.JMap
                 //Format the new line
                 string newLine = string.Format($"{x},{y},{text},{extra}");
 
-                if(firstLine)
-                    File.WriteAllText($"{Config.GetInstallDirectory()}\\JMap\\MarkedLocations.csv", newLine);
+                if (firstLine)
+                    File.WriteAllText($"{Config.GetInstallDirectory()}\\JMap\\" + fileName + ".csv", newLine);
                 else
-                    File.AppendAllText($"{Config.GetInstallDirectory()}\\JMap\\MarkedLocations.csv", Environment.NewLine + newLine);
+                    File.AppendAllText($"{Config.GetInstallDirectory()}\\JMap\\" + fileName + ".csv", Environment.NewLine + newLine);
 
                 firstLine = false;
             }
         }
 
-        public void AddMarker(PointF markedLoc, string optionalName = "", string optionalExtra = "")
+        public void SendPublicMarker(PointF markedLoc, string markerOwner, bool IsPublic, string optionalName = "", string optionalExtra = "")
         {
+            string shareMarkerData = $"{markedLoc.X},{markedLoc.Y},{optionalName},{optionalExtra}";
+
+            string partyMessage = $"New marker: {shareMarkerData}";
+
+            if(PacketHandlers.Party.Count > 0)
+            {
+                ClientCommunication.SendToServer(new SendPartyMessage(partyMessage));
+            }
+        }
+
+        public void AddMarker(PointF markedLoc, string markerOwner, bool IsPublic, string id, string optionalName = "", string optionalExtra = "")
+        {
+            string fileName = id;
+
             float xLoc = Convert.ToInt32(Math.Floor(markedLoc.X));
             float yLoc = Convert.ToInt32(Math.Floor(markedLoc.Y));
 
-            //int newLineNum = File.ReadLines($"{Config.GetInstallDirectory()}\\JMap\\MarkedLocations.csv").Count() + 1;
-            //StringBuilder builder = new StringBuilder();
-            //string lineNum = newLineNum.ToString();
             float x = xLoc;
             float y = yLoc;
             string text = optionalName;
@@ -2365,31 +1988,60 @@ namespace Assistant.JMap
 
             //Format the new line
             string newLine = string.Format($"{x},{y},{text},{extra}");
-            //builder.AppendLine(newLine);
 
-            markedLocations.Add(newLine);
-            //Write it to file
-            File.AppendAllText($"{Config.GetInstallDirectory()}\\JMap\\MarkedLocations.csv", Environment.NewLine + newLine);
+            Debug.WriteLine($"Writing button to {fileName}");
 
-            JMapButton btn = UIElements.NewButton(this, JMapButtonType.MapPin, x, y, "MarkedLocations", text, extra);
+            if(new FileInfo($"{Config.GetInstallDirectory()}\\JMap\\" + fileName + ".csv").Length == 0)
+            {
+                File.AppendAllText($"{Config.GetInstallDirectory()}\\JMap\\" + fileName + ".csv", newLine);
+            }
+            else
+            {
+                File.AppendAllText($"{Config.GetInstallDirectory()}\\JMap\\" + fileName + ".csv", Environment.NewLine + newLine);
+            }
+            
+
+            JMapButton btn = UIElements.NewButton(this, JMapButtonType.MapPin, x, y, markerOwner, IsPublic, id, text, extra);
 
             mapButtons.Add(btn);
             btn.LoadButton();
 
             UpdateAll();
-            //written new marker, clear our arrays, read the file again and repopulate (this is not ideal, but whatever :))
-            //markedLocations.Clear();
-            //mapButtons.Clear();
-            //ReadMarkers($"{Config.GetInstallDirectory()}\\JMap\\MarkedLocations.csv");
         }
 
         public void ReadMarkers(string path)
         {
             string fileName = Path.GetFileNameWithoutExtension(path);
 
+            JMapButtonType type = JMapButtonType.MapPin;
+            bool IsPublic = false;
+
+            switch (fileName)
+            {
+                case "MarkedLocations":
+                    type = JMapButtonType.MapPin;
+                    IsPublic = false;
+                    break;
+                case "PublicLocations":
+                    type = JMapButtonType.MapPin;
+                    IsPublic = true;
+                    break;
+                case "UOPoints":
+                    type = JMapButtonType.UOPoint;
+                    IsPublic = false;
+                    break;
+                case "PlayerHouses":
+                    IsPublic = false;
+                    type = JMapButtonType.PlayerHouse;
+                    break;
+                case "TreasureMapLocations":
+                    type = JMapButtonType.Treasure;
+                    IsPublic = false;
+                    break;
+            }
+
             using (StreamReader sr = new StreamReader(path))
             {
-                //int row = 0;
                 var lines = new List<string[]>();
                 int row = 0;
                 while (!sr.EndOfStream)
@@ -2402,15 +2054,16 @@ namespace Assistant.JMap
                 int i = 0;
                 foreach (string[] line in lines)
                 {
-                    markedLocations.Add(line);
-
-                    //int type = int.Parse(line[0]);
+                    //markedLocations.Add(line);
+                    
                     float x = float.Parse(line[0]);
                     float y = float.Parse(line[1]);
                     string text = line[2];
                     string extra = line[3];
-                                                                //(JMapButtonType)type
-                    JMapButton btn = UIElements.NewButton(this, JMapButtonType.MapPin, x, y, fileName, text, extra);
+
+                    string markerOwner = this.FocusMobile.Name;
+                                                                                                     
+                    JMapButton btn = UIElements.NewButton(this, (JMapButtonType)type, x, y, markerOwner, IsPublic, fileName, text, extra);
 
                     mapButtons.Add(btn);
                     btn.LoadButton();
@@ -2426,21 +2079,6 @@ namespace Assistant.JMap
             foreach (JMapButton jMapButton in markersToRemove)
             {
                 DeleteMarker(jMapButton);
-            }
-        }
-
-        private void LoadMapButtons()
-        {
-            int i = 0;
-
-            foreach (JMapButton btn in mapButtons)
-            {
-                ++i;
-                //Debug.WriteLine("Adding Button {0}/{1} Text:{2} X:{3} Y:{4}", i, mapButtons.Count, btn.displayText, btn.mapLoc.X, btn.mapLoc.Y);
-
-                
-                //this.Controls.Add(btn);
-                //btn.Enabled = true;
             }
         }
 
@@ -2551,8 +2189,6 @@ namespace Assistant.JMap
             set { m_Focus = value; }
         }
 
-
-
         public void Constrain(Control view)
         {
             Rectangle pr = view.ClientRectangle;
@@ -2581,7 +2217,7 @@ namespace Assistant.JMap
 
         public void mapPanel_MouseUp(object sender, EventArgs e)
         {
-            main.Cursor = Cursors.Default;
+            jMapMain.Cursor = Cursors.Default;
 
             IsMouseDown = false;
         }
@@ -2596,7 +2232,7 @@ namespace Assistant.JMap
             if (mouse.Button == MouseButtons.Left)
             {
                 mouseDown = mouse.Location;
-                MarkerToEdit = null;
+                //MarkerToEdit = null;
             }
 
             else if (mouse.Button == MouseButtons.Right)
@@ -2615,9 +2251,6 @@ namespace Assistant.JMap
             }
         }
 
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern bool LockWindowUpdate(IntPtr hWnd);
-
         public void mapPanel_MouseMove(object sender, EventArgs e)
         {
             
@@ -2627,89 +2260,29 @@ namespace Assistant.JMap
             int deltaX = mousePosNow.X - mouseDown.X;
             int deltaY = mousePosNow.Y - mouseDown.Y;
 
-            float newX = bgReg.X + deltaX;  //Location.X + deltaX; 
-            float newY = bgReg.Y + deltaY;   //Location.Y + deltaY; 
+            float newX = bgReg.X + deltaX;
+            float newY = bgReg.Y + deltaY;
 
             if (mouse.Button == MouseButtons.Left)
             {
                 IsPanning = true;
                 trackingPlayer = false;
-                main.Cursor = Cursors.SizeAll;
-                //SuspendLayout();
-                //SendMessage(Handle, WM_SETREDRAW, false, 0);
+                jMapMain.Cursor = Cursors.SizeAll;
 
-                //if (newX < 3)
-                //{
                 bgReg.X = Convert.ToInt32(Math.Floor((double)newX));
-                /*
-                if (bgReg.X > 0)
-                {
-                    bgReg.X = 0;
-                }
-
-                if (bgReg.X < (int)-mapWidth)
-                {
-                    bgReg.X = (int)-mapWidth;
-                }
-                */
-                //}
-
-                //if (newY < 3)
-                //{
                 bgReg.Y = Convert.ToInt32(Math.Floor((double)newY));
-                /*
-                if (bgReg.Y > 0)
-                {
-                    bgReg.Y = 0;
-                }
-
-                if (bgReg.Y < (int)-mapHeight)
-                {
-                    bgReg.Y = (int)-mapHeight;
-                }
-                */
-                //}
-
-                //Constrain(main);
-
-
-
-
-
-                //Refresh();
-
-                //Update();
-                //ResumeLayout();
-                //Invalidate(true);
-                //SendMessage(Handle, WM_SETREDRAW, true, 0);
 
                 UpdatePlayerPos();
                 UpdateMapPos();
                 UpdateAll();
 
-                //DrawMarkers();
-                //ResumeLayout();
-
-                //if (markerWorkerState == MarkerWorkerStates.IdleNoWork)
-                //{                  
-                //    NewMarkerWorker();
-                //}
-
-                
-                
                 mouseDown = mouse.Location;
-                //trackingPlayer = true;
                 IsPanning = false;
             }
             else
             {
-                if(!EditingMarker || !AddingMarker)
-                {
-                    MarkerToEdit = null;
-                }
                 MouseToMap(mousePosNow);
                 RenderMouseCoord();
-                //Debug.WriteLine($"MouseToMap: {MouseToMap(mousePosNow)} mousePosNow: {mousePosNow}");
                 MouseHoverWorker();
             }
 
@@ -2770,12 +2343,6 @@ namespace Assistant.JMap
                     }
                 }
 
-
-                //if(_mapSize.Width * offset.X >= main.Width && _mapSize.Height * offset.Y >= main.Height)
-                //{
-                //zoom.Width = Convert.ToInt32(Math.Floor((double)(_mapSize.Width * offset.X));
-                //zoom.Height = Convert.ToInt32(Math.Floor((double)(_mapSize.Height * offset.Y));
-
                 zoom.Width = (_mapSize.Width * offset.X);
                 zoom.Height = (_mapSize.Height * offset.Y);
 
@@ -2787,8 +2354,6 @@ namespace Assistant.JMap
 
                 SendMessage(Handle, WM_SETREDRAW, true, 0);
 
-                //Refresh();
-                //Invalidate(true);
                 UpdatePlayerPos();
                 
                 if (trackingPlayer)
@@ -2823,11 +2388,10 @@ namespace Assistant.JMap
             {
                 Debug.WriteLine("MouseDoubleClick");
                 
-                    if (main.FormBorderStyle == System.Windows.Forms.FormBorderStyle.Sizable) //main.ControlBox = false;                
-                        main.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-                    else //main.ControlBox = true;
-                        main.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
-                
+                    if (jMapMain.FormBorderStyle == System.Windows.Forms.FormBorderStyle.Sizable)
+                        jMapMain.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+                    else 
+                        jMapMain.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;              
             }
         }
 
@@ -2911,20 +2475,6 @@ namespace Assistant.JMap
         {
             if (IsShowAllPositions)
             {
-                /*this.Menu_ShowPlayerPosition.CheckState = CheckState.Unchecked;
-                IsShowPlayerPosition = false;
-
-                this.Menu_ShowPetPositions.CheckState = CheckState.Unchecked;
-                IsShowPetPositions = false;
-
-                this.Menu_ShowPartyPositions.CheckState = CheckState.Unchecked;
-                IsShowPartyPositions = false;
-
-                this.Menu_TrackPlayerPosition.CheckState = CheckState.Unchecked;
-                IsTrackPlayerPosition = false;
-
-                IsShowAllPositions = false;*/
-
                 IsShowAllPositions = false;
 
                 Menu_ShowPartyPositions.Checked = false;
@@ -2939,20 +2489,6 @@ namespace Assistant.JMap
             }
             else
             {
-                /*this.Menu_ShowPlayerPosition.CheckState = CheckState.Checked;
-                IsShowPlayerPosition = true;
-
-                this.Menu_ShowPetPositions.CheckState = CheckState.Checked;
-                IsShowPetPositions = true;
-
-                this.Menu_ShowPartyPositions.CheckState = CheckState.Checked;
-                IsShowPartyPositions = true;
-
-                this.Menu_TrackPlayerPosition.CheckState = CheckState.Checked;
-                IsTrackPlayerPosition = true;
-
-                IsShowAllPositions = true;*/
-
                 IsShowAllPositions = true;
 
                 Menu_ShowPartyPositions.Checked = true;
@@ -2983,6 +2519,7 @@ namespace Assistant.JMap
             else
                 UpdateAll();
         }
+
         private void mapPanel_ShowPetPositions(object sender, EventArgs e)
         {
             IsShowPetPositions = Menu_ShowPetPositions.Checked;
@@ -2994,6 +2531,7 @@ namespace Assistant.JMap
             else
                 UpdateAll();
         }
+
         private void mapPanel_ShowPartyPositions(object sender, EventArgs e)
         {
             IsShowPartyPositions = Menu_ShowPartyPositions.Checked;
@@ -3022,7 +2560,7 @@ namespace Assistant.JMap
         {
             AddingMarker = true;
             Form newMarker = new NewMarker(this);
-            //newMarker.mapPanel = this;
+
             newMarker.Show();
             
             if (trackingPlayer)
@@ -3035,7 +2573,7 @@ namespace Assistant.JMap
         {
             EditingMarker = true;
             Form newMarker = new NewMarker(this);
-            //newMarker.mapPanel = this;
+
             newMarker.Show();
 
 
@@ -3055,38 +2593,49 @@ namespace Assistant.JMap
                 UpdateAll();
         }
 
+        private void mapPanel_MarkerNames(object sender, EventArgs e)
+        {
+            DisplayMarkerNames = Menu_MarkerNames.Checked;
+
+            Config.SetProperty("DisplayMarkerNames", DisplayMarkerNames);
+
+            if (trackingPlayer)
+                TrackPlayer();
+            else
+                UpdateAll();
+        }
+
+        private void mapPanel_MarkerCoords(object sender, EventArgs e)
+        {
+            DisplayMarkerCoords = Menu_MarkerCoords.Checked;
+
+            Config.SetProperty("DisplayMarkerCoords", DisplayMarkerCoords);
+
+            if (trackingPlayer)
+                TrackPlayer();
+            else
+                UpdateAll();
+        }
+
         public void mapPanel_Exit(object sender, EventArgs e)
         {           
-            //ClientCommunication.SetMapWndHandle(null);
-            main.Close();
+            jMapMain.Close();
         }
 
         public void mapPanel_MouseEnter(object sender, EventArgs e)
         {
             mouseOnMap = true;
-            //Debug.WriteLine("MouseEnter");
-            //Debug.WriteLine("Mouse Enter");
-            //Activate();
-            //this.Focus();
-            //this.Capture = true;
-            if (!main.Focused && !AddingMarker && !EditingMarker)
+ 
+            if (!jMapMain.Focused && !AddingMarker && !EditingMarker)
             {
-                main.Focus();
-                main.Activate();
-            }
-                
+                jMapMain.Focus();
+                jMapMain.Activate();
+            }             
         }
 
         public void mapPanel_MouseLeave(object sender, EventArgs e)
         {
             mouseOnMap = false;
-            //Debug.WriteLine("MouseLeave");
-            //if (main.Focused && main.TopMost)
-            //{//Doesn't work as intended, inactive function
-            //    main.SendToBack();
-            //    main.BringToFront();
-            //}
-
         }
 
         private const int //WM CODES FOR CUSTOM RESIZE
@@ -3148,6 +2697,9 @@ namespace Assistant.JMap
             this.Menu_EditMarker = new System.Windows.Forms.ToolStripMenuItem();
             this.Menu_DeleteMarker = new System.Windows.Forms.ToolStripMenuItem();
             this.MapGenProgressBar = new System.Windows.Forms.ProgressBar();
+            this.OptionMarkers = new System.Windows.Forms.ToolStripMenuItem();
+            this.Menu_MarkerNames = new System.Windows.Forms.ToolStripMenuItem();
+            this.Menu_MarkerCoords = new System.Windows.Forms.ToolStripMenuItem();
             this.ContextOptions.SuspendLayout();
             this.ContextMarkerMenu.SuspendLayout();
             this.SuspendLayout();
@@ -3158,24 +2710,25 @@ namespace Assistant.JMap
             this.AddMapMarker,
             this.SeperatorOptions,
             this.OptionPositions,
+            this.OptionMarkers,
             this.OptionOverlays,
             this.OptionAlignments,
             this.SeperatorOptions2,
             this.OptionExit});
             this.ContextOptions.Name = "ContextOptions";
-            this.ContextOptions.Size = new System.Drawing.Size(137, 126);
+            this.ContextOptions.Size = new System.Drawing.Size(181, 170);
             // 
             // AddMapMarker
             // 
             this.AddMapMarker.Name = "AddMapMarker";
-            this.AddMapMarker.Size = new System.Drawing.Size(136, 22);
+            this.AddMapMarker.Size = new System.Drawing.Size(180, 22);
             this.AddMapMarker.Text = "Add Marker";
             this.AddMapMarker.Click += new System.EventHandler(this.mapPanel_AddMapMarker);
             // 
             // SeperatorOptions
             // 
             this.SeperatorOptions.Name = "SeperatorOptions";
-            this.SeperatorOptions.Size = new System.Drawing.Size(133, 6);
+            this.SeperatorOptions.Size = new System.Drawing.Size(177, 6);
             // 
             // OptionPositions
             // 
@@ -3186,7 +2739,7 @@ namespace Assistant.JMap
             this.Menu_ShowPetPositions,
             this.Menu_TrackPlayerPosition});
             this.OptionPositions.Name = "OptionPositions";
-            this.OptionPositions.Size = new System.Drawing.Size(136, 22);
+            this.OptionPositions.Size = new System.Drawing.Size(180, 22);
             this.OptionPositions.Text = "Positions";
             // 
             // Menu_ShowAllPositions
@@ -3246,7 +2799,7 @@ namespace Assistant.JMap
             this.Menu_OverlaysGuard,
             this.Menu_OverlaysGrid});
             this.OptionOverlays.Name = "OptionOverlays";
-            this.OptionOverlays.Size = new System.Drawing.Size(136, 22);
+            this.OptionOverlays.Size = new System.Drawing.Size(180, 22);
             this.OptionOverlays.Text = "Overlays";
             // 
             // Menu_OverlaysAll
@@ -3284,7 +2837,7 @@ namespace Assistant.JMap
             this.OptionAlignments.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.TiltMap45});
             this.OptionAlignments.Name = "OptionAlignments";
-            this.OptionAlignments.Size = new System.Drawing.Size(136, 22);
+            this.OptionAlignments.Size = new System.Drawing.Size(180, 22);
             this.OptionAlignments.Text = "Alignment";
             // 
             // TiltMap45
@@ -3300,12 +2853,12 @@ namespace Assistant.JMap
             // SeperatorOptions2
             // 
             this.SeperatorOptions2.Name = "SeperatorOptions2";
-            this.SeperatorOptions2.Size = new System.Drawing.Size(133, 6);
+            this.SeperatorOptions2.Size = new System.Drawing.Size(177, 6);
             // 
             // OptionExit
             // 
             this.OptionExit.Name = "OptionExit";
-            this.OptionExit.Size = new System.Drawing.Size(136, 22);
+            this.OptionExit.Size = new System.Drawing.Size(180, 22);
             this.OptionExit.Text = "Exit";
             this.OptionExit.Click += new System.EventHandler(this.mapPanel_Exit);
             // 
@@ -3340,6 +2893,35 @@ namespace Assistant.JMap
             this.MapGenProgressBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.MapGenProgressBar.TabIndex = 0;
             // 
+            // OptionMarkers
+            // 
+            this.OptionMarkers.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.Menu_MarkerNames,
+            this.Menu_MarkerCoords});
+            this.OptionMarkers.Name = "OptionMarkers";
+            this.OptionMarkers.Size = new System.Drawing.Size(180, 22);
+            this.OptionMarkers.Text = "Markers";
+            // 
+            // Menu_MarkerNames
+            // 
+            this.Menu_MarkerNames.Checked = true;
+            this.Menu_MarkerNames.CheckOnClick = true;
+            this.Menu_MarkerNames.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.Menu_MarkerNames.Name = "Menu_MarkerNames";
+            this.Menu_MarkerNames.Size = new System.Drawing.Size(193, 22);
+            this.Menu_MarkerNames.Text = "Display Marker Names";
+            this.Menu_MarkerNames.CheckedChanged += new System.EventHandler(this.mapPanel_MarkerNames);
+            // 
+            // Menu_MarkerCoords
+            // 
+            this.Menu_MarkerCoords.Checked = true;
+            this.Menu_MarkerCoords.CheckOnClick = true;
+            this.Menu_MarkerCoords.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.Menu_MarkerCoords.Name = "Menu_MarkerCoords";
+            this.Menu_MarkerCoords.Size = new System.Drawing.Size(193, 22);
+            this.Menu_MarkerCoords.Text = "Display Marker Coords";
+            this.Menu_MarkerCoords.CheckedChanged += new System.EventHandler(this.mapPanel_MarkerCoords);
+            // 
             // MapPanel
             // 
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
@@ -3353,4 +2935,15 @@ namespace Assistant.JMap
 
         }
     }
+
+    public static class PublicMarkers
+    {
+        public static MapPanel mapPanel { get; set; }
+
+        public static void ReceivePublicMarker(PointF markedLoc, string markerOwner, bool IsPublic, string id, string optionalName = "", string optionalExtra = "")
+        {
+            mapPanel.AddMarker(markedLoc, markerOwner, IsPublic, id, optionalName, optionalExtra);
+        }
+    }
+
 }

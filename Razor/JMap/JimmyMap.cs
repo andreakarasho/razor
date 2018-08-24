@@ -90,11 +90,10 @@ namespace Assistant.JMap
 
         private void JimmyMap_Load()
         {
-            tileDisplay = new TileDisplay();
+            //tileDisplay = new TileDisplay();
 
             if (!File.Exists($"{Config.GetInstallDirectory()}\\JMap\\MAP0-1.BMP"))
             {
-                //GenerateMaps();
                 mapGenProgressBar = new MapGenProgressBar();
 
                 // Hack to make progress bar function.. sort of :)
@@ -116,8 +115,6 @@ namespace Assistant.JMap
             {
                 JimmyMap_ContinueLoad();
             }
-            //-----------------------------  GenerateMaps(); ------------------------------------------//
-
 
             //Bitmap multiMap = MultiMap.GetMultiMap();
             //multiMap.Save(@"F:\UO Stuff\\UO Art\\Maps\\Generated\\Multis\\MULTI0-1.BMP", ImageFormat.Bmp);
@@ -134,7 +131,7 @@ namespace Assistant.JMap
                     (
                         mapPanel = new JMap.MapPanel()
                         {
-                            main = this,
+                            jMapMain = this,
                             Size = ClientRectangle.Size,
                             Parent = this,
                             BackColor = Color.Black,
@@ -160,17 +157,13 @@ namespace Assistant.JMap
 
             ClientCommunication.SetMapWndHandle(this);
 
-            //mapPanel.Invalidate();
             mapPanel.UpdatePlayerPos();
-            //mapPanel.UpdateAll();
+
 
             if (mapPanel.trackingPlayer)
                 mapPanel.TrackPlayer();
             else
                 mapPanel.UpdateAll();
-            //Invalidate();
-
-            //MapGeneration mapGen = new MapGeneration(this, mapPanel, 0);
         }
        
         #region MAP GEN WORKER
@@ -242,9 +235,8 @@ namespace Assistant.JMap
                 SuspendLayout();
                 mapPanel.Width = ClientRectangle.Width;
                 mapPanel.Height = ClientRectangle.Height;
-                mapPanel.Update();
-                mapPanel.Invalidate();
-                //UpdateMap();
+                mapPanel.UpdateAll();
+                //mapPanel.Invalidate();
                 ResumeLayout();
             }
 
