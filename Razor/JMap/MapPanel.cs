@@ -339,12 +339,16 @@ namespace Assistant.JMap
             Menu_OverlaysGrid.Checked = HasGridLines;
             Menu_OverlaysGuard.Checked = HasGuardLines;
 
+            Menu_ShowAllPositions.CheckedChanged -= mapPanel_ShowAllPositions;
             Menu_ShowAllPositions.Checked = IsShowPlayerPosition && IsShowPetPositions && IsShowPlayerPosition &&
                                             IsTrackPlayerPosition;
+            Menu_ShowAllPositions.CheckedChanged += mapPanel_ShowAllPositions;
 
+            Menu_OverlaysAll.CheckedChanged -= mapPanel_OverlaysAll;
             Menu_OverlaysAll.Checked = HasGridLines && HasGuardLines;
+            Menu_OverlaysAll.CheckedChanged += mapPanel_OverlaysAll;
 
-
+            LoadCheckedMarkers();
 
             ConvertFromUOAM($"{Config.GetInstallDirectory("JMap")}\\Houses.map");
 
@@ -360,6 +364,25 @@ namespace Assistant.JMap
 
             jMapMain.Text = $"UO Map - {this.FocusMobile.Name}";
             UpdateAll();//additional one to fire off rendering again, because it's gay
+        }
+
+        private void LoadCheckedMarkers()
+        {
+            if (string.IsNullOrEmpty(Config.GetString("MapSelectedPinList")))
+                return;
+
+            string[] markersToLoad = Config.GetString("MapSelectedPinList").Split(',');
+
+            foreach (string marker in markersToLoad)
+            {
+                ReadMarkers($"{Config.GetInstallDirectory("JMap")}\\{marker}.csv");
+
+                /*while (markerWorkerState != MarkerWorkerStates.IdleNoWork)
+                {
+                    Thread.Sleep(200);
+                }*/
+            }
+
         }
 
         #region GRID WORKER
