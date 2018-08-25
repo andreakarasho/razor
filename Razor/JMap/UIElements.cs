@@ -91,6 +91,7 @@ namespace Assistant.JMap
         }
         private static JMapButton PlayerHouse(MapPanel mapPanel, JMapButtonType type, float mapLocX, float mapLocY, string buttonId, string displayText = "", string variant = "")
         {
+            Debug.WriteLine($"Adding PlayerHouse: {variant}, {mapLocX}, {mapLocY}");
             try
             {
                 return new JMapButton()
@@ -98,7 +99,6 @@ namespace Assistant.JMap
                     mapPanel = mapPanel,
                     type = JMapButtonType.PlayerHouse,
                     Variant = variant.ToUpper(),
-                    curPath = $"{Config.GetInstallDirectory()}\\JMap\\Resources\\Houses\\" + variant + ".cur",
                     mapLoc = new PointF(mapLocX, mapLocY),
                     displayText = displayText,
                     id = buttonId
@@ -109,7 +109,7 @@ namespace Assistant.JMap
                 Debug.WriteLine($"Button Creation Error: {e.ToString()}");
                 return GenericButton(mapPanel, type, mapLocX, mapLocY, buttonId, displayText);
             }
-
+            
         }
         private static JMapButton Treasure(MapPanel mapPanel, JMapButtonType type, float mapLocX, float mapLocY, string buttonId, string displayText = "")
         {
@@ -280,7 +280,21 @@ namespace Assistant.JMap
                     //this.hotSpot = cur.HotSpot;
                     this.hotSpot = new Point(this.renderSize.Width / 2, this.renderSize.Height + 10);
                 }
-                else if(type == JMapButtonType.UOPoint)
+                else if(type == JMapButtonType.PlayerHouse)
+                {
+                    curPath = $"{Config.GetInstallDirectory()}\\JMap\\Resources\\Houses\\" + Variant + ".cur";
+
+                    this.textColor = Color.GhostWhite;
+
+                    this.cur = Markers.LoadCursor(this.curPath);
+                    Icon i = Icon.ExtractAssociatedIcon(this.curPath);
+                    this.img = i.ToBitmap();
+
+                    this.renderSize = new Size(24, 16); //NOT THE HOUSE SIZE! A test! :)
+                    this.hotSpot = cur.HotSpot;
+                }
+
+                else if (type == JMapButtonType.UOPoint)
                 {
                     curPath = $"{Config.GetInstallDirectory()}\\JMap\\Resources\\UOPoints\\" + Variant + ".cur";
                     
@@ -365,11 +379,6 @@ namespace Assistant.JMap
                     this.hotSpot = new Point(this.renderSize.Width /2, this.renderSize.Height / 2);
 
                 }
-
-
-
-
-
 
                 highlightColor = Color.Silver;
                 highlightArea = new GraphicsPath();

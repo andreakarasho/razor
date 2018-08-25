@@ -829,6 +829,9 @@
     <None Include="JMap\MarkedLocations.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="JMap\PlayerHouses.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="JMap\Resources\Palettes\felucca.pal">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

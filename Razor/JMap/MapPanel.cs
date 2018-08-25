@@ -96,10 +96,29 @@ namespace Assistant.JMap
         public BackgroundWorker mapMarkerWorker;
         public BackgroundWorker mouseHoverWorker;
 
+        //Houses
+        public List<JMapButton> houseButtons = new List<JMapButton>();
+        ArrayList bufferingHouseButtons = new ArrayList();
+        ArrayList visibleHouseButtons = new ArrayList(); //obviously MUST be empty
+
+        public bool IsUpdatingHouses;
+        public BackgroundWorker houseMarkerWorker;
+
+        public enum HouseWorkerStates
+        {
+            UpdatingMarkers,
+            UpdatingVisible,
+            UpdateFinished,
+            DrawingMarkers,
+            IdleNoWork
+        }
+        public HouseWorkerStates houseWorkerState = HouseWorkerStates.IdleNoWork;
+
         //public bool IsUpdatingGrid;
         public BackgroundWorker gridWorker;
         public ArrayList bufferingGrid = new ArrayList();
         public ArrayList visibleGrid = new ArrayList();
+
         public ArrayList gridPoints = new ArrayList();
         public bool GridBuilt = false;
 
@@ -275,6 +294,8 @@ namespace Assistant.JMap
             //if (map == null)
             //    map = Ultima.Map.Felucca;
 
+            
+
             _mapRegular_1 = ImportMaps(1);
             _mapSize = _mapRegular_1.Size; //Full scale reference Size
             mapWidth = _mapSize.Width;
@@ -325,7 +346,7 @@ namespace Assistant.JMap
 
 
 
-
+            ConvertFromUOAM($"{Config.GetInstallDirectory("JMap")}\\Houses.map");
 
             MouseHoverWorker();
 
@@ -410,7 +431,9 @@ namespace Assistant.JMap
         {
             try
             {
-                if (markerWorkerState != MarkerWorkerStates.UpdatingVisible && !IsMouseDown && !IsZooming)
+                if (markerWorkerState != MarkerWorkerStates.UpdatingVisible && 
+                    houseWorkerState != HouseWorkerStates.UpdatingVisible && 
+                    !IsMouseDown && !IsZooming)
                 {
                     foreach (Tuple<RectangleF, int> btnRef in hoverRegions)
                     {
@@ -517,6 +540,48 @@ namespace Assistant.JMap
 
         }
 
+        #endregion
+
+        #region HOUSE UPDATE WORKER
+        public void HouseUpdateWorker()
+        {
+            
+
+
+            if (houseMarkerWorker != null)
+                houseMarkerWorker.Dispose();
+
+            houseMarkerWorker = new BackgroundWorker();
+            houseMarkerWorker.DoWork += new DoWorkEventHandler(houseMarkerWorker_DoWork);
+            //houseMarkerWorker.ProgressChanged += new ProgressChangedEventHandler(houseMarkerWorker_ProgressChanged);
+            houseMarkerWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(houseMarkerWorker_RunWorkerCompleted);
+            houseMarkerWorker.WorkerReportsProgress = true;
+            houseMarkerWorker.WorkerSupportsCancellation = true;
+            houseMarkerWorker.RunWorkerAsync();
+        }
+
+        private void houseMarkerWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            BackgroundWorker worker = sender as BackgroundWorker;
+            UpdateHouses();
+        }
+
+        private void houseMarkerWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            houseWorkerState = HouseWorkerStates.UpdatingVisible;
+            visibleHouseButtons = bufferingHouseButtons;
+            hoverRegions.Clear();
+            foreach (JMapButton btn in visibleHouseButtons)
+            {
+                Tuple<RectangleF, int> btnRef = MarkerReference(btn, visibleHouseButtons.IndexOf(btn));
+
+                if (!hoverRegions.Contains(btnRef))
+                    hoverRegions.Add(btnRef);
+                else
+                    Debug.WriteLine("HoverRegions already contains this reference");
+            }
+            houseWorkerState = HouseWorkerStates.IdleNoWork;
+        }
         #endregion
 
         #region MARKER UPDATE WORKER
@@ -901,7 +966,15 @@ namespace Assistant.JMap
                         RectangleF rectF = new RectangleF(btn.renderLoc.X, btn.renderLoc.Y, btn.renderSize.Width, btn.renderSize.Height);
                         Rectangle pinRect = Rectangle.Round(rectF);
 
+                        pe.Graphics.DrawImage(btn.img, pinRect);
+                    }
+                    //HOUSES
+                    foreach(JMapButton btn in visibleHouseButtons)
+                    {
+                        btn.UpdateButton();
 
+                        RectangleF rectF = new RectangleF(btn.renderLoc.X, btn.renderLoc.Y, btn.renderSize.Width, btn.renderSize.Height);
+                        Rectangle pinRect = Rectangle.Round(rectF);
 
                         pe.Graphics.DrawImage(btn.img, pinRect);
                     }
@@ -1613,10 +1686,19 @@ namespace Assistant.JMap
 
             Invalidate();
 
+            if (houseWorkerState == HouseWorkerStates.IdleNoWork)
+            {
+                HouseUpdateWorker();
+            }
+
+
+
             if (markerWorkerState == MarkerWorkerStates.IdleNoWork)
             {
                 MarkerUpdateWorker();
             }
+
+            Debug.WriteLine($"HouseButton Count: {houseButtons.Count}");
         }
 
         public void TrackPetsParty()
@@ -1737,6 +1819,30 @@ namespace Assistant.JMap
                 {
                     if (bufferingMapButtons.Contains(btn))
                         bufferingMapButtons.Remove(btn);
+
+                    BeginInvoke(new InvokeDelegate(() => btn.UpdateButton()));
+                }
+
+            }
+        }
+
+        public void UpdateHouses()
+        {
+            houseWorkerState = HouseWorkerStates.UpdatingMarkers;
+
+            RectangleF extendedBounds = new RectangleF(renderingBounds.Left - 100, renderingBounds.Top - 100, renderingBounds.Right + 100, renderingBounds.Bottom + 100);
+
+            foreach (JMapButton btn in houseButtons)
+            {
+                if (extendedBounds.Contains(btn.renderLoc.X, btn.renderLoc.Y))
+                {
+                    if (!bufferingHouseButtons.Contains(btn))
+                        bufferingHouseButtons.Add(btn);
+                }
+                else if (!extendedBounds.Contains(btn.renderLoc.X, btn.renderLoc.Y))
+                {
+                    if (bufferingHouseButtons.Contains(btn))
+                        bufferingHouseButtons.Remove(btn);
 
                     BeginInvoke(new InvokeDelegate(() => btn.UpdateButton()));
                 }
@@ -2002,8 +2108,6 @@ namespace Assistant.JMap
             //Format the new line
             string newLine = string.Format($"{x},{y},{text},{extra}");
 
-            Debug.WriteLine($"Writing button to {fileName}");
-
             if(new FileInfo($"{Config.GetInstallDirectory()}\\JMap\\" + fileName + ".csv").Length == 0)
             {
                 File.AppendAllText($"{Config.GetInstallDirectory()}\\JMap\\" + fileName + ".csv", newLine);
@@ -2020,6 +2124,144 @@ namespace Assistant.JMap
             btn.LoadButton();
 
             UpdateAll();
+        }
+
+        public void ConvertFromUOAM(string path)
+        {
+            if(File.Exists(path))
+            {
+                //skip first line "3" and rewrite file
+                var allLines = File.ReadAllLines(path);
+                File.WriteAllLines(path, allLines.Skip(1).ToArray());
+
+                //remove blank line and +EOF from end of file and rewrite file
+                allLines = File.ReadAllLines(path);
+                File.WriteAllLines(path, allLines.Take(allLines.Length - 2).ToArray());
+
+                //write all lines to the map file a third time, because stupid carriage return+newline happens
+                //therefore we do this one more time to APPEND instead
+                var lines = new List<string>();
+                using (StreamReader sr = new StreamReader(path))
+                {
+                    while (!sr.EndOfStream)
+                    {
+                        string line = sr.ReadLine();
+                        lines.Add(line);
+                    }
+                }
+
+                bool firstLine = true;
+                foreach (string line in lines)
+                {
+                    
+                    string pLine = line.Replace("+", "\"");
+                    string finalLine = pLine.Replace(":", "\"");
+
+                    if (firstLine)
+                    {
+                        File.WriteAllText(path, finalLine);
+                        firstLine = false;
+                    }
+                    else
+                    {
+                        File.AppendAllText(path, Environment.NewLine + finalLine);
+                    }
+                }
+
+                //finally...read all lines and write to new csv :)
+                using (StreamReader sr = new StreamReader(path))
+                {
+                    var csvlines = new List<string[]>();
+                    while (!sr.EndOfStream)
+                    {
+                        string[] result = sr.ReadLine().Split('"')
+                                            .Select((element, index) => index % 2 == 0  // If even index
+                                            ? element.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)  // Split the item
+                                            : new string[] { element })  // Keep the entire item
+                                            .SelectMany(element => element).ToArray();
+                        
+                        //string[] line = sr.ReadLine().Split(' ', '\t');
+                        csvlines.Add(result);
+                    }
+                    foreach (string[] line in csvlines)
+                    {
+                        
+                        string houseType = line[0];
+                        int x = int.Parse(line[1]);
+                        int y = int.Parse(line[2]);
+                        string extra = line[3];
+                        string variant = "";
+
+                        switch(houseType)
+                        {
+                            case "castle":
+                                variant = "CASTLE";
+                                break;
+                            case "fortress":
+                                variant = "CASTLE";
+                                break;
+                            case "keep":
+                                variant = "KEEP";
+                                break;
+                            case "large house":
+                                variant = "LARGEHOUSE";
+                                break;
+                            case "log cabin":
+                                variant = "LOGCABIN";
+                                break;
+                            case "marble patio":
+                                variant = "MARPATIO";
+                                break;
+                            case "marble shop":
+                                variant = "SMLMSHOP";
+                                break;
+                            case "patio house":
+                                variant = "PATIO";
+                                break;
+                            case "sandstone patio":
+                                variant = "SNDPATIO";
+                                break;
+                            case "small house":
+                                variant = "SMALLHOUSE";
+                                break;
+                            case "small tower":
+                                variant = "SMLTOWER";
+                                break;
+                            case "stone shop":
+                                variant = "SMLSSHOP";
+                                break;
+                            case "tower":
+                                variant = "TOWER";
+                                break;
+                            case "two story house":
+                                variant = "TWOSTORY";
+                                break;
+                            case "villa":
+                                variant = "VILLA";
+                                break;
+                            case "None":
+                                variant = "";
+                                break;
+                        }
+
+                        string newLine = string.Format($"{x},{y},{houseType},{variant}");
+
+                        if (new FileInfo($"{Config.GetInstallDirectory()}\\JMap\\PlayerHouses.csv").Length == 0)
+                        {
+                            File.AppendAllText($"{Config.GetInstallDirectory()}\\JMap\\PlayerHouses.csv", newLine);
+                        }
+                        else
+                        {
+                            File.AppendAllText($"{Config.GetInstallDirectory()}\\JMap\\PlayerHouses.csv", Environment.NewLine + newLine);
+                        }
+                    }
+                }
+
+                string old = Path.GetFileNameWithoutExtension(path);
+                File.Copy(path, path + ".BAK");
+                File.Delete(path);
+            }
+            
         }
 
         public void ReadMarkers(string path)
@@ -2078,7 +2320,17 @@ namespace Assistant.JMap
                                                                                                      
                     JMapButton btn = UIElements.NewButton(this, (JMapButtonType)type, x, y, markerOwner, IsPublic, fileName, text, extra);
 
-                    mapButtons.Add(btn);
+                    if(fileName.Equals("PlayerHouses"))
+                    {
+                        houseButtons.Add(btn);
+                        Debug.WriteLine($"Adding House Button: {text},{x},{y}");
+                    }
+                    else
+                    {
+                        mapButtons.Add(btn);
+                        Debug.WriteLine($"Adding Map Button: {text},{x},{y}");
+                    }
+                    
                     btn.LoadButton();
                     ++i;
                 }                    
