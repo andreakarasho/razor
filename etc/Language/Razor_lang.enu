@@ -187,6 +187,7 @@ MainForm::showOverheadMessages=Show Overhead Messages
 MainForm::goldPerDisplay=Enable Gold Per Sec/Min/Hour Counters
 MainForm::stealthOverhead=Overhead
 MainForm::trackIncomingGold=Track gold per sec/min/hour
+MainForm::objectDelay=Object Delay:
 
 HueEntry::Text=Select a Hue
 HueEntry::cancel=Cancel
@@ -675,3 +676,4 @@ InputBox::ok=&OK
 1972=Dragon Sounds
 1973=Set Sell HotBag
 1974=Add UseOnce Container
+1975=Chicken Sounds

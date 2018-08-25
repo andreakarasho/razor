@@ -43,6 +43,7 @@ namespace Assistant
 	        AddProperty("CounterWarnAmount", (int) 5);
 	        AddProperty("CounterWarn", true);
 	        AddProperty("ObjectDelay", (int) 600);
+	        AddProperty("ObjectDelayEnabled", true);
 	        AddProperty("AlwaysOnTop", false);
 	        AddProperty("SortCounters", true);
 	        AddProperty("QueueActions", true);
@@ -182,6 +183,8 @@ namespace Assistant
             AddProperty("DisplayMarkerCoords", true);
 
             AddProperty("GuardLinesFile", "uorguardlines");
+
+	        AddProperty("MapSelectedPinList", "");
 
             Counter.Default();
 	        Filter.DisableAll();

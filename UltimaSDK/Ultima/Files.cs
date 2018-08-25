@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using Microsoft.Win32;
 
@@ -307,6 +308,12 @@ namespace Ultima
 					break;
 				}
 			}
+
+		    if (string.IsNullOrEmpty(dir))
+		    {
+                  dir = ConfigurationManager.AppSettings["UODataDir"];
+              }
+
 			return dir;
 		}
 

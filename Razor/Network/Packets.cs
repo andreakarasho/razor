@@ -64,7 +64,19 @@ namespace Assistant
 		}
 	}
 
-	public sealed class ContainerContent : Packet
+    public sealed class SendMessageParty : Packet
+    {
+        public SendMessageParty(string message) : base(0xBF)
+        {
+            EnsureCapacity(1 + 2 + 2 + 1 + 4);
+
+            Write((ushort)0x06); // party command
+            Write((byte)0x04); // tell party
+            WriteBigUniNull(message);
+        }
+    }
+
+    public sealed class ContainerContent : Packet
 	{
 		public ContainerContent(List<Item> items ) : this( items, Engine.UsePostKRPackets )
 		{

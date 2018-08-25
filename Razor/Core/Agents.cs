@@ -2440,7 +2440,17 @@ namespace Assistant
 				if ( m_Cont.IsContainer && m_Cont.Layer != Layer.Bank )
 				{
 					PlayerData.DoubleClick( m_Cont );
-					Timer.DelayedCallback( TimeSpan.FromMilliseconds( Config.GetInt( "ObjectDelay" ) + 200 ), new TimerCallback( DoRestock ) ).Start();
+
+				    if (Config.GetBool("ObjectDelayEnabled"))
+				    {
+				        Timer.DelayedCallback(TimeSpan.FromMilliseconds(Config.GetInt("ObjectDelay") + 200), new TimerCallback(DoRestock)).Start();
+                        }
+				    else
+				    {
+				        Timer.DelayedCallback(TimeSpan.FromMilliseconds(200), new TimerCallback(DoRestock)).Start();
+                        }
+
+					
 					World.Player.SendMessage( LocString.RestockQueued );
 				}
 				else

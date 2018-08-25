@@ -12,6 +12,15 @@ namespace Assistant.JMap
 {
     public partial class NewMarker : Form
     {
+        public const int WM_NCLBUTTONDOWN = 0xA1;
+        public const int HT_CAPTION = 0x2;
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        public static extern bool ReleaseCapture();
+
         public MapPanel mapPanel;
 
         public string name;
@@ -27,12 +36,15 @@ namespace Assistant.JMap
             InitializeComponent();
             mapPanel = mapPan;
             IsPublic = this.IsPublicCheckbox;
+            
 
             if (mapPanel.AddingMarker)
                 CreateMarker();
 
             if (mapPanel.EditingMarker)
                 EditMarker(mapPanel.MarkerToEdit);
+
+            this.MouseDown += NewMarker_MouseDown;
         }
 
         private void CreateMarker()
@@ -130,6 +142,15 @@ namespace Assistant.JMap
             this.BringToFront();
             this.newMarkerName.Focus();
             base.OnShown(e);
+        }
+
+        private void NewMarker_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                ReleaseCapture();
+                SendMessage(Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
+            }
         }
     }
 }
