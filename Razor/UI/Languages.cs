@@ -424,6 +424,7 @@ namespace Assistant
         SetSellAgentHotBag,
         AddUseOnceContainer,
         ChickenSounds,
+        JMapHotkey,
 
         __End
     }
