@@ -1973,8 +1973,8 @@ namespace Assistant.JMap
             foreach (JMapButton btn in mapButtons)
             {
                 // Dont save other pins to this file that were from other files
-                //if (!btn.id.Equals("MarkedLocations") || !btn.id.Equals("PublicLocations")) 
-                //    continue;
+                if (!btn.id.Equals("MarkedLocations")) 
+                    continue;
 
                 string fileName = btn.id;
                 
