@@ -513,6 +513,7 @@ namespace Assistant
 	        }
 
 	        serverList.Items.Add(new Custom_SE("UO Renaissance (Test)", "test.uorenaissance.com", 2597));
+	        serverList.Items.Add(new Custom_SE("UO Renaissance (Dev)", "dev.uorenaissance.com", 2598));
 
             // Load any custom servers they might have added
 	        NameValueCollection servers =

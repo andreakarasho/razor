@@ -2605,7 +2605,16 @@ namespace Assistant
                     gumpStrings.AddRange(ParseGumpString(gumpPieces, stringlistparse));
                 }
 
-                MessageInBottleCapture.CaptureMibCoordinates(gumpStrings[2]);
+                switch (gumpStrings.Count)
+                {
+                    //Classic, non-custom MIB
+                    case 3:
+                        MessageInBottleCapture.CaptureMibCoordinates(gumpStrings[2], false);
+                        break;
+                    case 4:
+                        MessageInBottleCapture.CaptureMibCoordinates(gumpStrings[2], true);
+                        break;
+                }
 
                 World.Player.CurrentGumpStrings.AddRange(gumpStrings);
                 World.Player.CurrentGumpRawData = layout; // Get raw data of current gump
