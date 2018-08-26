@@ -57,7 +57,7 @@ namespace Assistant.JMap
             Size = new Size(416, 439);
             AllowTransparency = true;
 
-
+            new GetPartyLocTimer().Start();
 
             //MaximumSize = new Size((int)(mapPanel.mapWidth - mapPanel.bgLeft), (int)(mapPanel.mapHeight - mapPanel.bgTop));
 
@@ -444,6 +444,67 @@ namespace Assistant.JMap
             public MapMenuItem(System.String text, System.EventHandler onClick) : base(text, onClick)
             {
                 Tag = null;
+            }
+        }
+
+        private class GetPartyLocTimer : Timer
+        {
+            public GetPartyLocTimer() : base(TimeSpan.FromSeconds(1.0), TimeSpan.FromSeconds(1.0))
+            {
+            }
+
+            protected override void OnTick()
+            {
+                // never send this packet to encrypted servers (could lead to OSI detecting razor)
+                if (ClientCommunication.ServerEncrypted)
+                {
+                    Stop();
+                    return;
+                }
+
+                if (Engine.MainWindow == null || Engine.MainWindow.JMap == null || !Engine.MainWindow.JMap.Visible)
+                    return; // don't bother when the map window isnt visible
+
+                if (World.Player != null && PacketHandlers.Party.Count > 0)
+                {
+                    if (PacketHandlers.SpecialPartySent > PacketHandlers.SpecialPartyReceived)
+                    {
+                        // If we sent more than we received then the server stopped responding
+                        // in that case, wait a long while before trying again
+                        PacketHandlers.SpecialPartySent = PacketHandlers.SpecialPartyReceived = 0;
+                        this.Interval = TimeSpan.FromSeconds(5.0);
+                        return;
+                    }
+                    else
+                    {
+                        this.Interval = TimeSpan.FromSeconds(1.0);
+                    }
+
+                    bool send = false;
+                    foreach (Serial s in PacketHandlers.Party)
+                    {
+                        Mobile m = World.FindMobile(s);
+
+                        if (m == World.Player)
+                            continue;
+
+                        if (m == null || Utility.Distance(World.Player.Position, m.Position) > World.Player.VisRange || !m.Visible)
+                        {
+                            send = true;
+                            break;
+                        }
+                    }
+
+                    if (send)
+                    {
+                        PacketHandlers.SpecialPartySent++;
+                        ClientCommunication.SendToServer(new QueryPartyLocs());
+                    }
+                }
+                else
+                {
+                    this.Interval = TimeSpan.FromSeconds(1.0);
+                }
             }
         }
     }
