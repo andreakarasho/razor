@@ -286,12 +286,13 @@ namespace Assistant.JMap
                         textColor = Color.Red;
                     }
                     this.renderSize = new Size(24, 24);
-                    this.hotSpot = new Point(this.hotSpot.X + 4, this.hotSpot.Y);
+                    
 
                     this.cur = Markers.LoadCursor(this.curPath);
                     Icon i = Icon.ExtractAssociatedIcon(this.curPath);
                     this.img = i.ToBitmap();
                     this.hotSpot = cur.HotSpot;
+                    this.hotSpot = new Point(this.hotSpot.X - 4, this.hotSpot.Y - 3);
                 }
                 else if (type == JMapButtonType.Treasure)
                 {

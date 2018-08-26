@@ -513,8 +513,35 @@ namespace Assistant.JMap
                             }
                             if (btn.type != JMapButtonType.UOPoint && btn.type != JMapButtonType.Treasure && btn.type != JMapButtonType.MessageInBottle)
                             {
-                                RectangleF highlightRect = new RectangleF((btn.renderLoc.X + btn.hotSpot.X) - 4, (btn.renderLoc.Y + btn.hotSpot.Y), 6, 6);
-                                gfx.DrawRectangle(btnColorPen, Rectangle.Round(highlightRect));
+
+                                int rSize = Math.Max(6, Convert.ToInt32(1 * offset.X));
+
+                                RectangleF highlightRect = new RectangleF((btn.renderLoc.X + btn.hotSpot.X) - (offset.X / 2),
+                                                                          (btn.renderLoc.Y + btn.hotSpot.Y) - (offset.Y / 2),
+                                                                          rSize,
+                                                                          rSize);
+
+                                PointF rotPoint = new PointF((btn.renderLoc.X + btn.hotSpot.X),(btn.renderLoc.Y + btn.hotSpot.Y));
+
+                                PointF tl = new PointF(Convert.ToInt32(Math.Floor((double)(highlightRect.X))), Convert.ToInt32(Math.Floor((double)highlightRect.Y)));
+                                PointF tr = new PointF(Convert.ToInt32(Math.Floor((double)(highlightRect.X + highlightRect.Width))), Convert.ToInt32(Math.Floor((double)highlightRect.Y)));
+                                PointF bl = new PointF(Convert.ToInt32(Math.Floor((double)(highlightRect.X))), Convert.ToInt32(Math.Floor((double)highlightRect.Y + highlightRect.Height)));
+                                PointF br = new PointF(Convert.ToInt32(Math.Floor((double)(highlightRect.X + highlightRect.Width))), Convert.ToInt32(Math.Floor((double)highlightRect.Y + highlightRect.Height)));
+
+                                if (mapRotated)
+                                {
+                                    tl = RotatePointF(tl, rotPoint, 45);
+                                    tr = RotatePointF(tr, rotPoint, 45);
+                                    bl = RotatePointF(bl, rotPoint, 45);
+                                    br = RotatePointF(br, rotPoint, 45);
+                                }
+
+                                PointF[] rgn = new PointF[] { tl, tr, br, bl };
+
+                                gfx.DrawPolygon(btnColorPen, rgn);
+
+
+                                //gfx.DrawRectangle(btnColorPen, Rectangle.Round(highlightRect));
                             }
 
                             
@@ -2061,7 +2088,7 @@ namespace Assistant.JMap
 
             PointF pnt1 = new PointF(newX + 0.5f, newY + 0.5f);
 
-            mouseLastPosOnMap = new Point(Convert.ToInt32(Math.Floor(pnt1.X / offset.X)), Convert.ToInt32(Math.Floor(pnt1.Y / offset.Y)));
+            mouseLastPosOnMap = new Point(Convert.ToInt32(Math.Round(pnt1.X / offset.X)), Convert.ToInt32(Math.Round(pnt1.Y / offset.Y)));
         }
 
         public void MouseToMap(PointF p)
@@ -2103,7 +2130,7 @@ namespace Assistant.JMap
 
             PointF pnt1 = new PointF(newX + 0.5f, newY + 0.5f);
 
-            mouseMapCoord = new Point(Convert.ToInt32(Math.Floor(pnt1.X / offset.X)), Convert.ToInt32(Math.Floor(pnt1.Y / offset.Y)));
+            mouseMapCoord = new Point(Convert.ToInt32(Math.Round(pnt1.X / offset.X)), Convert.ToInt32(Math.Round(pnt1.Y / offset.Y)));
         }
 
         public void RenderMouseCoord()
@@ -2186,8 +2213,6 @@ namespace Assistant.JMap
                     var fileStream = File.Create($"{Config.GetInstallDirectory()}\\JMap\\" + fileName + ".csv");
                     fileStream.Close();
                 }
-
-                //int fileLength = Path.GetFileName($"{Config.GetInstallDirectory()}\\JMap\\" + fileName + ".csv").Length;
 
                 float x = btn.mapLoc.X;
                 float y = btn.mapLoc.Y;
