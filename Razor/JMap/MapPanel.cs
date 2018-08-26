@@ -366,8 +366,6 @@ namespace Assistant.JMap
 
             jMapMain.Text = $"UO Map - {this.FocusMobile.Name}";
             UpdateAll();//additional one to fire off rendering again, because it's gay
-
-            MessageInBottleCapture.CaptureMibCoordinates("130°15'N,63°16'W");
         }
 
         private void LoadCheckedMarkers()
