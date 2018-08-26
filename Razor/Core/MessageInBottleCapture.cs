@@ -8,15 +8,18 @@ namespace Assistant.Core
 {
     public class MessageInBottleCapture
     {
-        private static readonly string _mibGumpLayout =
-            "{ page 0 }{ resizepic 0 40 2520 350 300 }{ xmfhtmlgump 30 80 285 160 1018326 1 1 }{ htmlgump 35 240 230 20 0 0 0 }{ button 35 265 4005 4007 1 0 0 }{ xmfhtmlgump 70 265 100 20 1011036 0 0 }";
+        private static readonly string[] _mibGumpLayout =
+        {
+            "{ page 0 }{ resizepic 0 40 2520 350 300 }{ xmfhtmlgump 30 80 285 160 1018326 1 1 }{ htmlgump 35 240 230 20 0 0 0 }{ button 35 265 4005 4007 1 0 0 }{ xmfhtmlgump 70 265 100 20 1011036 0 0 }",
+            "{ page 0 }{ htmlgump 200 140 230 20 0 0 0 }{ resizepic 0 40 2520 350 300 }{ xmfhtmlgump 30 80 285 160 1018326 1 1 }{ htmlgump 35 240 230 20 1 0 0 }{ button 35 265 4005 4007 1 0 0 }{ xmfhtmlgump 70 265 100 20 1011036 0 0 }"
+        };
 
         public static bool IsMibGump(string layout)
         {
-            return _mibGumpLayout.IndexOf(layout, StringComparison.OrdinalIgnoreCase) != -1;
+            return _mibGumpLayout.Any(gumpLayout => layout.IndexOf(gumpLayout, StringComparison.OrdinalIgnoreCase) != -1);
         }
 
-        public static void CaptureMibCoordinates(string coords)
+        public static void CaptureMibCoordinates(string coords, bool hasXY)
         {
             string mibLog =
                 $"{Config.GetInstallDirectory()}\\JMap\\MIBPins.csv";
@@ -36,8 +39,19 @@ namespace Assistant.Core
             int xAxis = 0;
             int yAxis = 0;
 
-            ConvertCoords(coords, ref xAxis, ref yAxis);
-
+            if (hasXY)
+            {
+                // 0   1 2
+                // MIB|x|y
+                string[] mibCoords = coords.Split('|');
+                xAxis = Convert.ToInt32(mibCoords[1]);
+                yAxis = Convert.ToInt32(mibCoords[2]);
+            }
+            else
+            {
+                ConvertCoords(coords, ref xAxis, ref yAxis);
+            }
+            
             using (StreamWriter sw = File.AppendText(mibLog))
             {
                 sw.WriteLine($"{xAxis},{yAxis},mib,");
