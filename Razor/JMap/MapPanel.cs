@@ -2950,7 +2950,9 @@ namespace Assistant.JMap
         private void mapPanel_AddMapMarker(object sender, EventArgs e)
         {
             AddingMarker = true;
-            Form newMarker = new NewMarker(this);
+            
+                                                //custom marker
+            Form newMarker = new NewMarker(this, true);
 
             newMarker.Show();
             
@@ -2963,9 +2965,20 @@ namespace Assistant.JMap
         private void mapPanel_EditMapMarker(object sender, EventArgs e)
         {
             EditingMarker = true;
-            Form newMarker = new NewMarker(this);
+            
+            if (MarkerToEdit.id.Equals("MarkedLocations") || MarkerToEdit.id.Equals("PublicLocations"))
+            {                                       //custom marker
+                Form newMarker = new NewMarker(this, true);
+                newMarker.Show();
+            }  
+            else
+            {                                       //not a custom marker
+                Form newMarker = new NewMarker(this, false);
+                newMarker.Show();
+            }
+                
 
-            newMarker.Show();
+            
 
 
             if (trackingPlayer)

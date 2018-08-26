@@ -88,6 +88,7 @@
             // newMarkerX
             // 
             this.newMarkerX.Location = new System.Drawing.Point(28, 44);
+            this.newMarkerX.MaxLength = 4;
             this.newMarkerX.Name = "newMarkerX";
             this.newMarkerX.Size = new System.Drawing.Size(69, 23);
             this.newMarkerX.TabIndex = 5;
@@ -104,6 +105,7 @@
             // newMarkerY
             // 
             this.newMarkerY.Location = new System.Drawing.Point(133, 44);
+            this.newMarkerY.MaxLength = 4;
             this.newMarkerY.Name = "newMarkerY";
             this.newMarkerY.Size = new System.Drawing.Size(75, 23);
             this.newMarkerY.TabIndex = 7;

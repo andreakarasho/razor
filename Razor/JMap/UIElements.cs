@@ -252,6 +252,8 @@ namespace Assistant.JMap
             {
                 if (type == JMapButtonType.MapPin)
                 {
+                    
+
                     if (IsPublic)
                     {
                         curPath = $"{Config.GetInstallDirectory()}\\JMap\\Resources\\Markers\\mapPin32A21_Gold.cur";

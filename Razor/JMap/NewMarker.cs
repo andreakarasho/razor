@@ -29,14 +29,16 @@ namespace Assistant.JMap
         public string extra;
         public CheckBox IsPublic;
         public string MarkerOwner;
-        public string id;
+        public string id = "";
 
-        public NewMarker(MapPanel mapPan)
+        public NewMarker(MapPanel mapPan, bool customMarker)
         {
             InitializeComponent();
             mapPanel = mapPan;
             IsPublic = this.IsPublicCheckbox;
-            
+
+            if (!customMarker)
+                IsPublic.Enabled = false;
 
             if (mapPanel.AddingMarker)
                 CreateMarker();
@@ -45,6 +47,8 @@ namespace Assistant.JMap
                 EditMarker(mapPanel.MarkerToEdit);
 
             this.MouseDown += NewMarker_MouseDown;
+            newMarkerX.KeyPress += new KeyPressEventHandler(Coordinate_KeyPress);
+            newMarkerY.KeyPress += new KeyPressEventHandler(Coordinate_KeyPress);
         }
 
         private void CreateMarker()
@@ -59,17 +63,14 @@ namespace Assistant.JMap
 
             if (this.IsPublic.Checked)
                 this.id = "PublicLocations";
-            else
-                this.id = "MarkedLocations";
-
 
             mapPanel.MarkerToEdit = null;
         }
 
         private void EditMarker(JMapButton markerToEdit)
         {
-            x = Convert.ToInt32(Math.Floor(markerToEdit.mapLoc.X));
-            y = Convert.ToInt32(Math.Floor(markerToEdit.mapLoc.Y));
+            this.x = Convert.ToInt32(Math.Floor(markerToEdit.mapLoc.X));
+            this.y = Convert.ToInt32(Math.Floor(markerToEdit.mapLoc.Y));
 
             this.newMarkerName.Text = markerToEdit.displayText;
             this.newMarkerX.Text = x.ToString();
@@ -80,9 +81,6 @@ namespace Assistant.JMap
 
             if (this.IsPublic.Checked)
                 this.id = "PublicLocations";
-            else
-                this.id = "MarkedLocations";
-
         }
 
         private void NewMarkerPoint(object sender, EventArgs e)
@@ -100,22 +98,20 @@ namespace Assistant.JMap
             {
                 if (this.IsPublic.Checked)
                     mapPanel.MarkerToEdit.id = "PublicLocations";
-                else
-                    mapPanel.MarkerToEdit.id = "MarkedLocations";
 
-                mapPanel.MarkerToEdit.mapLoc = new Point(x, y);
+                mapPanel.MarkerToEdit.mapLoc = new Point(int.Parse(this.newMarkerX.Text), int.Parse(this.newMarkerY.Text));
                 mapPanel.MarkerToEdit.displayText = this.newMarkerName.Text;
                 mapPanel.MarkerToEdit.extraText = this.newMarkerExtra.Text;
                 mapPanel.MarkerToEdit.MarkerOwner = this.OwnerLabel.Text;
                 mapPanel.MarkerToEdit.IsPublic = this.IsPublic.Checked;
 
+                System.Diagnostics.Debug.WriteLine($"MapLoc: {mapPanel.MarkerToEdit.mapLoc}");
                 mapPanel.MarkerToEdit.LoadButton();
             }
             if (this.IsPublic.Checked)
             {
                 mapPanel.SendPublicMarker(new Point(x, y), this.MarkerOwner, this.IsPublic.Checked, this.newMarkerName.Text, this.newMarkerExtra.Text);
             }
-
 
             mapPanel.EditingMarker = false;
             mapPanel.AddingMarker = false;
@@ -150,6 +146,14 @@ namespace Assistant.JMap
             {
                 ReleaseCapture();
                 SendMessage(Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
+            }
+        }
+
+        private void Coordinate_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!char.IsDigit(e.KeyChar))
+            {
+                e.Handled = true;
             }
         }
     }
