@@ -17,7 +17,8 @@ namespace Assistant.JMap
         MapPin = 1,
         UOPoint = 2,
         PlayerHouse = 3,
-        Treasure = 4
+        Treasure = 4,
+        MessageInBottle = 5
     }
 
     public class UIElements
@@ -31,6 +32,7 @@ namespace Assistant.JMap
                 case JMapButtonType.UOPoint: return UOPoint(mapPanel, type, mapLocX, mapLocY, buttonId, displayText, extraText);
                 case JMapButtonType.PlayerHouse: return PlayerHouse(mapPanel, type, mapLocX, mapLocY, buttonId, displayText, extraText);
                 case JMapButtonType.Treasure: return Treasure(mapPanel, type, mapLocX, mapLocY, buttonId, displayText);
+                case JMapButtonType.MessageInBottle: return MessageInBottle(mapPanel, type, mapLocX, mapLocY, buttonId, displayText);
                 default: return MapPin(mapPanel, type, mapLocX, mapLocY, markerOwner, IsPublic, buttonId, displayText, extraText);
             }
         }
@@ -124,6 +126,27 @@ namespace Assistant.JMap
                 };
             }
             catch(Exception e)
+            {
+                Debug.WriteLine($"Button Creation Error: {e.ToString()}");
+                return GenericButton(mapPanel, type, mapLocX, mapLocY, buttonId, displayText);
+            }
+
+        }
+
+        private static JMapButton MessageInBottle(MapPanel mapPanel, JMapButtonType type, float mapLocX, float mapLocY, string buttonId, string displayText = "")
+        {
+            try
+            {
+                return new JMapButton()
+                {
+                    mapPanel = mapPanel,
+                    type = JMapButtonType.MessageInBottle,
+                    mapLoc = new PointF(mapLocX, mapLocY),
+                    displayText = displayText,
+                    id = buttonId
+                };
+            }
+            catch (Exception e)
             {
                 Debug.WriteLine($"Button Creation Error: {e.ToString()}");
                 return GenericButton(mapPanel, type, mapLocX, mapLocY, buttonId, displayText);
@@ -252,8 +275,6 @@ namespace Assistant.JMap
             {
                 if (type == JMapButtonType.MapPin)
                 {
-                    
-
                     if (IsPublic)
                     {
                         curPath = $"{Config.GetInstallDirectory()}\\JMap\\Resources\\Markers\\mapPin32A21_Gold.cur";
@@ -282,8 +303,21 @@ namespace Assistant.JMap
                     this.cur = Markers.LoadCursor(this.curPath);
                     Icon i = Icon.ExtractAssociatedIcon(this.curPath);
                     this.img = i.ToBitmap();
-                    //this.hotSpot = cur.HotSpot;
+
                     this.hotSpot = new Point(this.renderSize.Width / 2, this.renderSize.Height + 10);
+                }
+                else if (type == JMapButtonType.MessageInBottle)
+                {
+                    curPath = $"{Config.GetInstallDirectory()}\\JMap\\Resources\\Markers\\mib.cur";
+                    this.renderSize = new Size(24, 24);
+
+                    this.textColor = Color.GhostWhite;
+
+                    this.cur = Markers.LoadCursor(this.curPath);
+                    Icon i = Icon.ExtractAssociatedIcon(this.curPath);
+                    this.img = i.ToBitmap();
+
+                    this.hotSpot = cur.HotSpot;
                 }
                 else if(type == JMapButtonType.PlayerHouse)
                 {

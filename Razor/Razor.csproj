@@ -567,6 +567,9 @@
     <Content Include="JMap\Resources\Markers\mapPin32A21_Gold.cur">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="JMap\Resources\Markers\mib.cur">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="JMap\Resources\Markers\treasure.cur">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -831,6 +834,9 @@
     </None>
     <None Include="JMap\PlayerHouses.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="JMap\MIBPins.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="JMap\Resources\Palettes\felucca.pal">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

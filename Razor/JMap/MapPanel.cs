@@ -464,7 +464,6 @@ namespace Assistant.JMap
                 {
                     foreach (Tuple<RectangleF, int> btnRef in hoverRegions)
                     {
-                        
                         JMapButton btn = (JMapButton)visibleMapButtons[btnRef.Item2];
 
                         if (btnRef.Item1.Contains(mousePosNow))
@@ -483,7 +482,7 @@ namespace Assistant.JMap
                             MarkerToEdit = btn;
                             Graphics gfx = CreateGraphics();
 
-                            if (btn.type == JMapButtonType.Treasure)
+                            if (btn.type == JMapButtonType.Treasure || btn.type == JMapButtonType.MessageInBottle)
                             {
                                 RectangleF highlightRect = new RectangleF((btn.renderLoc.X + btn.hotSpot.X) - ( offset.X / 2), 
                                                                           (btn.renderLoc.Y + btn.hotSpot.Y) - ( offset.Y / 2),
@@ -514,7 +513,7 @@ namespace Assistant.JMap
 
                                 gfx.ResetTransform();
                             }
-                            if (btn.type != JMapButtonType.UOPoint && btn.type != JMapButtonType.Treasure)
+                            if (btn.type != JMapButtonType.UOPoint && btn.type != JMapButtonType.Treasure && btn.type != JMapButtonType.MessageInBottle)
                             {
                                 RectangleF highlightRect = new RectangleF((btn.renderLoc.X + btn.hotSpot.X) - 4, (btn.renderLoc.Y + btn.hotSpot.Y), 6, 6);
                                 gfx.DrawRectangle(btnColorPen, Rectangle.Round(highlightRect));
@@ -2408,6 +2407,10 @@ namespace Assistant.JMap
                     type = JMapButtonType.Treasure;
                     IsPublic = false;
                     break;
+                case "MIBPins":
+                    type = JMapButtonType.MessageInBottle;
+                    IsPublic = false;
+                    break;
             }
 
             using (StreamReader sr = new StreamReader(path))
@@ -2950,8 +2953,8 @@ namespace Assistant.JMap
         private void mapPanel_AddMapMarker(object sender, EventArgs e)
         {
             AddingMarker = true;
-            
-                                                //custom marker
+
+                                                 //can be made public
             Form newMarker = new NewMarker(this, true);
 
             newMarker.Show();
@@ -2966,21 +2969,17 @@ namespace Assistant.JMap
         {
             EditingMarker = true;
             
-            if (MarkerToEdit.id.Equals("MarkedLocations") || MarkerToEdit.id.Equals("PublicLocations"))
-            {                                       //custom marker
+            if (MarkerToEdit.id.Equals("MarkedLocations") || MarkerToEdit.id.Equals("PublicLocations") || MarkerToEdit.id.Equals("MIBPins"))
+            {                                        //can be made public
                 Form newMarker = new NewMarker(this, true);
                 newMarker.Show();
             }  
             else
-            {                                       //not a custom marker
+            {                                        //cannot be made public
                 Form newMarker = new NewMarker(this, false);
                 newMarker.Show();
             }
                 
-
-            
-
-
             if (trackingPlayer)
                 TrackPlayer();
             else
