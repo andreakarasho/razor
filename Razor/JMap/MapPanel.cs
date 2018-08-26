@@ -2166,16 +2166,29 @@ namespace Assistant.JMap
 
         public void WriteUpdatedCSV()
         {
-            bool firstLine = true;
+            string[] filesToWrite = Config.GetString("MapSelectedPinList").Split(',');
+
+            foreach (string marker in filesToWrite)
+            {
+                File.Delete($"{Config.GetInstallDirectory("JMap")}\\{marker}.csv");
+            }
 
             foreach (JMapButton btn in mapButtons)
             {
                 // Dont save other pins to this file that were from other files
-                if (!btn.id.Equals("MarkedLocations")) 
-                    continue;
+                //if (!btn.id.Equals("MarkedLocations")) 
+                //    continue;
 
                 string fileName = btn.id;
-                
+
+                if (!File.Exists($"{Config.GetInstallDirectory()}\\JMap\\" + fileName + ".csv"))
+                {
+                    var fileStream = File.Create($"{Config.GetInstallDirectory()}\\JMap\\" + fileName + ".csv");
+                    fileStream.Close();
+                }
+
+                //int fileLength = Path.GetFileName($"{Config.GetInstallDirectory()}\\JMap\\" + fileName + ".csv").Length;
+
                 float x = btn.mapLoc.X;
                 float y = btn.mapLoc.Y;
                 string text = btn.displayText;
@@ -2184,12 +2197,12 @@ namespace Assistant.JMap
                 //Format the new line
                 string newLine = string.Format($"{x},{y},{text},{extra}");
 
-                if (firstLine)
+                int fileLength = File.ReadAllLines($"{Config.GetInstallDirectory()}\\JMap\\" + fileName + ".csv").Length;
+
+                if (fileLength == 0)
                     File.WriteAllText($"{Config.GetInstallDirectory()}\\JMap\\" + fileName + ".csv", newLine);
                 else
                     File.AppendAllText($"{Config.GetInstallDirectory()}\\JMap\\" + fileName + ".csv", Environment.NewLine + newLine);
-
-                firstLine = false;
             }
         }
 
@@ -2451,7 +2464,35 @@ namespace Assistant.JMap
 
         public void RemoveMarkers(string id)
         {
-            if(id.Equals("PlayerHouses"))
+            File.Delete($"{Config.GetInstallDirectory("JMap")}\\{id}.csv");
+
+            foreach (JMapButton btn in mapButtons.Where(b => b.id.Equals(id)))
+            {
+                string fileName = btn.id;
+
+                if (!File.Exists($"{Config.GetInstallDirectory()}\\JMap\\" + fileName + ".csv"))
+                {
+                    var fileStream = File.Create($"{Config.GetInstallDirectory()}\\JMap\\" + fileName + ".csv");
+                    fileStream.Close();
+                }
+
+                float x = btn.mapLoc.X;
+                float y = btn.mapLoc.Y;
+                string text = btn.displayText;
+                string extra = btn.extraText;
+
+                //Format the new line
+                string newLine = string.Format($"{x},{y},{text},{extra}");
+
+                int fileLength = File.ReadAllLines($"{Config.GetInstallDirectory()}\\JMap\\" + fileName + ".csv").Length;
+
+                if (fileLength == 0)
+                    File.WriteAllText($"{Config.GetInstallDirectory()}\\JMap\\" + fileName + ".csv", newLine);
+                else
+                    File.AppendAllText($"{Config.GetInstallDirectory()}\\JMap\\" + fileName + ".csv", Environment.NewLine + newLine);
+            }
+
+            if (id.Equals("PlayerHouses"))
             {
                 List<JMapButton> housesToRemove = houseButtons.Where(x => x.id.Equals(id)).ToList();
                 foreach (JMapButton jMapHouse in housesToRemove)
@@ -2467,11 +2508,6 @@ namespace Assistant.JMap
                     DeleteMarker(jMapButton);
                 }
             }
-                
-
-            
-
-
         }
 
         public static bool Format(Point p, Ultima.Map map, ref int xLong, ref int yLat, ref int xMins, ref int yMins, ref bool xEast, ref bool ySouth)

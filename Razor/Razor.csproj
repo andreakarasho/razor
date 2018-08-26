@@ -833,7 +833,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="JMap\PlayerHouses.csv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="JMap\MIBPins.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
