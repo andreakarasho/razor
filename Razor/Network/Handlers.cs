@@ -2223,8 +2223,8 @@ namespace Assistant
 					if (Engine.MainWindow.MapWindow != null)
 						Engine.MainWindow.MapWindow.UpdateMap();
 
-                        if (Engine.MainWindow.jMap != null)
-                            Engine.MainWindow.jMap.UpdateMap();
+                        if (Engine.MainWindow.JMap != null)
+                            Engine.MainWindow.JMap.UpdateMap();
 
                         break;
 				}
@@ -2333,8 +2333,8 @@ namespace Assistant
 			if (Engine.MainWindow.MapWindow != null)
 				Engine.MainWindow.MapWindow.UpdateMap();
 
-            if (Engine.MainWindow.jMap != null)
-                Engine.MainWindow.jMap.UpdateMap();
+            if (Engine.MainWindow.JMap != null)
+                Engine.MainWindow.JMap.UpdateMap();
         }
 
 		private static void PartyAutoDecline()

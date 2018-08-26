@@ -6345,16 +6345,21 @@ namespace Assistant
 			ShowMe();
 		}
 
-		public void ShowMe()
-		{
-			// Fuck windows, seriously.
+	    public void ShowMe()
+	    {
+	        // Fuck windows, seriously.
 
-			ClientCommunication.BringToFront( this.Handle );
-			if ( Config.GetBool( "AlwaysOnTop" ) )
-				this.TopMost = true;
-			if ( WindowState != FormWindowState.Normal )
-				WindowState = FormWindowState.Normal;
-		}
+	        ClientCommunication.BringToFront(this.Handle);
+	        if (Config.GetBool("AlwaysOnTop"))
+	            this.TopMost = true;
+	        if (WindowState != FormWindowState.Normal)
+	            WindowState = FormWindowState.Normal;
+
+	        if (JMap != null)
+	        {
+	            JMap.TopMost = true;
+	        }
+	    }
 
 		private void HideMe(object sender, System.EventArgs e)
 		{
@@ -6362,7 +6367,14 @@ namespace Assistant
 			this.TopMost = false;
 			this.SendToBack();
 			this.Hide();
-		}
+
+		    if (JMap != null)
+		    {
+		        JMap.TopMost = false;
+                  JMap.SendToBack();
+		        JMap.Hide();
+            }
+        }
 
 		private void NotifyIcon_DoubleClick(object sender, System.EventArgs e)
 		{
@@ -6963,7 +6975,7 @@ namespace Assistant
 
 		public Assistant.MapUO.MapWindow MapWindow;
 
-        public Assistant.JMap.JimmyMap jMap;
+        public Assistant.JMap.JimmyMap JMap;
 
         [System.Runtime.InteropServices.DllImport( "user32.dll" )]
 		private static extern IntPtr SetParent( IntPtr child, IntPtr newParent );
@@ -7359,18 +7371,18 @@ namespace Assistant
 
         private void openUOPS_Click(object sender, EventArgs e)
         {
-            if (jMap == null)
+            if (JMap == null)
             {
-                jMap = new Assistant.JMap.JimmyMap()
+                JMap = new Assistant.JMap.JimmyMap()
                 {
                     mainForm = this
                 };
             }
 
-            jMap.Show();
-            jMap.BringToFront();
+            JMap.Show();
+            JMap.BringToFront();
 
-            jMap.Enabled = true;
+            JMap.Enabled = true;
             
 
             //SetParent(jMap.Handle, ClientCommunication.FindUOWindow());
@@ -7424,18 +7436,18 @@ namespace Assistant
 
             if (e.NewValue == CheckState.Checked)
 	        {
-	            jMap?.mapPanel.ReadMarkers($"{Config.GetInstallDirectory("JMap")}\\{mapPins.SelectedItem}.csv");
+	            JMap?.mapPanel.ReadMarkers($"{Config.GetInstallDirectory("JMap")}\\{mapPins.SelectedItem}.csv");
 
-	            jMap?.mapPanel.UpdateAll();
+	            JMap?.mapPanel.UpdateAll();
 
 	            list = string.IsNullOrEmpty(list) ? $"{mapPins.SelectedItem}" : $"{list},{mapPins.SelectedItem}";
 
             }
 	        else
 	        {
-	            jMap?.mapPanel.RemoveMarkers($"{mapPins.SelectedItem}");
+	            JMap?.mapPanel.RemoveMarkers($"{mapPins.SelectedItem}");
 
-	            jMap?.mapPanel.UpdateAll();
+	            JMap?.mapPanel.UpdateAll();
 
 	            List<string> items = list.Split(',').ToList();
 	            items.Remove(mapPins.SelectedItem.ToString());
@@ -7524,8 +7536,8 @@ namespace Assistant
 	    {
 	        Config.SetProperty("GuardLinesFile", JMap_GuardlineDropdown.Text);
 
-	        if (jMap != null)
-	            jMap.mapPanel.LoadGuardLines();
+	        if (JMap != null)
+	            JMap.mapPanel.LoadGuardLines();
 	    }
 
     }

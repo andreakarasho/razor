@@ -679,8 +679,8 @@ namespace Assistant
 				if ( Engine.MainWindow != null && Engine.MainWindow.MapWindow != null )
 					Engine.MainWindow.MapWindow.PlayerMoved();
 
-                if (Engine.MainWindow != null && Engine.MainWindow.jMap != null)
-                    Engine.MainWindow.jMap.PlayerMoved();
+                if (Engine.MainWindow != null && Engine.MainWindow.JMap != null)
+                    Engine.MainWindow.JMap.PlayerMoved();
             }
 		}
 
@@ -751,8 +751,8 @@ namespace Assistant
 			if ( Engine.MainWindow != null && Engine.MainWindow.MapWindow != null )
 				Engine.MainWindow.MapWindow.PlayerMoved();
 
-            if (Engine.MainWindow != null && Engine.MainWindow.jMap != null)
-                Engine.MainWindow.jMap.PlayerMoved();
+            if (Engine.MainWindow != null && Engine.MainWindow.JMap != null)
+                Engine.MainWindow.JMap.PlayerMoved();
         }
 
 		/*public override void OnMapChange( byte old, byte cur )

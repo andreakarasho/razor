@@ -483,8 +483,8 @@ namespace Assistant
             if (this != World.Player && Engine.MainWindow.MapWindow != null)
                 Engine.MainWindow.MapWindow.CheckLocalUpdate(this);
 
-            if (this != World.Player && Engine.MainWindow.jMap != null)
-                Engine.MainWindow.jMap.CheckLocalUpdate(this);
+            if (this != World.Player && Engine.MainWindow.JMap != null)
+                Engine.MainWindow.JMap.CheckLocalUpdate(this);
 
             base.OnPositionChanging(newPos);
         }

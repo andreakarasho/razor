@@ -28,11 +28,6 @@ namespace Assistant.Core
 
             if (!File.Exists(mibLog))
             {
-                using (StreamWriter sr = File.CreateText(mibLog))
-                {
-                    sr.WriteLine("Timestamp,Coordinates,X,Y,UOAM");
-                }
-
                 File.Create(mibLog);
             }
 
