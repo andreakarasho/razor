@@ -84,6 +84,17 @@ namespace Assistant.Core
             {
                 xAxis = (int) (1323 + (xMinute / 60) * (5120.0 / 360) + xDegree * (5120.0 / 360));
             }
+
+            // Normalize values outside of map range.
+            if (xAxis < 0)
+                xAxis += 5120;
+            else if (xAxis > 5120)
+                xAxis -= 5120;
+
+            if (yAxis < 0)
+                yAxis += 4096;
+            else if (yAxis > 4096)
+                yAxis -= 4096;
         }
     }
 }

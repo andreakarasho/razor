@@ -830,7 +830,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="JMap\PlayerHouses.csv">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="JMap\Resources\Palettes\felucca.pal">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -851,7 +851,6 @@
     <None Include="Razor.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="JMap\Resources\Markers\" />
     <Folder Include="JMap\Resources\Signs\" />
   </ItemGroup>
   <ItemGroup>

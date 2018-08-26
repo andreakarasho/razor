@@ -12,6 +12,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using Ultima;
+using Assistant.Core;
 
 namespace Assistant.JMap
 {
@@ -87,10 +88,10 @@ namespace Assistant.JMap
         ArrayList markedLocations = new ArrayList();
 
         public List<JMapButton> mapButtons = new List<JMapButton>();
-        ArrayList bufferingMapButtons = new ArrayList();
-        ArrayList visibleMapButtons = new ArrayList();
+        List<JMapButton> bufferingMapButtons = new List<JMapButton>();
+        List<JMapButton> visibleMapButtons = new List<JMapButton>();
 
-        public ArrayList hoverRegions = new ArrayList();
+        public List<Tuple<RectangleF, int>> hoverRegions = new List<Tuple<RectangleF, int>>();
 
         public bool IsUpdatingMarkers;
         public BackgroundWorker mapMarkerWorker;
@@ -98,8 +99,9 @@ namespace Assistant.JMap
 
         //Houses
         public List<JMapButton> houseButtons = new List<JMapButton>();
-        ArrayList bufferingHouseButtons = new ArrayList();
-        ArrayList visibleHouseButtons = new ArrayList(); //obviously MUST be empty
+        List<JMapButton> bufferingHouseButtons = new List<JMapButton>();
+        List<JMapButton> visibleHouseButtons = new List<JMapButton>(); //obviously MUST be empty
+        public List<Tuple<RectangleF, int>> houseHoverRegions = new List<Tuple<RectangleF, int>>();
 
         public bool IsUpdatingHouses;
         public BackgroundWorker houseMarkerWorker;
@@ -364,6 +366,8 @@ namespace Assistant.JMap
 
             jMapMain.Text = $"UO Map - {this.FocusMobile.Name}";
             UpdateAll();//additional one to fire off rendering again, because it's gay
+
+            MessageInBottleCapture.CaptureMibCoordinates("130°15'N,63°16'W");
         }
 
         private void LoadCheckedMarkers()
@@ -460,7 +464,9 @@ namespace Assistant.JMap
                 {
                     foreach (Tuple<RectangleF, int> btnRef in hoverRegions)
                     {
+                        
                         JMapButton btn = (JMapButton)visibleMapButtons[btnRef.Item2];
+
                         if (btnRef.Item1.Contains(mousePosNow))
                         {
                             btn.IsHovered = true;
@@ -552,9 +558,72 @@ namespace Assistant.JMap
                             Invalidate();
                         }
                     }
+
+                    foreach (Tuple<RectangleF, int> btnRef in houseHoverRegions)
+                    {
+
+                        JMapButton btn = (JMapButton)visibleHouseButtons[btnRef.Item2];
+
+                        if (btnRef.Item1.Contains(mousePosNow))
+                        {
+                            btn.IsHovered = true;
+                        }
+                        if (btn.IsHovered)
+                        {
+                            Brush btnColorBrush = new SolidBrush(btn.textColor);
+                            Pen btnColorPen = new Pen(btnColorBrush);
+
+                            MarkerToEdit = btn;
+                            Graphics gfx = CreateGraphics();
+
+                            if (btn.type == JMapButtonType.PlayerHouse)
+                            {
+                                RectangleF highlightRect = new RectangleF((btn.renderLoc.X + btn.hotSpot.X), (btn.renderLoc.Y + btn.hotSpot.Y), 6, 6);
+                                gfx.DrawRectangle(btnColorPen, Rectangle.Round(highlightRect));
+                            }
+
+                            SizeF strLength = gfx.MeasureString(btn.displayText, m_RegFont);
+                            gfx.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+
+                            string displayString = "";
+
+                            if (DisplayMarkerNames)
+                            {
+                                if (btn.displayText.Length > 0)
+                                    displayString = btn.displayText;
+                            }
+                            if (DisplayMarkerCoords)
+                            {
+                                if (btn.displayText.Length > 0)
+                                    displayString += "\n" + btn.mapLoc.X + "," + btn.mapLoc.Y;
+                                else
+                                    displayString = btn.mapLoc.X + "," + btn.mapLoc.Y;
+                            }
+                            if (displayString != "")
+                            {
+                                gfx.DrawString(displayString, m_RegFont, btnColorBrush, btn.renderLoc.X + btn.hotSpot.X, (btn.renderLoc.Y - 5) - (strLength.Height / 2), stringFormat);
+                            }
+
+                            btnColorPen.Dispose();
+                            btnColorBrush.Dispose();
+                            gfx.Dispose();
+                        }
+                        if (!btnRef.Item1.Contains(mousePosNow) && btn.IsHovered)
+                        {
+                            if (!AddingMarker && !EditingMarker)
+                            {
+                                MarkerToEdit = null;
+                            }
+                            btn.IsHovered = false;
+                            Invalidate();
+                        }
+                    }
                 }
             }
-            catch { }
+            catch(Exception e)
+            {
+                Debug.WriteLine($"HOVER ERROR: {e.ToString()}");
+            }
 
         }
 
@@ -593,13 +662,13 @@ namespace Assistant.JMap
         {
             houseWorkerState = HouseWorkerStates.UpdatingVisible;
             visibleHouseButtons = bufferingHouseButtons;
-            hoverRegions.Clear();
+            houseHoverRegions.Clear();
             foreach (JMapButton btn in visibleHouseButtons)
             {
                 Tuple<RectangleF, int> btnRef = MarkerReference(btn, visibleHouseButtons.IndexOf(btn));
 
-                if (!hoverRegions.Contains(btnRef))
-                    hoverRegions.Add(btnRef);
+                if (!houseHoverRegions.Contains(btnRef))
+                    houseHoverRegions.Add(btnRef);
                 else
                     Debug.WriteLine("HoverRegions already contains this reference");
             }
@@ -996,10 +1065,35 @@ namespace Assistant.JMap
                     {
                         btn.UpdateButton();
 
-                        RectangleF rectF = new RectangleF(btn.renderLoc.X, btn.renderLoc.Y, btn.renderSize.Width, btn.renderSize.Height);
+                        RectangleF rectF = new RectangleF(btn.renderLoc.X, btn.renderLoc.Y, btn.renderSize.Width * offset.X, btn.renderSize.Height * offset.Y);
                         Rectangle pinRect = Rectangle.Round(rectF);
 
+                        //PointF rotPoint = new PointF((btn.renderLoc.X + btn.hotSpot.X),
+                        //                                (btn.renderLoc.Y + btn.hotSpot.Y));
+
+                        //PointF tl = new PointF(Convert.ToInt32(Math.Floor((double)(rectF.X))), Convert.ToInt32(Math.Floor((double)rectF.Y)));
+                        //PointF tr = new PointF(Convert.ToInt32(Math.Floor((double)(rectF.X + rectF.Width))), Convert.ToInt32(Math.Floor((double)rectF.Y)));
+                        //PointF bl = new PointF(Convert.ToInt32(Math.Floor((double)(rectF.X))), Convert.ToInt32(Math.Floor((double)rectF.Y + rectF.Height)));
+                        //PointF br = new PointF(Convert.ToInt32(Math.Floor((double)(rectF.X + rectF.Width))), Convert.ToInt32(Math.Floor((double)rectF.Y + rectF.Height)));
+
+                        if (mapRotated)
+                        {
+                            pe.Graphics.TranslateTransform(btn.renderLoc.X, btn.renderLoc.Y);
+                            pe.Graphics.RotateTransform(45);
+                            pe.Graphics.TranslateTransform(-btn.renderLoc.X, -btn.renderLoc.Y);
+
+                            //tl = RotatePointF(tl, zeroPoint, 45);
+                            //tr = RotatePointF(tr, zeroPoint, 45);
+                            //bl = RotatePointF(bl, zeroPoint, 45);
+                            //br = RotatePointF(br, zeroPoint, 45);
+                        }
+
+                        //PointF[] rgn = new PointF[] { tl, tr, br, bl };
+                        //pe.Graphics.DrawImage(btn.img, rgn);
+
                         pe.Graphics.DrawImage(btn.img, pinRect);
+                        
+                        pe.Graphics.ResetTransform();
                     }
 
 
@@ -1720,8 +1814,6 @@ namespace Assistant.JMap
             {
                 MarkerUpdateWorker();
             }
-
-            Debug.WriteLine($"HouseButton Count: {houseButtons.Count}");
         }
 
         public void TrackPetsParty()
@@ -2281,7 +2373,7 @@ namespace Assistant.JMap
                 }
 
                 string old = Path.GetFileNameWithoutExtension(path);
-                File.Copy(path, path + ".BAK");
+                File.Copy($"{Config.GetInstallDirectory("JMap")}\\Houses.map", $"{Config.GetInstallDirectory("JMap")}\\" + old + "BAK.map");
                 File.Delete(path);
             }
             
@@ -2332,8 +2424,6 @@ namespace Assistant.JMap
                 int i = 0;
                 foreach (string[] line in lines)
                 {
-                    //markedLocations.Add(line);
-                    
                     float x = float.Parse(line[0]);
                     float y = float.Parse(line[1]);
                     string text = line[2];
@@ -2346,12 +2436,10 @@ namespace Assistant.JMap
                     if(fileName.Equals("PlayerHouses"))
                     {
                         houseButtons.Add(btn);
-                        Debug.WriteLine($"Adding House Button: {text},{x},{y}");
                     }
                     else
                     {
                         mapButtons.Add(btn);
-                        Debug.WriteLine($"Adding Map Button: {text},{x},{y}");
                     }
                     
                     btn.LoadButton();
@@ -2362,12 +2450,27 @@ namespace Assistant.JMap
 
         public void RemoveMarkers(string id)
         {
-            List<JMapButton> markersToRemove = mapButtons.Where(x => x.id.Equals(id)).ToList();
-
-            foreach (JMapButton jMapButton in markersToRemove)
+            if(id.Equals("PlayerHouses"))
             {
-                DeleteMarker(jMapButton);
+                List<JMapButton> housesToRemove = houseButtons.Where(x => x.id.Equals(id)).ToList();
+                foreach (JMapButton jMapHouse in housesToRemove)
+                {
+                    DeleteMarker(jMapHouse);
+                }
             }
+            else
+            {
+                List<JMapButton> markersToRemove = mapButtons.Where(x => x.id.Equals(id)).ToList();
+                foreach (JMapButton jMapButton in markersToRemove)
+                {
+                    DeleteMarker(jMapButton);
+                }
+            }
+                
+
+            
+
+
         }
 
         public static bool Format(Point p, Ultima.Map map, ref int xLong, ref int yLat, ref int xMins, ref int yMins, ref bool xEast, ref bool ySouth)

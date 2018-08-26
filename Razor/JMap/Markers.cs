@@ -10,19 +10,31 @@ namespace Assistant.JMap
 {
     static class Markers
     {
-        [DllImport("user32.dll")]
-        static extern IntPtr LoadIcon(IntPtr hInstance, string lpIconName);
-
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern IntPtr LoadCursorFromFile(string path);
-        
-        [DllImport("user32")]
+
+        public static Cursor LoadCursor(string path)
+        {
+            IntPtr handle = LoadCursorFromFile(path);
+            if (handle == IntPtr.Zero) throw new Win32Exception();
+            var curs = new Cursor(handle);
+            // Note: force the cursor to own the handle so it gets released properly
+            var fi = typeof(Cursor).GetField("ownHandle", BindingFlags.NonPublic | BindingFlags.Instance);
+            fi.SetValue(curs, true);
+            return curs;
+        }
+
+        /*[DllImport("user32.dll")]
+        static extern IntPtr LoadIcon(IntPtr hInstance, string lpIconName);
+        */
+        /*[DllImport("user32.dll")]
         private static extern bool GetIconInfo(IntPtr hIcon, out ICONINFO pIconInfo);
-
-        [DllImport("gdi32.dll", SetLastError = true)]
+        */
+        /*[DllImport("gdi32.dll", SetLastError = true)]
         private static extern bool DeleteObject(IntPtr hObject);
+        */
 
-        [StructLayout(LayoutKind.Sequential)]
+        /*[StructLayout(LayoutKind.Sequential)]
         private struct ICONINFO
         {
             public bool fIcon;
@@ -30,9 +42,9 @@ namespace Assistant.JMap
             public int yHotspot;
             public IntPtr hbmMask;
             public IntPtr hbmColor;
-        }
+        }*/
 
-        public static Bitmap BitmapFromCursor(Cursor cur)
+        /*public static Bitmap BitmapFromCursor(Cursor cur)
         {
             ICONINFO ii;
             GetIconInfo(cur.Handle, out ii);
@@ -47,20 +59,11 @@ namespace Assistant.JMap
             bmp.UnlockBits(bmData);
 
             return new Bitmap(dstBitmap);
-        }
-        
-        public static Cursor LoadCursor(string path)
-        {
-            IntPtr handle = LoadCursorFromFile(path);
-            if (handle == IntPtr.Zero) throw new Win32Exception();
-            var curs = new Cursor(handle);
-            // Note: force the cursor to own the handle so it gets released properly
-            var fi = typeof(Cursor).GetField("ownHandle", BindingFlags.NonPublic | BindingFlags.Instance);
-            fi.SetValue(curs, true);
-            return curs;
-        }
+        }*/
 
-        public static Icon LoadIcon(string path)
+
+
+        /*public static Icon LoadIcon(string path)
         {
             IntPtr handle = LoadIcon(IntPtr.Zero, path);
             if (handle == IntPtr.Zero) throw new Win32Exception();
@@ -69,9 +72,9 @@ namespace Assistant.JMap
             var fi = typeof(Cursor).GetField("ownHandle", BindingFlags.NonPublic | BindingFlags.Instance);
             fi.SetValue(curs, true);
             return curs;
-        }
+        }*/
 
-        public static Cursor CursorFromBitmap(Bitmap bmp)
+        /*public static Cursor CursorFromBitmap(Bitmap bmp)
         {
             IntPtr handle = bmp.GetHbitmap(Color.White);
             if (handle == IntPtr.Zero) throw new Win32Exception();
@@ -79,6 +82,6 @@ namespace Assistant.JMap
             var fi = typeof(Cursor).GetField("ownHandle", BindingFlags.NonPublic | BindingFlags.Instance);
             fi.SetValue(curs, true);
             return curs;
-        }
+        }*/
     }
 }

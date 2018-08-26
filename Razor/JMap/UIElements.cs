@@ -91,7 +91,6 @@ namespace Assistant.JMap
         }
         private static JMapButton PlayerHouse(MapPanel mapPanel, JMapButtonType type, float mapLocX, float mapLocY, string buttonId, string displayText = "", string variant = "")
         {
-            Debug.WriteLine($"Adding PlayerHouse: {variant}, {mapLocX}, {mapLocY}");
             try
             {
                 return new JMapButton()
@@ -147,6 +146,8 @@ namespace Assistant.JMap
         public ImageAttributes imgAttr { get; set; }
         private Region hitbox { get; set; } //?? maybe not
         public PointF mapLoc { get; set; }
+        public PointF adjustLoc { get; set; }
+
         public Point hotSpot { get; set; }
         public PointF renderPoint { get; set; }
         public PointF renderLoc { get; set; }
@@ -218,9 +219,11 @@ namespace Assistant.JMap
             }
 
             renderPoint = new PointF(
-                                    Convert.ToInt32((Math.Floor((double)((mapLoc.X * offset.X) + zeroPoint.X)))),
-                                    Convert.ToInt32((Math.Floor((double)(mapLoc.Y * offset.Y) + zeroPoint.Y))));
+                                    Convert.ToInt32((Math.Floor((double)(((mapLoc.X) * offset.X) + zeroPoint.X)))),
+                                    Convert.ToInt32((Math.Floor((double)((mapLoc.Y) * offset.Y) + zeroPoint.Y))));
 
+
+            adjustLoc = new PointF(adjustLoc.X * offset.X, adjustLoc.Y * offset.Y);
 
             renderLoc = renderPoint;
 
@@ -230,7 +233,6 @@ namespace Assistant.JMap
                 this.hotSpot = new Point(this.renderSize.Width / 2,
                                          this.renderSize.Height + (2 * Convert.ToInt32(Math.Floor((double)offset.Y))));
             }
-                
 
             if (mapPanel.mapRotated)
             {
@@ -238,9 +240,10 @@ namespace Assistant.JMap
                 renderLoc = new PointF(Convert.ToInt32(Math.Floor((double)(renderLoc.X))), Convert.ToInt32(Math.Floor((double)(renderLoc.Y))));
             }
 
-
-
-            renderLoc = new PointF(renderLoc.X - hotSpot.X, renderLoc.Y - hotSpot.Y);
+            if(type == JMapButtonType.PlayerHouse)
+                renderLoc = new PointF((renderLoc.X), (renderLoc.Y));   //////RAGE!!!!!
+            else
+                renderLoc = new PointF(renderLoc.X - hotSpot.X, renderLoc.Y - hotSpot.Y);
         }
 
         public void LoadButton()
@@ -289,9 +292,57 @@ namespace Assistant.JMap
                     this.cur = Markers.LoadCursor(this.curPath);
                     Icon i = Icon.ExtractAssociatedIcon(this.curPath);
                     this.img = i.ToBitmap();
-
-                    this.renderSize = new Size(24, 16); //NOT THE HOUSE SIZE! A test! :)
                     this.hotSpot = cur.HotSpot;
+
+                    switch (Variant)
+                    {
+                        case "CASTLE":
+                            this.renderSize = new Size(32, 32);
+                            break;
+                        case "KEEP":
+                            this.renderSize = new Size(24, 24);
+                            break;
+                        case "LARGEHOUSE":
+                            this.renderSize = new Size(15, 15);
+                            break;
+                        case "LOGCABIN":
+                            this.renderSize = new Size(8, 14);
+                            break;
+                        case "MARPATIO":
+                            this.renderSize = new Size(15, 15);
+                            break;
+                        case "PATIO":
+                            this.renderSize = new Size(16, 15);
+                            break;
+                        case "SMALLHOUSE":
+                            this.renderSize = new Size(8, 8);
+                            break;
+                        case "SMLMSHOP":
+                            this.renderSize = new Size(7, 8);
+                            break;
+                        case "SMLSSHOP":
+                            this.renderSize = new Size(8, 8);
+                            break;
+                        case "SMLTOWER":
+                            this.renderSize = new Size(8, 9);
+                            this.adjustLoc = new PointF(-3, 1);
+                            break;
+                        case "SNDPATIO":
+                            this.renderSize = new Size(12, 9);
+                            break;
+                        case "TENT":
+                            this.renderSize = new Size(8, 8);
+                            break;
+                        case "TOWER":
+                            this.renderSize = new Size(24, 16);
+                            break;
+                        case "TWOSTORY":
+                            this.renderSize = new Size(14, 15);
+                            break;
+                        case "VILLA":
+                            this.renderSize = new Size(12, 12);
+                            break;
+                    }
                 }
 
                 else if (type == JMapButtonType.UOPoint)
