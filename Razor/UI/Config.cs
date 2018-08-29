@@ -184,7 +184,7 @@ namespace Assistant
 
             AddProperty("GuardLinesFile", "uorguardlines");
 
-	        AddProperty("MapSelectedPinList", "");
+	        AddProperty("MapSelectedPinList", "uopoints");
 
             Counter.Default();
 	        Filter.DisableAll();

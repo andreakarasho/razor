@@ -28,12 +28,7 @@ namespace Assistant.Core
             {
                 Directory.CreateDirectory($"{Config.GetInstallDirectory()}\\JMap");
             }
-
-            if (!File.Exists(mibLog))
-            {
-                File.Create(mibLog);
-            }
-
+            
             // 130°15'N,63°16'W
 
             int xAxis = 0;
@@ -56,6 +51,8 @@ namespace Assistant.Core
             {
                 sw.WriteLine($"{xAxis},{yAxis},mib,");
             }
+
+            World.Player.SendMessage(MsgLevel.Force, $"MIB Captured: {xAxis},{yAxis}");
         }
 
 
