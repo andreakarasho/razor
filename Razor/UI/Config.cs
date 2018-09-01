@@ -186,6 +186,10 @@ namespace Assistant
 
 	        AddProperty("MapSelectedPinList", "uopoints");
 
+	        AddProperty("ShowBuffDebuffOverhead", false);
+            AddProperty("BuffDebuffFormat", "[{action}{name}]");
+
+
             Counter.Default();
 	        Filter.DisableAll();
 	        DressList.ClearAll();
