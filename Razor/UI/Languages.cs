@@ -425,6 +425,10 @@ namespace Assistant
         AddUseOnceContainer,
         ChickenSounds,
         JMapHotkey,
+        ScavengerEnableDisable,
+        ScavengerSetHotBag,
+        ScavengerAddTarget,
+
 
         __End
     }
