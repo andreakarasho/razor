@@ -428,6 +428,7 @@ namespace Assistant
         ScavengerEnableDisable,
         ScavengerSetHotBag,
         ScavengerAddTarget,
+        GoldPerHotkey,
 
 
         __End

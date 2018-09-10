@@ -12,6 +12,7 @@ namespace Assistant.HotKeys
             HotKey.Add(HKCategory.Misc, LocString.VidStop, new HotKeyCallback(PacketPlayer.Stop));
 
             HotKey.Add(HKCategory.Misc, LocString.JMapHotkey, new HotKeyCallback(ToggleJMapVisibility));
+            HotKey.Add(HKCategory.Misc, LocString.GoldPerHotkey, new HotKeyCallback(ToggleGoldPer));
 
             HotKey.Add(HKCategory.Misc, LocString.ClearDragDropQueue, new HotKeyCallback(DragDropManager.GracefulStop));
 
@@ -46,10 +47,13 @@ namespace Assistant.HotKeys
         {
             if (Engine.MainWindow.JMap != null && Engine.MainWindow.JMap.Visible)
             {
+                World.Player.SendMessage(MsgLevel.Force, "Hiding JMap");
                 Engine.MainWindow.JMap.Close();
             }
             else
             {
+                World.Player.SendMessage(MsgLevel.Force, "Showing JMap");
+
                 if (Engine.MainWindow.JMap == null)
                 {
                     Engine.MainWindow.JMap = new Assistant.JMap.JimmyMap()
@@ -61,6 +65,20 @@ namespace Assistant.HotKeys
                 Engine.MainWindow.JMap.Show();
                 Engine.MainWindow.JMap.BringToFront();
                 Engine.MainWindow.JMap.Enabled = true;
+            }
+        }
+
+        private static void ToggleGoldPer()
+        {
+            if (GoldPerHourTimer.Running)
+            {
+                World.Player.SendMessage(MsgLevel.Force, "Stopping 'GoldPer Timer'");
+                GoldPerHourTimer.Stop();
+            }
+            else
+            {
+                World.Player.SendMessage(MsgLevel.Force, "Starting 'GoldPer Timer' when you loot your first gold");
+                GoldPerHourTimer.Start();
             }
         }
 
