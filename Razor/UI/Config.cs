@@ -189,6 +189,8 @@ namespace Assistant
 	        AddProperty("ShowBuffDebuffOverhead", false);
             AddProperty("BuffDebuffFormat", "[{action}{name}]");
 
+            AddProperty("BlockOpenCorpsesTwice", false);
+
 
             Counter.Default();
 	        Filter.DisableAll();
