@@ -542,8 +542,9 @@ namespace Assistant
                 Direction dir = (Direction)p.ReadByte();
                 sbyte z = p.ReadSByte();
 
-                if (WalkAction.IsMacroWalk(seq))
-                    args.Block = true;
+                //if (WalkAction.IsMacroWalk(seq))
+                //    args.Block = true;
+                
                 World.Player.MoveRej(seq, dir, new Point3D(x, y, z));
             }
         }
@@ -557,8 +558,8 @@ namespace Assistant
                 byte seq = p.ReadByte();
                 World.Player.Notoriety = p.ReadByte();
 
-                if (WalkAction.IsMacroWalk(seq))
-                    args.Block = true;
+                //if (WalkAction.IsMacroWalk(seq))
+                //    args.Block = true;
 
                 args.Block |= !World.Player.MoveAck(seq);
 
