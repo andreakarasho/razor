@@ -292,6 +292,8 @@ namespace Assistant
         private ListBox imgurUploads;
         private CheckBox screenShotClipboard;
         private CheckBox showAttackTarget;
+        private CheckBox rangeCheckTargetByType;
+        private CheckBox rangeCheckDoubleClick;
         private TreeView _hotkeyTreeViewCache = new TreeView();
 
 		[DllImport( "User32.dll" )]
@@ -409,6 +411,7 @@ namespace Assistant
             this.label3 = new System.Windows.Forms.Label();
             this.incomingCorpse = new System.Windows.Forms.CheckBox();
             this.moreMoreOptTab = new System.Windows.Forms.TabPage();
+            this.showAttackTarget = new System.Windows.Forms.CheckBox();
             this.lblBuffDebuff = new System.Windows.Forms.Label();
             this.buffDebuffFormat = new System.Windows.Forms.TextBox();
             this.showBuffDebuffOverhead = new System.Windows.Forms.CheckBox();
@@ -520,6 +523,7 @@ namespace Assistant
             this.chkAlt = new System.Windows.Forms.CheckBox();
             this.chkShift = new System.Windows.Forms.CheckBox();
             this.macrosTab = new System.Windows.Forms.TabPage();
+            this.rangeCheckTargetByType = new System.Windows.Forms.CheckBox();
             this.nextMacroAction = new System.Windows.Forms.Button();
             this.stepThroughMacro = new System.Windows.Forms.CheckBox();
             this.expandAdvancedMacros = new System.Windows.Forms.Button();
@@ -612,7 +616,7 @@ namespace Assistant
             this.aboutVer = new System.Windows.Forms.Label();
             this.timerTimer = new System.Windows.Forms.Timer(this.components);
             this.razorNotify = new System.Windows.Forms.NotifyIcon(this.components);
-            this.showAttackTarget = new System.Windows.Forms.CheckBox();
+            this.rangeCheckDoubleClick = new System.Windows.Forms.CheckBox();
             this.tabs.SuspendLayout();
             this.generalTab.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -1272,6 +1276,17 @@ namespace Assistant
             this.moreMoreOptTab.Size = new System.Drawing.Size(482, 460);
             this.moreMoreOptTab.TabIndex = 10;
             this.moreMoreOptTab.Text = "More Options";
+            // 
+            // showAttackTarget
+            // 
+            this.showAttackTarget.AutoSize = true;
+            this.showAttackTarget.Location = new System.Drawing.Point(245, 263);
+            this.showAttackTarget.Name = "showAttackTarget";
+            this.showAttackTarget.Size = new System.Drawing.Size(209, 19);
+            this.showAttackTarget.TabIndex = 80;
+            this.showAttackTarget.Text = "Show attack target name overhead";
+            this.showAttackTarget.UseVisualStyleBackColor = true;
+            this.showAttackTarget.CheckedChanged += new System.EventHandler(this.showAttackTarget_CheckedChanged);
             // 
             // lblBuffDebuff
             // 
@@ -2365,6 +2380,8 @@ namespace Assistant
             // 
             // macrosTab
             // 
+            this.macrosTab.Controls.Add(this.rangeCheckDoubleClick);
+            this.macrosTab.Controls.Add(this.rangeCheckTargetByType);
             this.macrosTab.Controls.Add(this.nextMacroAction);
             this.macrosTab.Controls.Add(this.stepThroughMacro);
             this.macrosTab.Controls.Add(this.expandAdvancedMacros);
@@ -2380,10 +2397,21 @@ namespace Assistant
             this.macrosTab.TabIndex = 7;
             this.macrosTab.Text = "Macros";
             // 
+            // rangeCheckTargetByType
+            // 
+            this.rangeCheckTargetByType.AutoSize = true;
+            this.rangeCheckTargetByType.Location = new System.Drawing.Point(267, 290);
+            this.rangeCheckTargetByType.Name = "rangeCheckTargetByType";
+            this.rangeCheckTargetByType.Size = new System.Drawing.Size(190, 19);
+            this.rangeCheckTargetByType.TabIndex = 9;
+            this.rangeCheckTargetByType.Text = "Range check on \'TargetByType\'";
+            this.rangeCheckTargetByType.UseVisualStyleBackColor = true;
+            this.rangeCheckTargetByType.CheckedChanged += new System.EventHandler(this.rangeCheckTargetByType_CheckedChanged);
+            // 
             // nextMacroAction
             // 
             this.nextMacroAction.Enabled = false;
-            this.nextMacroAction.Location = new System.Drawing.Point(407, 287);
+            this.nextMacroAction.Location = new System.Drawing.Point(407, 352);
             this.nextMacroAction.Name = "nextMacroAction";
             this.nextMacroAction.Size = new System.Drawing.Size(60, 23);
             this.nextMacroAction.TabIndex = 8;
@@ -2394,7 +2422,7 @@ namespace Assistant
             // stepThroughMacro
             // 
             this.stepThroughMacro.AutoSize = true;
-            this.stepThroughMacro.Location = new System.Drawing.Point(267, 290);
+            this.stepThroughMacro.Location = new System.Drawing.Point(267, 355);
             this.stepThroughMacro.Name = "stepThroughMacro";
             this.stepThroughMacro.Size = new System.Drawing.Size(135, 19);
             this.stepThroughMacro.TabIndex = 7;
@@ -3149,6 +3177,7 @@ namespace Assistant
             // jsonApi
             // 
             this.jsonApi.AutoSize = true;
+            this.jsonApi.Enabled = false;
             this.jsonApi.Location = new System.Drawing.Point(202, 148);
             this.jsonApi.Name = "jsonApi";
             this.jsonApi.Size = new System.Drawing.Size(113, 19);
@@ -3354,16 +3383,16 @@ namespace Assistant
             this.razorNotify.Icon = ((System.Drawing.Icon)(resources.GetObject("razorNotify.Icon")));
             this.razorNotify.Visible = true;
             // 
-            // showAttackTarget
+            // rangeCheckDoubleClick
             // 
-            this.showAttackTarget.AutoSize = true;
-            this.showAttackTarget.Location = new System.Drawing.Point(245, 263);
-            this.showAttackTarget.Name = "showAttackTarget";
-            this.showAttackTarget.Size = new System.Drawing.Size(209, 19);
-            this.showAttackTarget.TabIndex = 80;
-            this.showAttackTarget.Text = "Show attack target name overhead";
-            this.showAttackTarget.UseVisualStyleBackColor = true;
-            this.showAttackTarget.CheckedChanged += new System.EventHandler(this.showAttackTarget_CheckedChanged);
+            this.rangeCheckDoubleClick.AutoSize = true;
+            this.rangeCheckDoubleClick.Location = new System.Drawing.Point(267, 315);
+            this.rangeCheckDoubleClick.Name = "rangeCheckDoubleClick";
+            this.rangeCheckDoubleClick.Size = new System.Drawing.Size(208, 19);
+            this.rangeCheckDoubleClick.TabIndex = 10;
+            this.rangeCheckDoubleClick.Text = "Range check on \'DoubleClickType\'";
+            this.rangeCheckDoubleClick.UseVisualStyleBackColor = true;
+            this.rangeCheckDoubleClick.CheckedChanged += new System.EventHandler(this.rangeCheckDoubleClick_CheckedChanged);
             // 
             // MainForm
             // 
@@ -3733,6 +3762,9 @@ namespace Assistant
             screenShotNotification.Checked = Config.GetBool("ScreenshotUploadNotifications");
 
             showAttackTarget.Checked = Config.GetBool("ShowAttackTargetOverhead");
+
+            rangeCheckTargetByType.Checked = Config.GetBool("RangeCheckTargetByType");
+            rangeCheckDoubleClick.Checked = Config.GetBool("RangeCheckDoubleClick");
 
             // Disable SmartCPU in case it was enabled before the feature was removed
             ClientCommunication.SetSmartCPU(false);
@@ -7899,6 +7931,16 @@ namespace Assistant
         private void showAttackTarget_CheckedChanged(object sender, EventArgs e)
         {
             Config.SetProperty("ShowAttackTargetOverhead", showAttackTarget.Checked);
+        }
+
+        private void rangeCheckTargetByType_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.SetProperty("RangeCheckTargetByType", rangeCheckTargetByType.Checked);
+        }
+
+        private void rangeCheckDoubleClick_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.SetProperty("RangeCheckDoubleClick", rangeCheckDoubleClick.Checked);
         }
     }
 }

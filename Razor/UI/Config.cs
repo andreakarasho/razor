@@ -197,6 +197,10 @@ namespace Assistant
 
             AddProperty("ShowAttackTargetOverhead", true);
 
+            AddProperty("RangeCheckTargetByType", false);
+            AddProperty("RangeCheckDoubleClick", false);
+
+
             Counter.Default();
 	        Filter.DisableAll();
 	        DressList.ClearAll();
