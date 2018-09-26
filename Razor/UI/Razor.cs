@@ -521,6 +521,7 @@ namespace Assistant
             this.chkAlt = new System.Windows.Forms.CheckBox();
             this.chkShift = new System.Windows.Forms.CheckBox();
             this.macrosTab = new System.Windows.Forms.TabPage();
+            this.rangeCheckDoubleClick = new System.Windows.Forms.CheckBox();
             this.rangeCheckTargetByType = new System.Windows.Forms.CheckBox();
             this.nextMacroAction = new System.Windows.Forms.Button();
             this.stepThroughMacro = new System.Windows.Forms.CheckBox();
@@ -614,7 +615,6 @@ namespace Assistant
             this.aboutVer = new System.Windows.Forms.Label();
             this.timerTimer = new System.Windows.Forms.Timer(this.components);
             this.razorNotify = new System.Windows.Forms.NotifyIcon(this.components);
-            this.rangeCheckDoubleClick = new System.Windows.Forms.CheckBox();
             this.tabs.SuspendLayout();
             this.generalTab.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -1277,7 +1277,6 @@ namespace Assistant
             // 
             // showAttackTarget
             // 
-            this.showAttackTarget.AutoSize = true;
             this.showAttackTarget.Location = new System.Drawing.Point(245, 263);
             this.showAttackTarget.Name = "showAttackTarget";
             this.showAttackTarget.Size = new System.Drawing.Size(209, 19);
@@ -2398,6 +2397,17 @@ namespace Assistant
             this.macrosTab.TabIndex = 7;
             this.macrosTab.Text = "Macros";
             // 
+            // rangeCheckDoubleClick
+            // 
+            this.rangeCheckDoubleClick.AutoSize = true;
+            this.rangeCheckDoubleClick.Location = new System.Drawing.Point(267, 315);
+            this.rangeCheckDoubleClick.Name = "rangeCheckDoubleClick";
+            this.rangeCheckDoubleClick.Size = new System.Drawing.Size(208, 19);
+            this.rangeCheckDoubleClick.TabIndex = 10;
+            this.rangeCheckDoubleClick.Text = "Range check on \'DoubleClickType\'";
+            this.rangeCheckDoubleClick.UseVisualStyleBackColor = true;
+            this.rangeCheckDoubleClick.CheckedChanged += new System.EventHandler(this.rangeCheckDoubleClick_CheckedChanged);
+            // 
             // rangeCheckTargetByType
             // 
             this.rangeCheckTargetByType.AutoSize = true;
@@ -3383,17 +3393,6 @@ namespace Assistant
             this.razorNotify.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Info;
             this.razorNotify.Icon = ((System.Drawing.Icon)(resources.GetObject("razorNotify.Icon")));
             this.razorNotify.Visible = true;
-            // 
-            // rangeCheckDoubleClick
-            // 
-            this.rangeCheckDoubleClick.AutoSize = true;
-            this.rangeCheckDoubleClick.Location = new System.Drawing.Point(267, 315);
-            this.rangeCheckDoubleClick.Name = "rangeCheckDoubleClick";
-            this.rangeCheckDoubleClick.Size = new System.Drawing.Size(208, 19);
-            this.rangeCheckDoubleClick.TabIndex = 10;
-            this.rangeCheckDoubleClick.Text = "Range check on \'DoubleClickType\'";
-            this.rangeCheckDoubleClick.UseVisualStyleBackColor = true;
-            this.rangeCheckDoubleClick.CheckedChanged += new System.EventHandler(this.rangeCheckDoubleClick_CheckedChanged);
             // 
             // MainForm
             // 
