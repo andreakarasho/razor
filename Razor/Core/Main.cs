@@ -223,7 +223,6 @@ namespace Assistant
             
 			ClientLaunch launch = ClientLaunch.TwoD;
 
-			int attPID = -1;
 			string dataDir;
 
 			// check if the new ServerEncryption option is in app.config
@@ -248,8 +247,6 @@ namespace Assistant
 				ClientCommunication.ServerEncrypted = Utility.ToInt32( dataDir, 0 ) != 0;
 			}
 			dataDir = null;
-
-			bool advCmdLine = false;
 			
 			for (int i=0;i<Args.Length;i++)
 			{
@@ -257,16 +254,6 @@ namespace Assistant
 				if ( arg == "--serverenc" )
 				{
 					ClientCommunication.ServerEncrypted = true;
-					advCmdLine = true;
-				}
-				else if ( arg == "--pid" && i+1 < Args.Length )
-				{
-					i++;
-					attPID = Utility.ToInt32( Args[i], 0 );
-				}
-				else if ( arg.Substring( 0, 5 ) == "--pid" && arg.Length > 5 ) //support for uog 1.8 (damn you fixit)
-				{
-					attPID = Utility.ToInt32( arg.Substring(5), 0 );
 				}
 				else if ( arg == "--uodata" && i+1 < Args.Length )
 				{
@@ -288,11 +275,6 @@ namespace Assistant
 					ScavengerAgent.Debug = true;
 					DragDropManager.Debug = true;
 				}
-			}
-
-			if ( attPID > 0 && !advCmdLine )
-			{
-				ClientCommunication.ServerEncrypted = false;
 			}
 
 			if ( !Language.Load( "ENU" ) )
@@ -340,69 +322,43 @@ namespace Assistant
 			if ( !Config.LoadLastProfile() )
 				MessageBox.Show( SplashScreen.Instance, "The selected profile could not be loaded, using default instead.", "Profile Load Error", MessageBoxButtons.OK, MessageBoxIcon.Warning );
 
-			if ( attPID == -1 )
-            {
-                ClientCommunication.SetConnectionInfo(IPAddress.None, -1);
+            ClientCommunication.SetConnectionInfo(IPAddress.None, -1);
 
-				ClientCommunication.Loader_Error result = ClientCommunication.Loader_Error.UNKNOWN_ERROR;
+			ClientCommunication.Loader_Error result = ClientCommunication.Loader_Error.UNKNOWN_ERROR;
 
-				SplashScreen.Message = LocString.LoadingClient;
+			SplashScreen.Message = LocString.LoadingClient;
 				
-				if ( launch == ClientLaunch.TwoD )
-					clientPath = Ultima.Files.GetFilePath("client.exe");
-				else if ( launch == ClientLaunch.ThirdDawn )
-					clientPath = Ultima.Files.GetFilePath( "uotd.exe" );
+			if ( launch == ClientLaunch.TwoD )
+				clientPath = Ultima.Files.GetFilePath("client.exe");
+			else if ( launch == ClientLaunch.ThirdDawn )
+				clientPath = Ultima.Files.GetFilePath( "uotd.exe" );
 
-				if ( clientPath != null && File.Exists( clientPath ) )
-					result = ClientCommunication.LaunchClient( clientPath );
+			if ( clientPath != null && File.Exists( clientPath ) )
+				result = ClientCommunication.LaunchClient( clientPath );
 
-				if ( result != ClientCommunication.Loader_Error.SUCCESS )
-				{
-					if ( clientPath == null && File.Exists( clientPath ) )
-						MessageBox.Show( SplashScreen.Instance, String.Format( "Unable to find the client specified.\n{0}: \"{1}\"", launch.ToString(), clientPath != null ? clientPath : "-null-" ), "Could Not Start Client", MessageBoxButtons.OK, MessageBoxIcon.Stop );
-					else
-						MessageBox.Show( SplashScreen.Instance, String.Format( "Unable to launch the client specified. (Error: {2})\n{0}: \"{1}\"", launch.ToString(), clientPath != null ? clientPath : "-null-", result ), "Could Not Start Client", MessageBoxButtons.OK, MessageBoxIcon.Stop );
-					SplashScreen.End();
-					return;
-				}
-                
-                string addr = Config.GetAppSetting<string>("LastServer");
-                int port = Config.GetAppSetting<int>("LastPort");
-
-				// if these are null then the registry entry does not exist (old razor version)
-				IPAddress ip = Resolve( addr );
-				if ( ip == IPAddress.None || port == 0 )
-				{
-					MessageBox.Show( SplashScreen.Instance, Language.GetString( LocString.BadServerAddr ), "Bad Server Address", MessageBoxButtons.OK, MessageBoxIcon.Stop );
-					SplashScreen.End();
-					return;
-				}
-
-				ClientCommunication.SetConnectionInfo( ip, port );
-			}
-			else
+			if ( result != ClientCommunication.Loader_Error.SUCCESS )
 			{
-				string error = "Error attaching to the UO client.";
-				bool result = false;
-				try
-				{
-					result = ClientCommunication.Attach( attPID );
-				}
-				catch ( Exception e )
-				{
-					result = false;
-					error = e.Message;
-				}
-
-				if ( !result )
-				{
-					MessageBox.Show( SplashScreen.Instance, String.Format( "{1}\nThe specified PID '{0}' may be invalid.", attPID, error ), "Attach Error", MessageBoxButtons.OK, MessageBoxIcon.Error );
-					SplashScreen.End();
-					return;
-				}
-
-                ClientCommunication.SetConnectionInfo(IPAddress.Any, 0);
+				if ( clientPath == null && File.Exists( clientPath ) )
+					MessageBox.Show( SplashScreen.Instance, String.Format( "Unable to find the client specified.\n{0}: \"{1}\"", launch.ToString(), clientPath != null ? clientPath : "-null-" ), "Could Not Start Client", MessageBoxButtons.OK, MessageBoxIcon.Stop );
+				else
+					MessageBox.Show( SplashScreen.Instance, String.Format( "Unable to launch the client specified. (Error: {2})\n{0}: \"{1}\"", launch.ToString(), clientPath != null ? clientPath : "-null-", result ), "Could Not Start Client", MessageBoxButtons.OK, MessageBoxIcon.Stop );
+				SplashScreen.End();
+				return;
 			}
+                
+            string addr = Config.GetAppSetting<string>("LastServer");
+            int port = Config.GetAppSetting<int>("LastPort");
+
+			// if these are null then the registry entry does not exist (old razor version)
+			IPAddress ip = Resolve( addr );
+			if ( ip == IPAddress.None || port == 0 )
+			{
+				MessageBox.Show( SplashScreen.Instance, Language.GetString( LocString.BadServerAddr ), "Bad Server Address", MessageBoxButtons.OK, MessageBoxIcon.Stop );
+				SplashScreen.End();
+				return;
+			}
+
+			ClientCommunication.SetConnectionInfo( ip, port );
 
 			Ultima.Multis.PostHSFormat = UsePostHSChanges;
 
