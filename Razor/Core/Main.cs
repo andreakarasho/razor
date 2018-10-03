@@ -221,13 +221,10 @@ namespace Assistant
 		    {
 		    }
             
-			bool patch = Config.GetAppSetting<int>("PatchEncy") != 0;
 			ClientLaunch launch = ClientLaunch.TwoD;
 
 			int attPID = -1;
 			string dataDir;
-
-			ClientCommunication.ClientEncrypted = false;
 
 			// check if the new ServerEncryption option is in app.config
 			dataDir = Config.GetAppSetting<string>("ServerEnc");
@@ -245,9 +242,6 @@ namespace Assistant
 				    Config.SetAppSetting("ServerEnc", "0");
                     ClientCommunication.ServerEncrypted = false;
 				}
-                
-			    Config.SetAppSetting("PatchEncy", "1");
-                patch = true;
 			}
 			else
 			{
@@ -260,17 +254,7 @@ namespace Assistant
 			for (int i=0;i<Args.Length;i++)
 			{
 				string arg = Args[i].ToLower();
-				if ( arg == "--nopatch" )
-				{
-					patch = false;
-				}
-				else if ( arg == "--clientenc" )
-				{
-					ClientCommunication.ClientEncrypted = true;
-					advCmdLine = true;
-					patch = false;
-				}
-				else if ( arg == "--serverenc" )
+				if ( arg == "--serverenc" )
 				{
 					ClientCommunication.ServerEncrypted = true;
 					advCmdLine = true;
@@ -278,12 +262,10 @@ namespace Assistant
 				else if ( arg == "--pid" && i+1 < Args.Length )
 				{
 					i++;
-					patch = false;
 					attPID = Utility.ToInt32( Args[i], 0 );
 				}
 				else if ( arg.Substring( 0, 5 ) == "--pid" && arg.Length > 5 ) //support for uog 1.8 (damn you fixit)
 				{
-					patch = false;
 					attPID = Utility.ToInt32( arg.Substring(5), 0 );
 				}
 				else if ( arg == "--uodata" && i+1 < Args.Length )
@@ -311,7 +293,6 @@ namespace Assistant
 			if ( attPID > 0 && !advCmdLine )
 			{
 				ClientCommunication.ServerEncrypted = false;
-				ClientCommunication.ClientEncrypted = false;
 			}
 
 			if ( !Language.Load( "ENU" ) )
@@ -333,7 +314,6 @@ namespace Assistant
 			m_ActiveWnd = welcome;
 			if ( welcome.ShowDialog() == DialogResult.Cancel )
 				return;
-			patch = welcome.PatchEncryption;
 			launch = welcome.Client;
 			dataDir = welcome.DataDirectory;
 			if ( launch == ClientLaunch.Custom )
@@ -372,9 +352,6 @@ namespace Assistant
 					clientPath = Ultima.Files.GetFilePath("client.exe");
 				else if ( launch == ClientLaunch.ThirdDawn )
 					clientPath = Ultima.Files.GetFilePath( "uotd.exe" );
-
-				if ( !advCmdLine )
-					ClientCommunication.ClientEncrypted = patch;
 
 				if ( clientPath != null && File.Exists( clientPath ) )
 					result = ClientCommunication.LaunchClient( clientPath );

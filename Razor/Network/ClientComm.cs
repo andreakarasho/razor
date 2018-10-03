@@ -689,9 +689,6 @@ namespace Assistant
 				return err;
 		}
 
-		private static bool m_ClientEnc = false;
-		internal static bool ClientEncrypted { get { return m_ClientEnc; } set { m_ClientEnc = value; } }
-
 		private static bool m_ServerEnc = false;
 		internal static bool ServerEncrypted { get { return m_ServerEnc; } set { m_ServerEnc = value; } }
 
@@ -702,9 +699,6 @@ namespace Assistant
 
 			if ( Config.GetBool( "Negotiate" ) )
 				flags |= 0x04;
-
-			if ( ClientEncrypted )
-				flags |= 0x08;
 
 			if ( ServerEncrypted )
 				flags |= 0x10;

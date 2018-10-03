@@ -17,7 +17,6 @@ namespace Assistant
 	public class WelcomeForm : System.Windows.Forms.Form
 	{
 		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.CheckBox patchEncy;
 		private System.Windows.Forms.Button okay;
 		private System.Windows.Forms.Button quit;
 		private System.Windows.Forms.Label label3;
@@ -40,10 +39,8 @@ namespace Assistant
 
 		public string ClientPath{ get{ return m_ClientPath; } }
 		public ClientLaunch Client{ get{ return m_Launch; } } 
-		public bool PatchEncryption{ get{ return m_PatchEncy; } }
 		public string DataDirectory{ get{ if ( m_DataDir == "" || m_DataDir == "(Auto Detect)" ) m_DataDir = null; return m_DataDir; } }
 
-		private bool m_PatchEncy = false;
 		private string m_ClientPath = "";
 		private ClientLaunch m_Launch = ClientLaunch.Custom;
         private TextBox uoClient;
@@ -81,7 +78,6 @@ namespace Assistant
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(WelcomeForm));
             this.label1 = new System.Windows.Forms.Label();
             this.browse = new System.Windows.Forms.Button();
-            this.patchEncy = new System.Windows.Forms.CheckBox();
             this.okay = new System.Windows.Forms.Button();
             this.quit = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
@@ -119,15 +115,6 @@ namespace Assistant
             this.browse.TabIndex = 2;
             this.browse.Text = "Browse...";
             this.browse.Click += new System.EventHandler(this.browse_Click);
-            // 
-            // patchEncy
-            // 
-            this.patchEncy.Location = new System.Drawing.Point(8, 45);
-            this.patchEncy.Name = "patchEncy";
-            this.patchEncy.Size = new System.Drawing.Size(171, 20);
-            this.patchEncy.TabIndex = 3;
-            this.patchEncy.Text = "Patch client encryption";
-            this.patchEncy.CheckedChanged += new System.EventHandler(this.patchEncy_CheckedChanged);
             // 
             // okay
             // 
@@ -172,7 +159,6 @@ namespace Assistant
             this.groupBox1.Controls.Add(this.makeDef);
             this.groupBox1.Controls.Add(this.browse);
             this.groupBox1.Controls.Add(this.label1);
-            this.groupBox1.Controls.Add(this.patchEncy);
             this.groupBox1.Location = new System.Drawing.Point(4, 4);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(359, 97);
@@ -481,7 +467,6 @@ namespace Assistant
 
 	        IsValidClientAndDataDir();
 
-            patchEncy.Checked = Config.GetAppSetting<int>("PatchEncy") != 0;
 	        useEnc.Checked = Config.GetAppSetting<int>("ServerEnc") != 0;
 
 	        LoginCFG_SE lse = new LoginCFG_SE();
@@ -559,8 +544,6 @@ namespace Assistant
 
 	    private void makeDef_Click(object sender, System.EventArgs e)
 	    {
-
-	        Config.SetAppSetting("PatchEncy", patchEncy.Checked ? "1" : "0");
 	        Config.SetAppSetting("ServerEnc", useEnc.Checked ? "1" : "0");
 
 	        MessageBox.Show(this, Language.GetString(LocString.SaveOK), "Done", MessageBoxButtons.OK,
@@ -576,8 +559,6 @@ namespace Assistant
 		
 		private void okay_Click(object sender, System.EventArgs e)
 		{
-            m_PatchEncy = patchEncy.Checked;
-
 		    m_Launch = ClientLaunch.TwoD;
 		    m_ClientPath = uoClient.Text;
 
@@ -670,15 +651,6 @@ namespace Assistant
 				    Config.SetAppSetting("DefaultLanguage", Language.Current );
 					Language.LoadControlNames( this );
 				}
-			}
-		}
-
-		private void patchEncy_CheckedChanged(object sender, System.EventArgs e)
-		{
-			if ( !patchEncy.Checked )
-			{
-				if ( MessageBox.Show( this, Language.GetString( LocString.NoPatchWarning ), Language.GetString( LocString.Confirm ), MessageBoxButtons.YesNo, MessageBoxIcon.Question ) == DialogResult.No )
-					patchEncy.Checked = true;
 			}
 		}
 

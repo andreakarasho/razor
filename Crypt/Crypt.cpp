@@ -48,7 +48,6 @@ bool InGame = false;
 bool CopyFailed = true;
 bool Forwarding = false;
 bool Forwarded = false;
-bool ClientEncrypted = false;
 bool ServerEncrypted = false;
 bool DwmAttrState = true;
 
@@ -252,7 +251,6 @@ DLLFUNCTION int InstallLibrary( HWND PostWindow, DWORD pid, int flags )
 		return NO_HOOK;
 
 	ServerEncrypted = (flags&0x10) != 0;
-	ClientEncrypted = (flags&0x08) != 0;
 	PostMessage( hWatchWnd, WM_PROCREADY, (WPARAM)flags, (LPARAM)hPostWnd );
 	return SUCCESS;
 }
@@ -986,11 +984,8 @@ void CreateEncryption()
 	delete ServerCrypt;
 	delete ServerLogin;
 
-	if ( ClientEncrypted )
-	{
-		ClientCrypt = new OSIEncryption();
-		ClientLogin = new LoginEncryption();
-	}
+	ClientCrypt = new OSIEncryption();
+	ClientLogin = new LoginEncryption();
 
 	if ( ServerEncrypted )
 	{
@@ -1174,7 +1169,7 @@ int PASCAL HookRecv( SOCKET sock, char *buff, int len, int flags )
 				pShared->OutRecv.Length -= blen;
 			}
 
-			if ( ClientEncrypted && ackLen > 0 )
+			if ( ackLen > 0 )
 				ClientCrypt->EncryptForClient( (BYTE*)buff, (BYTE*)buff, ackLen );
 		}
 
@@ -1223,11 +1218,8 @@ int PASCAL HookSend( SOCKET sock, char *buff, int len, int flags )
 					ServerLogin->Initialize( (BYTE*)&CryptSeed );
 				}
 
-				if ( ClientEncrypted )
-				{
-					ClientCrypt->Initialize( CryptSeed );
-					ClientLogin->Initialize( (BYTE*)&CryptSeed );
-				}
+				ClientCrypt->Initialize( CryptSeed );
+				ClientLogin->Initialize( (BYTE*)&CryptSeed );
 
 				Compression::Reset();
 			}
@@ -1243,10 +1235,7 @@ int PASCAL HookSend( SOCKET sock, char *buff, int len, int flags )
 			{
 				FirstSend = false;
 
-				if ( ClientEncrypted )
-					LoginServer = ClientLogin->TestForLogin( (BYTE)buff[0] );
-				else
-					LoginServer = LoginEncryption::IsLoginByte( (BYTE)buff[0] );
+				LoginServer = ClientLogin->TestForLogin( (BYTE)buff[0] );
 
 				if ( LoginServer )
 					Forwarding = Forwarded = false;
@@ -1254,36 +1243,31 @@ int PASCAL HookSend( SOCKET sock, char *buff, int len, int flags )
 
 			WaitForSingleObject( CommMutex, INFINITE );
 
-			if (ClientEncrypted)
+			if ( Forwarded )
 			{
-				if ( Forwarded )
+				CryptSeed = LoginEncryption::GenerateBadSeed( CryptSeed );
+
+				ClientCrypt->Initialize( CryptSeed );
+
+				ClientCrypt->DecryptFromClient( (BYTE*)buff, (BYTE*)(&pShared->InSend.Buff[pShared->InSend.Start+pShared->InSend.Length]), len );
+				ClientLogin->Decrypt( (BYTE*)(&pShared->InSend.Buff[pShared->InSend.Start+pShared->InSend.Length]), (BYTE*)(&pShared->InSend.Buff[pShared->InSend.Start+pShared->InSend.Length]), len );
+
+				LoginServer = Forwarding = Forwarded = false;
+			}
+			else
+			{
+				if ( LoginServer )
 				{
-					CryptSeed = LoginEncryption::GenerateBadSeed( CryptSeed );
+					ClientLogin->Decrypt( (BYTE*)(buff), (BYTE*)(&pShared->InSend.Buff[pShared->InSend.Start+pShared->InSend.Length]), len );
 
-					ClientCrypt->Initialize( CryptSeed );
-
-					ClientCrypt->DecryptFromClient( (BYTE*)buff, (BYTE*)(&pShared->InSend.Buff[pShared->InSend.Start+pShared->InSend.Length]), len );
-					ClientLogin->Decrypt( (BYTE*)(&pShared->InSend.Buff[pShared->InSend.Start+pShared->InSend.Length]), (BYTE*)(&pShared->InSend.Buff[pShared->InSend.Start+pShared->InSend.Length]), len );
-
-					LoginServer = Forwarding = Forwarded = false;
+					if ( ((BYTE)pShared->InSend.Buff[pShared->InSend.Start+pShared->InSend.Length]) == 0xA0 )
+						Forwarding = true;
 				}
 				else
 				{
-					if ( LoginServer )
-					{
-						ClientLogin->Decrypt( (BYTE*)(buff), (BYTE*)(&pShared->InSend.Buff[pShared->InSend.Start+pShared->InSend.Length]), len );
-
-						if ( ((BYTE)pShared->InSend.Buff[pShared->InSend.Start+pShared->InSend.Length]) == 0xA0 )
-							Forwarding = true;
-					}
-					else
-					{
-						ClientCrypt->DecryptFromClient((BYTE*)(buff), (BYTE*)(&pShared->InSend.Buff[pShared->InSend.Start + pShared->InSend.Length]), len);
-					}
+					ClientCrypt->DecryptFromClient((BYTE*)(buff), (BYTE*)(&pShared->InSend.Buff[pShared->InSend.Start + pShared->InSend.Length]), len);
 				}
 			}
-			else
-				memcpy( &pShared->InSend.Buff[pShared->InSend.Start+pShared->InSend.Length], buff, len );
 
 			pShared->InSend.Length += len;
 			ReleaseMutex( CommMutex );
@@ -1824,7 +1808,6 @@ void MessageProc( HWND hWnd, UINT nMsg, WPARAM wParam, LPARAM lParam, MSG *pMsg 
 		if (!pShared) // If this failed the first time or was not run at all, try it once more before panicing
 			OnAttach(NULL, 0);
 
-		ClientEncrypted = (wParam & 0x08) != 0;
 		ServerEncrypted = (wParam & 0x10) != 0;
 		
 		InitThemes();
