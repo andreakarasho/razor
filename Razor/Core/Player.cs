@@ -57,9 +57,9 @@ namespace Assistant
 		{
 			get{ return m_Base; }
 			set
-			{ 
+			{
 				m_Delta += (short)(value - m_Base);
-				m_Base = value; 
+				m_Base = value;
 			}
 		}
 
@@ -87,8 +87,8 @@ namespace Assistant
 			set{ m_Cap = (ushort)(value*10.0); }
 		}
 
-		public double Delta 
-		{ 
+		public double Delta
+		{
 			get{ return m_Delta / 10.0; }
 			set{ m_Delta = (short)(value*10); }
 		}
@@ -155,16 +155,13 @@ namespace Assistant
 
 	public class PlayerData : Mobile
 	{
-		public class MoveEntry
+		public class MoveReq
 		{
-			//public byte Seq;
+			public byte Seq;
 			public Direction Dir;
-			//public int x;
-			//public int y;
-			public Point3D Position;
-			public bool IsStep;
-
-			public bool FilterAck;
+			public bool Run;
+			public bool Rejected;
+			public bool Internal;
 		}
 
 		public int VisRange = 18;
@@ -174,7 +171,7 @@ namespace Assistant
 
 		private short m_FireResist, m_ColdResist, m_PoisonResist, m_EnergyResist, m_Luck;
 		private ushort m_DamageMin, m_DamageMax;
-		
+
 		private ushort m_Str, m_Dex, m_Int;
 		private LockType m_StrLock, m_DexLock, m_IntLock;
 		private uint m_Gold;
@@ -192,14 +189,11 @@ namespace Assistant
 		private int[] m_MapPatches = new int[10];
 
 		private bool m_SkillsSent;
-		//private Item m_Holding;
-		//private ushort m_HoldAmt;
-		private Dictionary<byte, MoveEntry> m_MoveInfo;
+
+		private Queue<MoveReq> m_MovementRequests;
+
 		private Timer m_CriminalTime;
 		private DateTime m_CriminalStart = DateTime.MinValue;
-		private byte m_WalkSeq;
-
-		public static int FastWalkKey = 0;
 
 		public override void SaveState( BinaryWriter writer )
 		{
@@ -217,7 +211,7 @@ namespace Assistant
 			writer.Write( (byte)m_IntLock );
 			writer.Write( m_Gold );
 			writer.Write( m_Weight );
-			
+
 			writer.Write( (byte)Skill.Count );
 			for(int i=0;i<Skill.Count;i++)
 			{
@@ -237,7 +231,7 @@ namespace Assistant
 			writer.Write( m_GlobalLight );
 			writer.Write( m_Features );
 			writer.Write( m_Season );
-			
+
 			writer.Write( (byte) m_MapPatches.Length );
 			for(int i=0;i<m_MapPatches.Length;i++)
 				writer.Write( (int)m_MapPatches[i] );
@@ -259,9 +253,9 @@ namespace Assistant
 			m_Gold = reader.ReadUInt32();
 			m_Weight = reader.ReadUInt16();
 
-			m_MoveInfo = new Dictionary<byte, MoveEntry>(256);
+			m_MovementRequests = new Queue<MoveReq>();
 
-            if ( version >= 4 )
+			if ( version >= 4 )
 			{
 				Skill.Count = c = reader.ReadByte();
 			}
@@ -333,8 +327,9 @@ namespace Assistant
 
 		public PlayerData( Serial serial ) : base( serial )
 		{
-			m_MoveInfo = new Dictionary<byte, MoveEntry>(256);
-            m_Skills = new Skill[Skill.Count];
+			m_MovementRequests = new Queue<MoveReq>();
+
+			m_Skills = new Skill[Skill.Count];
 			for (int i=0;i<m_Skills.Length;i++)
 				m_Skills[i] = new Skill(i);
 		}
@@ -374,7 +369,7 @@ namespace Assistant
 			get
 			{
 				if ( m_MaxWeight == -1 )
-					return (ushort)((m_Str * 3.5) + 40); 
+					return (ushort)((m_Str * 3.5) + 40);
 				else
 					return (ushort)m_MaxWeight;
 			}
@@ -482,8 +477,6 @@ namespace Assistant
 			set{ m_SkillsSent = value; }
 		}
 
-		public byte WalkSequence{ get{ return m_WalkSeq; } }
-
 		public int CriminalTime
 		{
 			get
@@ -510,23 +503,6 @@ namespace Assistant
 			}
 		}
 
-		public void Resync()
-		{
-			m_OutstandingMoves = m_WalkSeq = 0;
-			m_MoveInfo.Clear();
-		}
-
-		private int m_OutstandingMoves = 0;
-
-		public int OutstandingMoveReqs { get { return m_OutstandingMoves; } }
-
-		public MoveEntry GetMoveEntry( byte seq )
-		{
-		    MoveEntry me;
-		    m_MoveInfo.TryGetValue(seq, out me);
-		    return me;
-        }
-
 		private static Timer m_OpenDoorReq = Timer.DelayedCallback( TimeSpan.FromSeconds( 0.005 ), new TimerCallback( OpenDoor ) );
 		private static void OpenDoor()
 		{
@@ -536,22 +512,29 @@ namespace Assistant
 
 		private Serial m_LastDoor = Serial.Zero;
 		private DateTime m_LastDoorTime = DateTime.MinValue;
-		public void MoveReq( Direction dir, byte seq )
+
+		public void Resync()
 		{
-			m_OutstandingMoves++;
-			FastWalkKey++;
+			// TODO
+			// Needs to set a flag so we don't go into a resynchronize death spiral
+		}
 
-			MoveEntry e = new MoveEntry();
-			m_MoveInfo[seq] = e;
+		public int OutstandingMoveReqs { get { return m_MovementRequests.Count; } }
 
-			e.IsStep = (dir & Direction.Mask) == (Direction & Direction.Mask);
-			e.Dir = dir;
+		// Called when the client performs a movement request
+		public void MoveReq(byte seq, Direction dir, bool run)
+		{
+			MoveReq m = new MoveReq();
+			m.Seq = seq;
+			m.Dir = dir;
+			m.Run = run;
+			m.Rejected = false;
+			m.Internal = false;
 
-			ProcessMove( dir ); // shouldnt this be in MoveAck?!?
+			m_MovementRequests.Enqueue(m);
 
-			e.Position = Position;
-
-			if ( Body != 0x03DB && !IsGhost && ((int)(e.Dir&Direction.Mask))%2 == 0 && Config.GetBool( "AutoOpenDoors" ) && ClientCommunication.AllowBit( FeatureBit.AutoOpenDoors ))
+			// Auto open doors logic. TODO: Maybe this should attempt to calculate the final position after outstanding movement requests.
+			if ( Body != 0x03DB && !IsGhost && (dir %) 2 == 0 && Config.GetBool( "AutoOpenDoors" ) && ClientCommunication.AllowBit( FeatureBit.AutoOpenDoors ))
 			{
 				int x = Position.X, y = Position.Y;
 				Utility.Offset( e.Dir, ref x, ref y );
@@ -569,85 +552,121 @@ namespace Assistant
 					}
 				}
 			}
-
-			/*if ( m_OutstandingMoves < 5 && !Macros.WalkAction.IsMacroWalk( seq ) && Config.GetBool( "SmoothWalk" ) )
-			{
-				e.FilterAck = true;
-				ClientCommunication.SendToClient( new MoveAcknowledge( seq, Notoriety ) );
-			}
-			else
-			{
-				e.FilterAck = false;
-			}*/
-
-			e.FilterAck = false;
-
-			m_WalkSeq = (byte)(seq >= 255 ? 1 : seq+1);
 		}
 
-		public void ProcessMove( Direction dir )
+		// Called when the server rejects a movement request
+		public void MoveRej(byte seq, Direction dir, Point3D pos)
 		{
-			if ( (dir & Direction.Mask) == (this.Direction & Direction.Mask) )
-			{
-				int x = Position.X, y = Position.Y;
-
-				Utility.Offset( dir&Direction.Mask, ref x, ref y );
-				
-				int newZ = Position.Z;
-				try { newZ = Assistant.Map.ZTop( Map, x, y, newZ ); } 
-				catch { }
-				Position = new Point3D( x, y, newZ );
+			if (m_MovementRequests.Count == 0) {
+				// We're out of sync if this happens. Just set our position
+				// to the one provided and it will hopefully work itself back out
+				// on the next movement request.
+				Direction = dir;
+				Position = pos;
+				return;
 			}
-			Direction = dir;
+
+			MoveReq m = m_MovementRequests.Dequeue();
+
+			if (m.Seq != seq) {
+				// This only occurs on a server bug.
+				// The best way to handle this is to assume the server
+				// just got the sequence number wrong. This is a known bug
+				// in RunUO.
+				seq = m.Seq;
+			}
+
+			if (m.Rejected) {
+				// We expected this to get rejected, so do nothing.
+			} else {
+				ForceMove(dir, pos);
+				Direction = dir;
+				Position = pos;
+			}
 		}
 
-		public bool HasWalkEntry( byte seq )
+		// Called when the server acknowledges a movement request
+		public bool MoveAck(byte seq)
 		{
-			return m_MoveInfo.ContainsKey(seq);
-        }
+			if (m_MovementRequests.Count == 0) {
+				// We're out of sync if this happens.
+				// Our only recourse is to resynchronize.
+				Resync();
+				return;
+			}
 
-		public void MoveRej( byte seq, Direction dir, Point3D pos )
+			MoveReq m = m_MovementRequests.Dequeue();
+
+			if (m.Seq != seq) {
+				// This only occurs on a server bug.
+				// Our only recourse is to resynchronize.
+				Resync();
+				return;
+			}
+
+			// Recalculate new position
+			if (m.Dir == Direction) {
+				// The player is already facing in the direction of the request, so they will move forward.
+				int x = Position.X;
+				int y = Position.Y;
+				int z = Position.Z;
+
+				Utility.Offset(m.Dir, ref x, ref y);
+
+				// TODO: Does this actually work?
+				try {
+					z = Assistant.Map.ZTop(Map, x, y, z);
+				} catch {}
+
+				Position = new Point3D(x, y, z);
+
+				if (m.Run == false && !IsGhost) {
+					StealthSteps.OnMove();
+				}
+			} else {
+				// Just turning
+				Direction = m.Dir;
+			}
+
+			// TODO: Check which way this needs to go
+			return m.Internal;
+		}
+
+		// Called when the server forcibly moves the player
+		public void ForceMove(Direction dir, Position pos)
 		{
-			m_OutstandingMoves--;
-
 			Direction = dir;
 			Position = pos;
-			Resync();
+
+			// Mark all outstanding requests as expected rejects.
+			foreach (MoveReq m in m_MovementRequests) {
+				if (m.Seq == 0) {
+					// Only the current run of sequence numbers will get rejected.
+					// If we've already restarted from 0, those are still valid.
+					break;
+				}
+
+				m.Rejected = true;
+			}
+
 		}
-
-		public bool MoveAck( byte seq )
-		{
-            m_OutstandingMoves--;
-
-            MoveEntry e;
-            if (m_MoveInfo.TryGetValue(seq, out e) && e != null)
-            {
-                if (e.IsStep && !IsGhost)
-                    StealthSteps.OnMove();
-
-                return !e.FilterAck;
-            }
-            else
-            {
-                return true;
-            }
-        }
 
 		private static bool m_ExternZ = false;
 		public static bool ExternalZ { get { return m_ExternZ; } set { m_ExternZ = value; } }
 
 		//private sbyte m_CalcZ = 0;
-		public int CalcZ 
-		{ 
-			get 
-			{ 
+		public int CalcZ
+		{
+			get
+			{
 				if ( !m_ExternZ || !ClientCommunication.IsCalibrated() )
 					return Assistant.Map.ZTop( Map, Position.X, Position.Y, Position.Z );
 				else
-					return Position.Z; 
-			} 
+					return Position.Z;
+			}
 		}
 
+		// TODO: Take a look at this. Can we figure out Z internally without snooping client?
 		public override Point3D Position
 		{
 			get
@@ -674,23 +693,23 @@ namespace Assistant
 
 		public override void OnPositionChanging( Point3D newPos )
 		{
-		    List<Mobile> mlist = new List<Mobile>( World.Mobiles.Values );
+			List<Mobile> mlist = new List<Mobile>( World.Mobiles.Values );
 			for (int i=0;i< mlist.Count;i++)
 			{
 				Mobile m = mlist[i];
 				if ( m != this )
 				{
 					if ( !Utility.InRange( m.Position, newPos, VisRange ) )
-                        m.Remove();
+						m.Remove();
 					else
-                        Targeting.CheckLastTargetRange(m);
+						Targeting.CheckLastTargetRange(m);
 				}
 			}
 
-		    mlist = null;
+			mlist = null;
 
 
-            List<Item> ilist = new List<Item>( World.Items.Values );
+			List<Item> ilist = new List<Item>( World.Items.Values );
 			ScavengerAgent s = ScavengerAgent.Instance;
 			for (int i=0;i< ilist.Count;i++)
 			{
@@ -705,14 +724,14 @@ namespace Assistant
 					s.Scavenge( item );
 			}
 
-		    ilist = null;
+			ilist = null;
 
-            base.OnPositionChanging( newPos );
+			base.OnPositionChanging( newPos );
 		}
 
 		public override void OnMapChange( byte old, byte cur )
 		{
-		    List<Mobile> list = new List<Mobile>( World.Mobiles.Values );
+			List<Mobile> list = new List<Mobile>( World.Mobiles.Values );
 			for (int i=0;i<list.Count;i++)
 			{
 				Mobile m = list[i];
@@ -720,7 +739,7 @@ namespace Assistant
 					m.Remove();
 			}
 
-		    list = null;
+			list = null;
 
 			World.Items.Clear();
 			Counter.Reset();
@@ -729,13 +748,13 @@ namespace Assistant
 				Item item = (Item)Contains[i];
 				World.AddItem( item );
 				item.Contains.Clear();
-			}	
+			}
 
 			if ( Config.GetBool( "AutoSearch" ) && Backpack != null )
 				PlayerData.DoubleClick( Backpack ) ;
 
 			ClientCommunication.PostMapChange( cur );
-			
+
 			if ( Engine.MainWindow != null && Engine.MainWindow.MapWindow != null )
 				Engine.MainWindow.MapWindow.PlayerMoved();
 		}
@@ -747,7 +766,7 @@ namespace Assistant
 			Counter.Reset();
 
 			Contains.Clear();
-			
+
 			World.AddMobile( this );
 
 			ClientCommunication.PostMapChange( cur );
@@ -796,7 +815,7 @@ namespace Assistant
 				ClientCommunication.RequestTitlebarUpdate();
 			}
 		}
-		
+
 		internal void SendMessage( MsgLevel lvl, LocString loc, params object[] args )
 		{
 			SendMessage( lvl, Language.Format( loc, args ) );
@@ -848,7 +867,7 @@ namespace Assistant
 					case MsgLevel.Warning:
 						hue = Config.GetInt( "WarningColor" );
 						break;
-					
+
 					default:
 						hue = Config.GetInt( "SysColor" );
 						break;
@@ -889,7 +908,7 @@ namespace Assistant
 
 		//private UOEntity m_LastCtxM = null;
 		//public UOEntity LastContextMenu { get { return m_LastCtxM; } set { m_LastCtxM = value; } }
-		
+
 		public static bool DoubleClick( object clicked )
 		{
 			return DoubleClick( clicked, true );

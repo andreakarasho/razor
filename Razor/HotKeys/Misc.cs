@@ -10,22 +10,22 @@ namespace Assistant.HotKeys
 			HotKey.Add( HKCategory.Misc, LocString.Resync, new HotKeyCallback( Resync ) );
 			HotKey.Add( HKCategory.Misc, LocString.RecStart, new HotKeyCallback( PacketPlayer.Record ) );
 			HotKey.Add( HKCategory.Misc, LocString.VidStop, new HotKeyCallback( PacketPlayer.Stop ) );
-			
+
 			HotKey.Add( HKCategory.Misc, LocString.ClearDragDropQueue, new HotKeyCallback( DragDropManager.GracefulStop ) );
-			
+
 			HotKey.Add( HKCategory.Misc, LocString.LastSpell, new HotKeyCallback( LastSpell ) );
 			HotKey.Add( HKCategory.Misc, LocString.LastSkill, new HotKeyCallback( LastSkill ) );
 			HotKey.Add( HKCategory.Misc, LocString.LastObj, new HotKeyCallback( LastObj ) );
 			HotKey.Add( HKCategory.Misc, LocString.AllNames, new HotKeyCallback( AllNames ) );
 			HotKey.Add( HKCategory.Misc, LocString.Dismount, new HotKeyCallback( Dismount ) );
-			
+
 			HotKey.Add( HKCategory.Items, LocString.BandageSelf, new HotKeyCallback( BandageSelf ) );
 			HotKey.Add( HKCategory.Items, LocString.BandageLT, new HotKeyCallback( BandageLastTarg ) );
 			HotKey.Add( HKCategory.Items, LocString.UseHand, new HotKeyCallback( UseItemInHand ) );
 
 			HotKey.Add( HKCategory.Misc, LocString.PartyAccept, new HotKeyCallback( PartyAccept ) );
 			HotKey.Add( HKCategory.Misc, LocString.PartyDecline, new HotKeyCallback( PartyDecline ) );
-			
+
 			HotKeyCallbackState call = new HotKeyCallbackState( OnUseItem );
 			HotKey.Add( HKCategory.Items,					LocString.UseBandage,	call, (ushort)3617 );
 			HotKey.Add( HKCategory.Items, HKSubCat.Potions, LocString.DrinkHeal,	call, (ushort)3852 );
@@ -72,7 +72,7 @@ namespace Assistant.HotKeys
 			{
 				if ( m != World.Player )
 					ClientCommunication.SendToServer( new SingleClick( m ) );
-				
+
 				if ( textFlags )
 					Targeting.CheckTextFlags( m );
 			}
@@ -112,6 +112,8 @@ namespace Assistant.HotKeys
 			if ( DateTime.UtcNow - m_LastSync > TimeSpan.FromSeconds( 1.0 ) )
 			{
 				m_LastSync = DateTime.UtcNow;
+
+				// TODO: REWORK WHAT HAPPENS ON RESYNC
 
 				//ClientCommunication.SendToClient( new MoveReject( World.Player.WalkSequence, World.Player ) );
 				ClientCommunication.SendToClient( new MobileUpdate( World.Player ) );
@@ -197,7 +199,7 @@ namespace Assistant.HotKeys
 				World.Player.SendMessage( MsgLevel.Force, LocString.HealPoisonBlocked );
 				return;
 			}
-			
+
 			if ( !UseItem( pack, id ) )
 				World.Player.SendMessage( LocString.NoItemOfType, (ItemID)id );
 		}

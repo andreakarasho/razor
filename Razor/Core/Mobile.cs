@@ -7,19 +7,18 @@ using System.Text;
 namespace Assistant
 {
 	[Flags]
-	public enum	Direction :	byte
+	public enum Direction : byte
 	{
-		North =	0x0,
-		Right =	0x1,
+		North = 0x0,
+		Northeast = 0x1,
 		East = 0x2,
-		Down = 0x3,
-		South =	0x4,
-		Left = 0x5,
+		Southeast = 0x3,
+		South = 0x4,
+		Southwest = 0x5,
 		West = 0x6,
-		Up = 0x7,
+		Northwest = 0x7,
 		Mask = 0x7,
-		Running	= 0x80,
-		ValueMask =	0x87
+		Run = 0x8,
 	}
 
     public enum BodyType : byte
@@ -82,7 +81,7 @@ namespace Assistant
 	            }
 	        }
 	    }
-        
+
         public override	void SaveState(	BinaryWriter writer	)
 		{
 			base.SaveState (writer);
@@ -95,7 +94,7 @@ namespace Assistant
 			writer.Write( m_HitsMax	);
 			writer.Write( m_Hits );
 			writer.Write( m_Map	);
-			
+
 			writer.Write( (int)m_Items.Count );
 			for(int	i=0;i<m_Items.Count;i++)
 				writer.Write( (uint)(((Item)m_Items[i]).Serial)	);
@@ -144,14 +143,14 @@ namespace Assistant
 		public string Name
 		{
 			get
-			{ 
+			{
 				if ( m_Name	== null	)
 					return "";
 				else
 					return m_Name;
 			}
 			set
-			{ 
+			{
 				if ( value != null )
 				{
 					string trim	= value.Trim();
@@ -191,9 +190,9 @@ namespace Assistant
 			set{ m_Blessed = value;	}
 		}
 
-        public bool	IsGhost	
+        public bool	IsGhost
 		{
-			get	
+			get
 			{
 				return m_Body == 402
 					|| m_Body == 403
@@ -264,12 +263,12 @@ namespace Assistant
 		{
 			get{ return	m_Notoriety;  }
 			set
-			{ 
+			{
 				if ( value != Notoriety	)
 				{
 					OnNotoChange( m_Notoriety, value );
-					m_Notoriety	= value; 
-				}	
+					m_Notoriety	= value;
+				}
 			}
 		}
 
@@ -278,11 +277,11 @@ namespace Assistant
 		}
 
 		// grey, blue, green, 'canbeattacked'
-		private	static uint[] m_NotoHues = new uint[8] 
-		{ 
+		private	static uint[] m_NotoHues = new uint[8]
+		{
 			// hue color #30
 			0x000000, // black		unused 0
-			0x30d0e0, // blue		0x0059 1 
+			0x30d0e0, // blue		0x0059 1
 			0x60e000, // green		0x003F 2
 			0x9090b2, // greyish	0x03b2 3
 			0x909090, // grey		   "   4
@@ -318,7 +317,7 @@ namespace Assistant
 			get{ return	m_Hits;	}
 			set{ m_Hits	= value; }
 		}
-		
+
 		public ushort Stam
 		{
 			get{ return m_Stam; }
@@ -348,11 +347,11 @@ namespace Assistant
 		{
 			get{ return	m_Map; }
 			set
-			{ 
+			{
 				if ( m_Map != value	)
 				{
 					OnMapChange( m_Map,	value );
-					m_Map =	value; 
+					m_Map =	value;
 				}
 			}
 		}
@@ -360,7 +359,7 @@ namespace Assistant
 		public virtual void	OnMapChange( byte old, byte	cur	)
 		{
 		}
-		
+
 		public void	AddItem( Item item )
 		{
 			m_Items.Add( item );
@@ -392,7 +391,7 @@ namespace Assistant
 
 		public bool	InParty
 		{
-			get	
+			get
 			{
 				return PacketHandlers.Party.Contains( this.Serial );
 			}
@@ -409,7 +408,7 @@ namespace Assistant
 			return null;
 		}
 
-		public Item	Backpack 
+		public Item	Backpack
 		{
 			get
 			{
@@ -448,7 +447,7 @@ namespace Assistant
 
 			base.OnPositionChanging	(newPos);
 		}
-		
+
 		public int GetPacketFlags()
 		{
 			int	flags =	0x0;
@@ -475,8 +474,8 @@ namespace Assistant
 		{
 			if ( !PacketHandlers.UseNewStatus )
 				m_Poisoned = (flags&0x04) != 0;
-			
-			m_Female  =	(flags&0x02) !=	0;	
+
+			m_Female  =	(flags&0x02) !=	0;
 			m_Blessed =	(flags&0x08) !=	0;
 			m_Warmode =	(flags&0x40) !=	0;
 			m_Visible =	(flags&0x80) ==	0;

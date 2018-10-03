@@ -74,9 +74,9 @@ namespace Assistant.Macros
 		public TimeSpan Timeout { get{ return m_Timeout; } }
 		public DateTime StartTime{ get{ return m_Start; } set{ m_Start = value; } }
 
-		public MacroMenuItem EditTimeoutMenuItem 
+		public MacroMenuItem EditTimeoutMenuItem
 		{
-			get 
+			get
 			{
 				if ( m_MenuItem == null )
 					m_MenuItem = new MacroMenuItem( LocString.EditTimeout, new MacroMenuCallback( EditTimeout ) );
@@ -138,7 +138,7 @@ namespace Assistant.Macros
 					new MacroMenuItem( LocString.Edit, new MacroMenuCallback( Edit ) )
 				};
 			}
-			
+
 			return m_MenuItems;
 		}
 
@@ -204,7 +204,7 @@ namespace Assistant.Macros
 					new MacroMenuItem( LocString.Conv2DCT, new MacroMenuCallback( ConvertToByType ) )
 				};
 			}
-			
+
 			return m_MenuItems;
 		}
 
@@ -333,7 +333,7 @@ namespace Assistant.Macros
 					new MacroMenuItem( LocString.ReTarget, new MacroMenuCallback( ReTarget ) )
 				};
 			}
-			
+
 			return m_MenuItems;
 		}
 
@@ -359,7 +359,7 @@ namespace Assistant.Macros
 		private ushort m_Amount;
 		private Serial m_Serial;
 		private ushort m_Gfx;
-		
+
 		private static Item m_LastLift;
 		public static Item LastLift { get{ return m_LastLift; } set{ m_LastLift = value; } }
 
@@ -421,7 +421,7 @@ namespace Assistant.Macros
 					new MacroMenuItem( LocString.Edit, new MacroMenuCallback( EditAmount ) )
 				};
 			}
-			
+
 			return m_MenuItems;
 		}
 
@@ -516,7 +516,7 @@ namespace Assistant.Macros
 					new MacroMenuItem( LocString.Edit, new MacroMenuCallback( EditAmount ) )
 				};
 			}
-			
+
 			return m_MenuItems;
 		}
 
@@ -619,7 +619,7 @@ namespace Assistant.Macros
 						new MacroMenuItem( LocString.ConvRelLoc, new MacroMenuCallback( ConvertToRelLoc ) )
 					};
 				}
-				
+
 				return m_MenuItems;
 			}
 		}
@@ -770,7 +770,7 @@ namespace Assistant.Macros
 		public AbsoluteTargetAction( string[] args )
 		{
 			m_Info = new TargetInfo();
-			
+
 			m_Info.Type = Convert.ToByte( args[1] );
 			m_Info.Flags = Convert.ToByte( args[2] );
 			m_Info.Serial = Convert.ToUInt32( args[3] );
@@ -821,7 +821,7 @@ namespace Assistant.Macros
 					new MacroMenuItem( LocString.ConvRelLoc, new MacroMenuCallback( ConvertToRelLoc ) )
 				};
 			}
-			
+
 			return m_MenuItems;
 		}
 
@@ -866,11 +866,11 @@ namespace Assistant.Macros
 
     /// <summary>
     /// Action to handle variable macros to alleviate the headache of having multiple macros for the same thing
-    /// 
+    ///
     /// This Action does break the pattern that you see in every other action because the data that is stored for this
     /// action exists not in the Macro file, but in a different file that has all the variables
-    /// 
-    /// TODO: Re-eval this concept and instead store all data 
+    ///
+    /// TODO: Re-eval this concept and instead store all data
     /// </summary>
     public class AbsoluteTargetVariableAction : MacroAction
     {
@@ -894,7 +894,7 @@ namespace Assistant.Macros
             _variableName = name;
             _profileName = profile;
         }
-        
+
         public AbsoluteTargetVariableAction(string[] args)
         {
             _variableName = args[1];
@@ -1064,7 +1064,7 @@ namespace Assistant.Macros
 					new MacroMenuItem( LocString.ConvLT, new MacroMenuCallback( ConvertToLastTarget ) )
 				};
 			}
-			
+
 			return m_MenuItems;
 		}
 
@@ -1117,7 +1117,7 @@ namespace Assistant.Macros
 			try
 			{
 				Ultima.HuedTile tile = Map.GetTileNear( World.Player.Map, x, y, z );
-				Targeting.Target( new Point3D( x, y, tile.Z ), (ushort)tile.ID );	
+				Targeting.Target( new Point3D( x, y, tile.Z ), (ushort)tile.ID );
 			}
 			catch ( Exception e )
 			{
@@ -1146,7 +1146,7 @@ namespace Assistant.Macros
 					new MacroMenuItem( LocString.ReTarget, new MacroMenuCallback( ReTarget ) )
 				};
 			}
-			
+
 			return m_MenuItems;
 		}
 
@@ -1284,7 +1284,7 @@ namespace Assistant.Macros
 					World.Player.SpeechHue = m_Hue;
 				hue = World.Player.SpeechHue;
 			}
-			
+
 			ClientCommunication.SendToServer( new ClientUniMessage( m_Type, hue, m_Font, m_Lang, m_Keywords, m_Speech ) );
 			return true;
 		}
@@ -1675,6 +1675,8 @@ namespace Assistant.Macros
 			}
 			else
 			{
+
+				// TODO: THIS IS ALL SUSPECT
 				m_LastSeq = World.Player.WalkSequence;
 				m_LastWalk = DateTime.UtcNow;
 
@@ -1751,7 +1753,7 @@ namespace Assistant.Macros
 				if ( m_MenuID == 0 || ((WaitForMenuAction)a).m_MenuID == m_MenuID )
 					return true;
 			}
-			
+
 			return false;
 		}
 
@@ -1766,7 +1768,7 @@ namespace Assistant.Macros
 					this.EditTimeoutMenuItem
 				};
 			}
-			
+
 			return m_MenuItems;
 		}
 
@@ -1844,7 +1846,7 @@ namespace Assistant.Macros
 				if ( m_GumpID == 0 || ((WaitForGumpAction)a).m_GumpID == m_GumpID )
 					return true;
 			}
-			
+
 			return false;
 		}
 
@@ -1866,7 +1868,7 @@ namespace Assistant.Macros
 			else
 				m_MenuItems[1].Text = String.Format( "Change to \"{0}\"", Language.GetString( LocString.WaitAnyGump ) );
 			m_MenuItems[1].Enabled = m_GumpID != 0 || m_Strict;
-			
+
 			return m_MenuItems;
 		}
 
@@ -1933,7 +1935,7 @@ namespace Assistant.Macros
 					this.EditTimeoutMenuItem
 				};
 			}
-			
+
 			return m_MenuItems;
 		}
 
@@ -1996,7 +1998,7 @@ namespace Assistant.Macros
 					new MacroMenuItem( LocString.Edit, new MacroMenuCallback( Edit ) )
 				};
 			}
-			
+
 			return m_MenuItems;
 		}
 
@@ -2054,7 +2056,7 @@ namespace Assistant.Macros
 		public override bool PerformWait()
 		{
 			if ( m_Direction > 0 )
-			{ 
+			{
 				// wait for m_Stat >= m_Value
 				switch ( m_Stat )
 				{
@@ -2099,7 +2101,7 @@ namespace Assistant.Macros
 					this.EditTimeoutMenuItem
 				};
 			}
-			
+
 			return m_MenuItems;
 		}
 
@@ -2138,7 +2140,7 @@ namespace Assistant.Macros
 		public object Value { get { return m_Value; } }
 		public IfVarType Variable { get{ return m_Var; } }
 		public string Counter { get { return m_Counter; } }
-		
+
 		public IfAction( string[] args )
 		{
 			m_Var = (IfVarType)Convert.ToInt32( args[1] );
@@ -2207,7 +2209,7 @@ namespace Assistant.Macros
 				{
 					int val = (int)m_Value;
 					if ( m_Direction > 0 )
-					{ 
+					{
 						// if stat >= m_Value
 						switch ( m_Var )
 						{
@@ -2236,7 +2238,7 @@ namespace Assistant.Macros
 								return World.Player.Weight <= val;
 						}
 					}
-					
+
 					return false;
 				}
 
@@ -2344,7 +2346,7 @@ namespace Assistant.Macros
 					new MacroMenuItem( LocString.Edit, new MacroMenuCallback( Edit ) )
 				};
 			}
-			
+
 			return m_MenuItems;
 		}
 
@@ -2440,7 +2442,7 @@ namespace Assistant.Macros
 
 		public int Count { get { return m_Count; } set { m_Count = value; } }
 		public int Max { get{ return m_Max; } }
-		
+
 		public ForAction( string[] args )
 		{
 			m_Max = Convert.ToInt32( args[1] );
@@ -2476,7 +2478,7 @@ namespace Assistant.Macros
 					new MacroMenuItem( LocString.Edit, new MacroMenuCallback( Edit ) )
 				};
 			}
-			
+
 			return m_MenuItems;
 		}
 
