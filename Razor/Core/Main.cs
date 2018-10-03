@@ -209,18 +209,17 @@ namespace Assistant
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler( CurrentDomain_UnhandledException );
 			Directory.SetCurrentDirectory( Config.GetInstallDirectory() );
 #endif
-			ClientLaunch launch = ClientLaunch.TwoD;
-			string dataDir;
-			string clientPath = "";
 
 			WelcomeForm welcome = new WelcomeForm();
 			m_ActiveWnd = welcome;
 			if (welcome.ShowDialog() == DialogResult.Cancel)
 				return;
-			launch = welcome.Client;
-			dataDir = welcome.DataDirectory;
-			if (launch == ClientLaunch.Custom)
-				clientPath = welcome.ClientPath;
+
+			SplashScreen.Start();
+			m_ActiveWnd = SplashScreen.Instance;
+
+			string clientPath = Config.GetAppSetting<string>("UOClient");
+			string dataDir = Config.GetAppSetting<string>("UODataDir");
 
 			if ( ClientCommunication.InitializeLibrary( Engine.Version ) == 0 )
 				throw new InvalidOperationException( "This Razor installation is corrupted." );
@@ -276,11 +275,6 @@ namespace Assistant
 			if ( defLang != null && !Language.Load( defLang ) )
 				MessageBox.Show( String.Format( "WARNING: Razor was unable to load the file Language/Razor_lang.{0}\nENU will be used instead.", defLang ), "Language Load Error", MessageBoxButtons.OK, MessageBoxIcon.Warning );
 
-			SplashScreen.End();
-
-			SplashScreen.Start();
-			m_ActiveWnd = SplashScreen.Instance;
-
 			if (dataDir != null && Directory.Exists(dataDir)) {
 				Ultima.Files.SetMulPath(dataDir);
 			}
@@ -300,24 +294,15 @@ namespace Assistant
 
             ClientCommunication.SetConnectionInfo(IPAddress.None, -1);
 
-			ClientCommunication.Loader_Error result = ClientCommunication.Loader_Error.UNKNOWN_ERROR;
-
 			SplashScreen.Message = LocString.LoadingClient;
-				
-			if ( launch == ClientLaunch.TwoD )
-				clientPath = Ultima.Files.GetFilePath("client.exe");
-			else if ( launch == ClientLaunch.ThirdDawn )
-				clientPath = Ultima.Files.GetFilePath( "uotd.exe" );
 
+			ClientCommunication.Loader_Error result = ClientCommunication.Loader_Error.UNKNOWN_ERROR;
 			if ( clientPath != null && File.Exists( clientPath ) )
 				result = ClientCommunication.LaunchClient( clientPath );
 
 			if ( result != ClientCommunication.Loader_Error.SUCCESS )
 			{
-				if ( clientPath == null && File.Exists( clientPath ) )
-					MessageBox.Show( SplashScreen.Instance, String.Format( "Unable to find the client specified.\n{0}: \"{1}\"", launch.ToString(), clientPath != null ? clientPath : "-null-" ), "Could Not Start Client", MessageBoxButtons.OK, MessageBoxIcon.Stop );
-				else
-					MessageBox.Show( SplashScreen.Instance, String.Format( "Unable to launch the client specified. (Error: {2})\n{0}: \"{1}\"", launch.ToString(), clientPath != null ? clientPath : "-null-", result ), "Could Not Start Client", MessageBoxButtons.OK, MessageBoxIcon.Stop );
+				MessageBox.Show( SplashScreen.Instance, String.Format( "Unable to find the client specified: \"{0}\"", clientPath), "Could Not Start Client", MessageBoxButtons.OK, MessageBoxIcon.Stop);
 				SplashScreen.End();
 				return;
 			}
