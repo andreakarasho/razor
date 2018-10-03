@@ -4,7 +4,6 @@ using System.Configuration;
 using System.IO;
 using System.Windows.Forms;
 using Microsoft.Win32;
-using Newtonsoft.Json;
 
 namespace Assistant
 {

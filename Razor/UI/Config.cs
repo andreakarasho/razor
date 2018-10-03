@@ -144,7 +144,6 @@ namespace Assistant
 	        AddProperty("ShowPartyStats", false);
 	        AddProperty("PartyStatFmt", "[{0}% / {1}%]");
 
-	        AddProperty("JsonApi", false);
 	        AddProperty("HotKeyStop", false);
 	        AddProperty("DiffTargetByType", false);
 	        AddProperty("StepThroughMacro", false);

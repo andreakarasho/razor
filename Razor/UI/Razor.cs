@@ -12,8 +12,6 @@ using System.Runtime.InteropServices;
 using Assistant.Filters;
 using Assistant.Macros;
 using System.Diagnostics;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace Assistant
 {
@@ -242,7 +240,6 @@ namespace Assistant
         private TextBox statusBox;
         private TextBox features;
         private CheckBox negotiate;
-        private CheckBox jsonApi;
         private Label aboutSubInfo;
         private ComboBox titleBarParams;
         private Button expandAdvancedMacros;
@@ -533,7 +530,6 @@ namespace Assistant
             this.dispTime = new System.Windows.Forms.CheckBox();
             this.advancedTab = new System.Windows.Forms.TabPage();
             this.disableSmartCPU = new System.Windows.Forms.Button();
-            this.jsonApi = new System.Windows.Forms.CheckBox();
             this.negotiate = new System.Windows.Forms.CheckBox();
             this.backupDataDir = new System.Windows.Forms.Button();
             this.openRazorDataDir = new System.Windows.Forms.Button();
@@ -2760,7 +2756,6 @@ namespace Assistant
             // 
             this.advancedTab.BackColor = System.Drawing.SystemColors.Control;
             this.advancedTab.Controls.Add(this.disableSmartCPU);
-            this.advancedTab.Controls.Add(this.jsonApi);
             this.advancedTab.Controls.Add(this.negotiate);
             this.advancedTab.Controls.Add(this.backupDataDir);
             this.advancedTab.Controls.Add(this.openRazorDataDir);
@@ -2784,17 +2779,6 @@ namespace Assistant
             this.disableSmartCPU.Text = "Disable SmartCPU";
             this.disableSmartCPU.UseVisualStyleBackColor = true;
             this.disableSmartCPU.Click += new System.EventHandler(this.disableSmartCPU_Click);
-            // 
-            // jsonApi
-            // 
-            this.jsonApi.AutoSize = true;
-            this.jsonApi.Location = new System.Drawing.Point(202, 148);
-            this.jsonApi.Name = "jsonApi";
-            this.jsonApi.Size = new System.Drawing.Size(113, 19);
-            this.jsonApi.TabIndex = 73;
-            this.jsonApi.Text = "Enable JSON API";
-            this.jsonApi.UseVisualStyleBackColor = true;
-            this.jsonApi.CheckedChanged += new System.EventHandler(this.jsonApi_CheckedChanged);
             // 
             // negotiate
             // 
@@ -3279,16 +3263,10 @@ namespace Assistant
 			dressList.SelectedIndex = -1;
 			hotkeyTree.SelectedNode = null;
 
-		    jsonApi.Checked = Config.GetBool("JsonApi");
 		    targetByTypeDifferent.Checked = Config.GetBool("DiffTargetByType");
 		    stepThroughMacro.Checked = Config.GetBool("StepThroughMacro");
 
 		    //hotKeyStop.Checked = Config.GetBool("HotKeyStop");
-
-            if (jsonApi.Checked)
-		    {
-		        new JsonApiTimer(this).Start();
-            }
 
 		    // Disable SmartCPU in case it was enabled before the feature was removed
 		    ClientCommunication.SetSmartCPU(false);
@@ -3477,49 +3455,6 @@ namespace Assistant
 				}
 			}
 		}
-
-	    private class JsonApiTimer : Timer
-	    {
-	        MainForm m_Form;
-	        public JsonApiTimer(MainForm form) : base(TimeSpan.FromSeconds(0.5), TimeSpan.FromSeconds(0.5))
-	        {
-	            m_Form = form;
-	        }
-
-	        protected override void OnTick()
-	        {
-	            if (Config.GetBool("JsonApi"))
-	            {
-	                m_Form.UpdateJsonApi();
-                }
-	            else
-	            {
-	                m_Form.UpdateJsonApi();
-                    Stop();
-	            }
-	            
-	        }
-	    }
-
-        public void UpdateJsonApi()
-	    {
-
-	        if (World.Player == null)
-	            return;
-
-	        var jsonDict = new Dictionary<string, string>
-	        {
-	            {"Name", World.Player.Name},
-	            {"CriminalTime", World.Player.CriminalTime.ToString()},
-	            {"Weight", World.Player.Weight.ToString()},
-	            {"Weight", World.Player.LastSpell.ToString()}
-            };
-
-	        string json = JsonConvert.SerializeObject(jsonDict);
-
-	        File.WriteAllText($"{Config.GetUserDirectory("")}\\{World.Player.Name}.json", json);
-
-	    }
 
 		public void UpdateSkill( Skill skill )
 		{
@@ -6770,16 +6705,6 @@ namespace Assistant
 	            MessageBox.Show(this, ex.Message, "Unable to create backup", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
 	    }
-
-        private void jsonApi_CheckedChanged(object sender, EventArgs e)
-        {
-            Config.SetProperty("JsonApi", jsonApi.Checked);
-
-            if (jsonApi.Checked)
-            {
-                new JsonApiTimer(this).Start();
-            }
-        }
 
         private void titleBarParams_SelectedIndexChanged(object sender, EventArgs e)
         {
