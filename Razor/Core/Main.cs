@@ -204,11 +204,23 @@ namespace Assistant
 		{
 			m_Running = true;
             Thread.CurrentThread.Name = "Razor Main Thread";
-            
+
 #if !DEBUG
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler( CurrentDomain_UnhandledException );
 			Directory.SetCurrentDirectory( Config.GetInstallDirectory() );
 #endif
+			ClientLaunch launch = ClientLaunch.TwoD;
+			string dataDir;
+			string clientPath = "";
+
+			WelcomeForm welcome = new WelcomeForm();
+			m_ActiveWnd = welcome;
+			if (welcome.ShowDialog() == DialogResult.Cancel)
+				return;
+			launch = welcome.Client;
+			dataDir = welcome.DataDirectory;
+			if (launch == ClientLaunch.Custom)
+				clientPath = welcome.ClientPath;
 
 			if ( ClientCommunication.InitializeLibrary( Engine.Version ) == 0 )
 				throw new InvalidOperationException( "This Razor installation is corrupted." );
@@ -220,18 +232,14 @@ namespace Assistant
 		    catch
 		    {
 		    }
-            
-			ClientLaunch launch = ClientLaunch.TwoD;
-
-			string dataDir;
 
 			// check if the new ServerEncryption option is in app.config
-			dataDir = Config.GetAppSetting<string>("ServerEnc");
-			if ( dataDir == null )
+			string serverEnc = Config.GetAppSetting<string>("ServerEnc");
+			if (serverEnc == null )
 			{
 				// if not, add it (copied from UseOSIEnc)
-			    dataDir = Config.GetAppSetting<string>("UseOSIEnc");
-                if ( dataDir == "1" )
+				serverEnc = Config.GetAppSetting<string>("UseOSIEnc");
+                if (serverEnc == "1" )
 				{
 					ClientCommunication.ServerEncrypted = true;
 				    Config.SetAppSetting("ServerEnc", "1");
@@ -244,9 +252,8 @@ namespace Assistant
 			}
 			else
 			{
-				ClientCommunication.ServerEncrypted = Utility.ToInt32( dataDir, 0 ) != 0;
+				ClientCommunication.ServerEncrypted = Utility.ToInt32(serverEnc, 0 ) != 0;
 			}
-			dataDir = null;
 			
 			for (int i=0;i<Args.Length;i++)
 			{
@@ -287,19 +294,8 @@ namespace Assistant
             string defLang = Config.GetAppSetting<string>("DefaultLanguage");
 			if ( defLang != null && !Language.Load( defLang ) )
 				MessageBox.Show( String.Format( "WARNING: Razor was unable to load the file Language/Razor_lang.{0}\nENU will be used instead.", defLang ), "Language Load Error", MessageBoxButtons.OK, MessageBoxIcon.Warning );
-			
-			string clientPath = "";
 
 			SplashScreen.End();
-
-			WelcomeForm welcome = new WelcomeForm();
-			m_ActiveWnd = welcome;
-			if ( welcome.ShowDialog() == DialogResult.Cancel )
-				return;
-			launch = welcome.Client;
-			dataDir = welcome.DataDirectory;
-			if ( launch == ClientLaunch.Custom )
-				clientPath = welcome.ClientPath;
 
 			SplashScreen.Start();
 			m_ActiveWnd = SplashScreen.Instance;
@@ -319,8 +315,7 @@ namespace Assistant
 
 			SplashScreen.Message = LocString.LoadingLastProfile;
 			Config.LoadCharList();
-			if ( !Config.LoadLastProfile() )
-				MessageBox.Show( SplashScreen.Instance, "The selected profile could not be loaded, using default instead.", "Profile Load Error", MessageBoxButtons.OK, MessageBoxIcon.Warning );
+			Config.LoadLastProfile();
 
             ClientCommunication.SetConnectionInfo(IPAddress.None, -1);
 
