@@ -222,7 +222,6 @@ namespace Assistant
 		    }
             
 			bool patch = Config.GetAppSetting<int>("PatchEncy") != 0;
-			bool showWelcome = Config.GetAppSetting<int>("ShowWelcome") != 0;
 			ClientLaunch launch = ClientLaunch.TwoD;
 
 			int attPID = -1;
@@ -276,14 +275,6 @@ namespace Assistant
 					ClientCommunication.ServerEncrypted = true;
 					advCmdLine = true;
 				}
-				else if ( arg == "--welcome" )
-				{
-					showWelcome = true;
-				}
-				else if ( arg == "--nowelcome" )
-				{
-					showWelcome = false;
-				}
 				else if ( arg == "--pid" && i+1 < Args.Length )
 				{
 					i++;
@@ -308,8 +299,6 @@ namespace Assistant
 					{
 					    Config.SetAppSetting("LastServer", split[0]);
 					    Config.SetAppSetting("LastPort", split[1]);
-
-						showWelcome = false;
 					}
 				}
 				else if ( arg == "--debug" )
@@ -338,43 +327,20 @@ namespace Assistant
 			
 			string clientPath = "";
 
-			// welcome only needed when not loaded by a launcher (ie uogateway)
-			if ( attPID == -1 )
-			{
-				if ( !showWelcome )
-				{
-				    int cli = Config.GetAppSetting<int>("DefClient");
-					if ( cli < 0 || cli > 1 )
-					{
-						launch = ClientLaunch.Custom;
-					    clientPath = Config.GetAppSetting<string>($"Client{cli - 1}");
-						if ( string.IsNullOrEmpty(clientPath) )
-							showWelcome = true;
-					}
-					else
-					{
-						launch = (ClientLaunch)cli;
-					}
-				}
+			SplashScreen.End();
 
-				if ( showWelcome )
-				{
-					SplashScreen.End();
+			WelcomeForm welcome = new WelcomeForm();
+			m_ActiveWnd = welcome;
+			if ( welcome.ShowDialog() == DialogResult.Cancel )
+				return;
+			patch = welcome.PatchEncryption;
+			launch = welcome.Client;
+			dataDir = welcome.DataDirectory;
+			if ( launch == ClientLaunch.Custom )
+				clientPath = welcome.ClientPath;
 
-					WelcomeForm welcome = new WelcomeForm();
-					m_ActiveWnd = welcome;
-					if ( welcome.ShowDialog() == DialogResult.Cancel )
-						return;
-					patch = welcome.PatchEncryption;
-					launch = welcome.Client;
-					dataDir = welcome.DataDirectory;
-					if ( launch == ClientLaunch.Custom )
-						clientPath = welcome.ClientPath;
-
-					SplashScreen.Start();
-					m_ActiveWnd = SplashScreen.Instance;
-				}
-			}
+			SplashScreen.Start();
+			m_ActiveWnd = SplashScreen.Instance;
 
 			if (dataDir != null && Directory.Exists(dataDir)) {
 				Ultima.Files.SetMulPath(dataDir);

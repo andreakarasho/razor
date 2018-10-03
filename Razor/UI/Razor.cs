@@ -116,7 +116,6 @@ namespace Assistant
 		private System.Windows.Forms.Button agentB6;
 		private System.Windows.Forms.CheckBox undressConflicts;
 		private System.Windows.Forms.CheckBox titlebarImages;
-		private System.Windows.Forms.CheckBox showWelcome;
 		private System.Windows.Forms.CheckBox highlightSpellReags;
 		private System.Windows.Forms.ColumnHeader skillHDRlock;
 		private System.ComponentModel.IContainer components;
@@ -331,7 +330,6 @@ namespace Assistant
             this.delProfile = new System.Windows.Forms.Button();
             this.newProfile = new System.Windows.Forms.Button();
             this.profiles = new System.Windows.Forms.ComboBox();
-            this.showWelcome = new System.Windows.Forms.CheckBox();
             this.opacity = new System.Windows.Forms.TrackBar();
             this.alwaysTop = new System.Windows.Forms.CheckBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -621,7 +619,6 @@ namespace Assistant
             this.generalTab.Controls.Add(this.label7);
             this.generalTab.Controls.Add(this.label11);
             this.generalTab.Controls.Add(this.groupBox4);
-            this.generalTab.Controls.Add(this.showWelcome);
             this.generalTab.Controls.Add(this.opacity);
             this.generalTab.Controls.Add(this.alwaysTop);
             this.generalTab.Controls.Add(this.groupBox1);
@@ -751,15 +748,6 @@ namespace Assistant
             this.profiles.Size = new System.Drawing.Size(111, 23);
             this.profiles.TabIndex = 0;
             this.profiles.SelectedIndexChanged += new System.EventHandler(this.profiles_SelectedIndexChanged);
-            // 
-            // showWelcome
-            // 
-            this.showWelcome.Location = new System.Drawing.Point(184, 62);
-            this.showWelcome.Name = "showWelcome";
-            this.showWelcome.Size = new System.Drawing.Size(162, 23);
-            this.showWelcome.TabIndex = 26;
-            this.showWelcome.Text = "Show Welcome Screen";
-            this.showWelcome.CheckedChanged += new System.EventHandler(this.showWelcome_CheckedChanged);
             // 
             // opacity
             // 
@@ -3086,8 +3074,6 @@ namespace Assistant
 			m_ProfileConfirmLoad = false;
 			Config.SetupProfilesList( profiles, Config.CurrentProfile.Name );
 			m_ProfileConfirmLoad = true;
-            
-			showWelcome.Checked = Config.GetAppSetting<int>("ShowWelcome") == 1;
 				
 			m_Tip.Active = true;
             m_Tip.SetToolTip(titleStr, Language.GetString(LocString.TitleBarTip));
@@ -4723,12 +4709,6 @@ namespace Assistant
 		private void corpseRange_TextChanged(object sender, System.EventArgs e)
 		{
 			Config.SetProperty( "CorpseRange", Utility.ToInt32( corpseRange.Text, 2 ) );
-		}
-
-		private void showWelcome_CheckedChanged(object sender, System.EventArgs e)
-		{
-			Config.SetAppSetting("ShowWelcome", ( showWelcome.Checked ? 1 : 0 ).ToString());
-
 		}
 
 		private ContextMenu m_DressItemsMenu = null;

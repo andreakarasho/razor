@@ -32,7 +32,6 @@ namespace Assistant
 		private System.Windows.Forms.Button browse;
 		private System.Windows.Forms.Button makeDef;
 		
-		private System.Windows.Forms.CheckBox showAtStart;
 		private System.Windows.Forms.Label label5;
 		private System.Windows.Forms.ComboBox langSel;
 		private System.Windows.Forms.CheckBox useEnc;
@@ -86,7 +85,6 @@ namespace Assistant
             this.okay = new System.Windows.Forms.Button();
             this.quit = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
-            this.showAtStart = new System.Windows.Forms.CheckBox();
             this.serverList = new System.Windows.Forms.ComboBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.uoClient = new System.Windows.Forms.TextBox();
@@ -158,15 +156,6 @@ namespace Assistant
             this.label3.Size = new System.Drawing.Size(44, 16);
             this.label3.TabIndex = 9;
             this.label3.Text = "Server:";
-            // 
-            // showAtStart
-            // 
-            this.showAtStart.Location = new System.Drawing.Point(187, 265);
-            this.showAtStart.Name = "showAtStart";
-            this.showAtStart.Size = new System.Drawing.Size(176, 20);
-            this.showAtStart.TabIndex = 10;
-            this.showAtStart.Text = "Show this when Razor starts";
-            this.showAtStart.CheckedChanged += new System.EventHandler(this.showAtStart_CheckedChanged);
             // 
             // serverList
             // 
@@ -304,7 +293,6 @@ namespace Assistant
             this.Controls.Add(this.label5);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.showAtStart);
             this.Controls.Add(this.quit);
             this.Controls.Add(this.okay);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -488,8 +476,6 @@ namespace Assistant
 	        langSel.Items.AddRange(Language.GetPackNames());
 	        langSel.SelectedItem = Language.Current;
 
-	        showAtStart.Checked = Config.GetAppSetting<int>("ShowWelcome") == 1;
-
 	        uoClient.Text = Config.GetAppSetting<string>("UOClient");
             dataDir.Text = Config.GetAppSetting<string>("UODataDir");
 
@@ -667,11 +653,6 @@ namespace Assistant
 		    Config.SetAppSetting("UODataDir", dataDir.Text);
 		    m_DataDir = dataDir.Text;
         }
-
-	    private void showAtStart_CheckedChanged(object sender, System.EventArgs e)
-	    {
-	        Config.SetAppSetting("ShowWelcome", (showAtStart.Checked ? 1 : 0).ToString());
-	    }
 
 		private void langSel_SelectedIndexChanged(object sender, System.EventArgs e)
 		{
