@@ -258,26 +258,7 @@ namespace Assistant
 			for (int i=0;i<Args.Length;i++)
 			{
 				string arg = Args[i].ToLower();
-				if ( arg == "--serverenc" )
-				{
-					ClientCommunication.ServerEncrypted = true;
-				}
-				else if ( arg == "--uodata" && i+1 < Args.Length )
-				{
-					i++;
-					dataDir = Args[i];
-				}
-				else if ( arg == "--server" && i+1 < Args.Length )
-				{
-					i++;
-					string[] split = Args[i].Split( ',', ':', ';', ' ' );
-					if ( split.Length >= 2 )
-					{
-					    Config.SetAppSetting("LastServer", split[0]);
-					    Config.SetAppSetting("LastPort", split[1]);
-					}
-				}
-				else if ( arg == "--debug" )
+				if ( arg == "--debug" )
 				{
 					ScavengerAgent.Debug = true;
 					DragDropManager.Debug = true;
