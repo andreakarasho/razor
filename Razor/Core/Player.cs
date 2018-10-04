@@ -553,10 +553,7 @@ namespace Assistant
 
 			if ( Body != 0x03DB && !IsGhost && ((int)(e.Dir&Direction.Mask))%2 == 0 && Config.GetBool( "AutoOpenDoors" ) && ClientCommunication.AllowBit( FeatureBit.AutoOpenDoors ))
 			{
-				int x = Position.X, y = Position.Y;
-				Utility.Offset( e.Dir, ref x, ref y );
-
-				int z = CalcZ;
+				int x = Position.X, y = Position.Y, z = Position.Z;
 
 				foreach ( Item i in World.Items.Values )
 				{
@@ -587,18 +584,15 @@ namespace Assistant
 
 		public void ProcessMove( Direction dir )
 		{
-			if ( (dir & Direction.Mask) == (this.Direction & Direction.Mask) )
-			{
-				int x = Position.X, y = Position.Y;
+			int x;
+			int y;
+			int z;
 
-				Utility.Offset( dir&Direction.Mask, ref x, ref y );
-				
-				int newZ = Position.Z;
-				try { newZ = Assistant.Map.ZTop( Map, x, y, newZ ); } 
-				catch { }
-				Position = new Point3D( x, y, newZ );
+			if (ClientCommunication.GetPosition(out x, out y, out z))
+			{
+				Position = new Point3D(x, y, z);
+				Direction = dir;
 			}
-			Direction = dir;
 		}
 
 		public bool HasWalkEntry( byte seq )
@@ -633,35 +627,12 @@ namespace Assistant
             }
         }
 
-		private static bool m_ExternZ = false;
-		public static bool ExternalZ { get { return m_ExternZ; } set { m_ExternZ = value; } }
-
-		//private sbyte m_CalcZ = 0;
-		public int CalcZ 
-		{ 
-			get 
-			{ 
-				if ( !m_ExternZ || !ClientCommunication.IsCalibrated() )
-					return Assistant.Map.ZTop( Map, Position.X, Position.Y, Position.Z );
-				else
-					return Position.Z; 
-			} 
-		}
 
 		public override Point3D Position
 		{
 			get
 			{
-				if ( m_ExternZ && ClientCommunication.IsCalibrated() )
-				{
-					Point3D p = new Point3D( base.Position );
-					p.Z = ClientCommunication.GetZ( p.X, p.Y, p.Z );
-					return p;
-				}
-				else
-				{
-					return base.Position;
-				}
+				return base.Position;
 			}
 			set
 			{

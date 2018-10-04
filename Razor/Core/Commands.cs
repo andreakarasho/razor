@@ -184,10 +184,6 @@ namespace Assistant
             }
 
             World.Player.SendMessage(MsgLevel.Force, LocString.CurLoc, World.Player.Position, mapStr);
-#if DEBUG
-            World.Player.SendMessage(MsgLevel.Debug, "Cal? {0} - CalcZ = {1} (Extern = {2})",
-                ClientCommunication.IsCalibrated(), World.Player.CalcZ, PlayerData.ExternalZ);
-#endif
         }
 
         private static void Ping(string[] param)

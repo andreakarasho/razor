@@ -22,6 +22,8 @@ HMODULE hInstance = NULL;
 SOCKET CurrentConnection = 0;
 int ConnectedIP = 0;
 
+Position *CurrentPosition = nullptr;
+
 HANDLE CommMutex = NULL;
 
 char *tempBuff = NULL;
@@ -330,67 +332,31 @@ DLLFUNCTION unsigned int TotalIn()
 		return 0;
 }
 
-DLLFUNCTION bool IsCalibrated()
+DLLFUNCTION void CalibratePosition(int x, int y, int z)
 {
-	return pShared && pShared->Position[0] == 0xFFFFFFFF && pShared->Position[1] == 0xDEADBEEF && pShared->Position[2] != 0 && pShared->Position[2] != 0xFFFFFFFF;
+	WaitForSingleObject(CommMutex, INFINITE);
+	pShared->Pos.x = x;
+	pShared->Pos.y = y;
+	pShared->Pos.z = z;
+	ReleaseMutex(CommMutex);
+
+	PostMessage(hWatchWnd, WM_UONETEVENT, CALIBRATE_POS, 0);
 }
 
-DLLFUNCTION void CalibratePosition( int x, int y, int z )
+DLLFUNCTION bool GetPosition(int *x, int *y, int *z)
 {
-	pShared->Position[2] = x;
-	pShared->Position[1] = y;
-	pShared->Position[0] = z;
+	bool ret = false;
 
-	PostMessage( hWatchWnd, WM_UONETEVENT, CALIBRATE_POS, 0 );
-}
-
-DLLFUNCTION bool GetPosition( int *x, int *y, int *z )
-{
-	if ( IsCalibrated() )
-	{
-		int buffer[3];
-		DWORD Read = 0;
-		HANDLE hProc = OpenProcess( PROCESS_VM_READ, FALSE, UOProcId );
-		if ( !hProc )
-			return false;
-
-		if ( ReadProcessMemory( hProc, (void*)pShared->Position[2], buffer, sizeof(int)*3, &Read ) )
-		{
-			if ( Read == sizeof(int)*3 )
-			{
-				if ( x ) 
-					*x = buffer[2];
-				if ( y ) 
-					*y = buffer[1];
-				if ( z ) 
-					*z = buffer[0];
-			}
-			else
-			{
-				Read = 0;
-			}
-		}
-		else
-		{
-			Read = 0;
-		}
-
-		CloseHandle( hProc );
-
-		if ( Read == sizeof(int)*3 && ( x == NULL || ( *x >= 0 && *x < 8192 ) ) && ( y == NULL || ( *y >= 0 && *y < 8192 ) ) )
-		{
-			return true;
-		}
-		else
-		{
-			memset( pShared->Position, 0, sizeof(int)*3 );
-			return false;
-		}
+	WaitForSingleObject(CommMutex, 50);
+	if (pShared->PositionCalibrated) {
+		*x = pShared->Pos.x;
+		*y = pShared->Pos.y;
+		*z = pShared->Pos.z;
+		ret = true;
 	}
-	else
-	{
-		return false;
-	}
+	ReleaseMutex(CommMutex);
+
+	return ret;
 }
 
 DLLFUNCTION void BringToFront( HWND hWnd )
@@ -939,6 +905,7 @@ bool CreateSharedMemory()
 	}
 
 	//memset( pShared, 0, sizeof(SharedMemory) );
+	pShared->PositionCalibrated = false;
 
 	return true;
 }
@@ -1160,6 +1127,10 @@ int PASCAL HookRecv( SOCKET sock, char *buff, int len, int flags )
 		}
 		else
 		{
+			if (CurrentPosition) {
+				memcpy(&pShared->Pos, CurrentPosition, sizeof(pShared->Pos));
+			}
+
 			ackLen = 0;
 			while ( pShared->OutRecv.Length > 0 )
 			{
@@ -1473,7 +1444,6 @@ int PASCAL HookCloseSocket( SOCKET sock )
 
 		WaitForSingleObject( CommMutex, INFINITE );
 		pShared->OutRecv.Length = pShared->InRecv.Length = pShared->OutSend.Length = pShared->InSend.Length = 0;
-		memset( pShared->Position, 0, 4*3 );
 		pShared->TotalSend = pShared->TotalRecv = 0;
 		pShared->ForceDisconn = false;
 		ReleaseMutex( CommMutex );
@@ -1797,6 +1767,20 @@ void FindList( DWORD val, unsigned short size )
 		PostMessage( hPostWnd, WM_UONETEVENT, MAKELONG(FINDDATA,i+1), addrList[i] );
 }
 
+DWORD FindMem(Position *pos, int length, DWORD addressHint, DWORD addressMax)
+{
+	for (DWORD addr = addressHint; addr < addressMax && !IsBadReadPtr((void*)addr, length); addr++)
+	{
+		Position *mem = (Position *)addr;
+
+		if (mem->x == pos->x && mem->y == pos->y && mem->z == pos->z) {
+			return addr;
+		}
+	}
+
+	return 0;
+}
+
 void MessageProc( HWND hWnd, UINT nMsg, WPARAM wParam, LPARAM lParam, MSG *pMsg )
 {
 	/*if ( SizePtr && ( SizePtr->cx != DesiredSize.cx || SizePtr->cy != DesiredSize.cy ) )// && ( SizePtr->cx != 640 || SizePtr->cy != 480 ) )
@@ -1866,21 +1850,11 @@ void MessageProc( HWND hWnd, UINT nMsg, WPARAM wParam, LPARAM lParam, MSG *pMsg 
 			PatchDeathMsg();
 			break;
 		case CALIBRATE_POS:
-			WaitForSingleObject( CommMutex, INFINITE );
-			if ( pShared->Position[0] >= -255 && pShared->Position[0] <= 255 && pShared->Position[1] >= 0 && pShared->Position[1] <= 8192 && pShared->Position[2] >= 0 && pShared->Position[2] <= 8192 )
-			{
-				pShared->Position[2] = (int)MemFinder::Find( pShared->Position, sizeof(int)*3, 0x00500000, 0x00C00000 );
-				if ( pShared->Position[2] )
-				{
-					pShared->Position[0] = 0xFFFFFFFF;
-					pShared->Position[1] = 0xDEADBEEF;
-				}
-				else
-				{
-					memset( pShared->Position, 0, sizeof(int)*3 );
-				}
-			}
-			ReleaseMutex( CommMutex );
+			WaitForSingleObject(CommMutex, INFINITE);
+			/* Scan the region of memory in the client known to hold the player's position */
+			CurrentPosition = (Position *)FindMem(&pShared->Pos, sizeof(pShared->Pos), 0x00500000, 0x00C00000);
+			pShared->PositionCalibrated = true;
+			ReleaseMutex(CommMutex);
 			break;
 
 		case OPEN_RPV:
@@ -2020,6 +1994,8 @@ LRESULT CALLBACK WndProcRetHookFunc( int Code, WPARAM Flag, LPARAM pMsg )
 
 	return CallNextHookEx( NULL, Code, Flag, pMsg );
 }
+
+#define LOGGING 1
 
 void Log( const char *format, ... )
 {

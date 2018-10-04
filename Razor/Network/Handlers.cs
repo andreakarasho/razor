@@ -1021,8 +1021,6 @@ namespace Assistant
 			World.AddMobile( World.Player = m );
 			Config.LoadProfileFor( World.Player );
 
-			PlayerData.ExternalZ = false;
-
 			p.ReadUInt32(); // always 0?
 			m.Body = p.ReadUInt16();
 			m.Position = new Point3D( p.ReadUInt16(), p.ReadUInt16(), p.ReadInt16() );
@@ -1047,8 +1045,6 @@ namespace Assistant
 
 			Stream.Fill();
 			*/
-
-			ClientCommunication.BeginCalibratePosition();
 		}
 		
 		private static void MobileMoving( Packet p, PacketHandlerEventArgs args )
@@ -1084,7 +1080,7 @@ namespace Assistant
 
 				if ( m == World.Player )
 				{
-					ClientCommunication.BeginCalibratePosition();
+					ClientCommunication.CalibratePosition(m.Position.X, m.Position.Y, m.Position.Z);
 
 					if ( wasPoisoned != m.Poisoned || ( oldNoto != m.Notoriety && Config.GetBool( "ShowNotoHue" ) ) )
 						ClientCommunication.RequestTitlebarUpdate();
@@ -1381,8 +1377,6 @@ namespace Assistant
 
 			if ( m == World.Player )
 			{
-				ClientCommunication.BeginCalibratePosition();
-
 				World.Player.Resync();
 
 				if ( !wasHidden && !m.Visible )
@@ -1404,6 +1398,11 @@ namespace Assistant
 			p.ReadUInt16(); //always 0?
 			m.Direction = (Direction)p.ReadByte();
 			m.Position = new Point3D( x, y, p.ReadSByte() );
+
+			if (m == World.Player)
+			{
+				ClientCommunication.CalibratePosition(m.Position.X, m.Position.Y, m.Position.Z);
+			}
 
 			Item.UpdateContainers();
 		}
@@ -1456,7 +1455,7 @@ namespace Assistant
 			
 			if ( m == World.Player )
 			{
-				ClientCommunication.BeginCalibratePosition();
+				ClientCommunication.CalibratePosition(position.X, position.Y, position.Z);
 
 				if ( !wasHidden && !m.Visible )
 				{

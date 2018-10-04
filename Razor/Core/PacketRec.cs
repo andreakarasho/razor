@@ -602,8 +602,6 @@ namespace Assistant
 			if ( wasRunning )
 				m_PlayTimer.Stop();
 
-			PlayerData.ExternalZ = false;
-
 			int sleepCount = 0;
 			while ( m_Elapsed < target && !m_GZIn.EndOfFile )
 			{
@@ -654,8 +652,6 @@ namespace Assistant
 					Stop();
 				}
 			}
-
-			ClientCommunication.BeginCalibratePosition();
 		}
 
 		public static void Open( string filename )
@@ -927,8 +923,6 @@ namespace Assistant
 
 		private static void DoLogin( PlayerData player )
 		{
-			PlayerData.ExternalZ = false;
-
 			ClientCommunication.ForceSendToClient( new LoginConfirm( player ) );
 			ClientCommunication.ForceSendToClient( new MapChange( player.Map ) );
 			ClientCommunication.ForceSendToClient( new MapPatches( player.MapPatches ) );
@@ -975,8 +969,6 @@ namespace Assistant
 			ClientCommunication.ForceSendToClient( new MobileIncoming( player ) );
 
 			PacketHandlers.PlayCharTime = DateTime.UtcNow;
-			
-			ClientCommunication.BeginCalibratePosition();
 		}
 
 		public static string ElapsedString
