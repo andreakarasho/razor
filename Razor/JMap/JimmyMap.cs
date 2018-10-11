@@ -230,7 +230,7 @@ namespace Assistant.JMap
 
         protected override void OnResize(EventArgs e)
         {
-            if(mapPanel != null)
+            if (mapPanel != null)
             {
                 SuspendLayout();
                 mapPanel.Width = ClientRectangle.Width;
@@ -258,6 +258,9 @@ namespace Assistant.JMap
 
         public void PlayerMoved()
         {
+            if (mapPanel == null)
+                return;
+
             if(!mapPanel.trackingPlayer)
                 mapPanel.trackingPlayer = true;
 
@@ -311,7 +314,10 @@ namespace Assistant.JMap
         public void main_OnMouseWheel(object s, MouseEventArgs e)
         {
             //Debug.WriteLine("MainMouseWheel");
-            mapPanel.mapPanel_OnMouseWheel(s, e);
+            if (mapPanel != null)
+            {
+                mapPanel.mapPanel_OnMouseWheel(s, e);
+            }
         }
 
         public void main_MouseEnter(object sender, EventArgs e)
@@ -330,7 +336,10 @@ namespace Assistant.JMap
                 Focus();
             }
 
-            mapPanel.mapPanel_MouseEnter(sender, e);    
+            if (mapPanel != null)
+            {
+                mapPanel.mapPanel_MouseEnter(sender, e);
+            }
         }
 
         public void main_MouseLeave(object sender, EventArgs e)
@@ -342,28 +351,43 @@ namespace Assistant.JMap
             //    BringToFront();
             //}
 
-            mapPanel.mapPanel_MouseLeave(sender, e);
+            if (mapPanel != null)
+            {
+                mapPanel.mapPanel_MouseLeave(sender, e);
+            }
         }
 
         public void main_MouseDown(object sender, MouseEventArgs e)
         {
-            mapPanel.mapPanel_MouseDown(sender, e);
+            if (mapPanel != null)
+            {
+                mapPanel.mapPanel_MouseDown(sender, e);
+            }
         }
 
         public void main_MouseUp(object sender, MouseEventArgs e)
         {
             //Cursor = Cursors.Default;
-            mapPanel.mapPanel_MouseUp(sender, e);
+            if (mapPanel != null)
+            {
+                mapPanel.mapPanel_MouseUp(sender, e);
+            }
         }
 
         public void main_MouseMove(object sender, MouseEventArgs e)
         {
-            mapPanel.mapPanel_MouseMove(sender, e);
+            if (mapPanel != null)
+            {
+                mapPanel.mapPanel_MouseMove(sender, e);
+            }
         }
 
         public void main_DoubleClick(object sender, MouseEventArgs e)
         {
-            mapPanel.mapPanel_DoubleClick(sender, e);
+            if (mapPanel != null)
+            {
+                mapPanel.mapPanel_DoubleClick(sender, e);
+            }
         }
 
         private void main_Exit(object sender, FormClosingEventArgs e)
@@ -385,7 +409,10 @@ namespace Assistant.JMap
 
         private void main_Closing_SaveAll(object sender, FormClosingEventArgs e)
         {
-            mapPanel.WriteUpdatedCSV();
+            if (mapPanel != null)
+            {
+                mapPanel.WriteUpdatedCSV();
+            }
         }
 
         // MAP BORDER ZONES
