@@ -431,6 +431,7 @@ namespace Assistant
         GoldPerHotkey,
         EnterNewText,
         ImportFromPrevious,
+        SetOrganizerHB,
 
 
         __End
