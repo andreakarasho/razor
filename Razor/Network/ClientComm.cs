@@ -20,7 +20,7 @@ namespace Assistant
 	{
 		public static readonly uint WeatherFilter	=  0;
 		public static readonly uint LightFilter		=  1;
-		public static readonly uint SmartLT			=  2;	
+		public static readonly uint SmartLT			=  2;
 		public static readonly uint RangeCheckLT	=  3;
 		public static readonly uint AutoOpenDoors	=  4;
 		public static readonly uint UnequipBeforeCast= 5;
@@ -169,7 +169,7 @@ namespace Assistant
 					}
 
 					m_WndReg.Add( new WndRegEnt( wParam, lParam == 1 ? 1 : 0 ) );
-					
+
 					if ( lParam == 1 && World.Items != null )
 					{
 						foreach ( Item item in World.Items.Values )
@@ -178,7 +178,7 @@ namespace Assistant
 								PostMessage( (IntPtr)wParam, (uint)UOAMessage.ADD_MULTI, (IntPtr)((int)((item.Position.X&0xFFFF)|((item.Position.Y&0xFFFF)<<16))), (IntPtr)item.ItemID.Value );
 						}
 					}
-					
+
 					return 1;
 				}
 				case UOAMessage.COUNT_RESOURCES:
@@ -221,7 +221,7 @@ namespace Assistant
 				{
 					if ( World.Player == null || wParam < 0 || wParam > 5 )
 						return 0;
-					
+
 					switch ( wParam )
 					{
 						case 0: return World.Player.Str;
@@ -306,7 +306,7 @@ namespace Assistant
 				}
 				case UOAMessage.GET_UO_HWND:
 				{
-					return FindUOWindow().ToInt32();
+					return UOWindow.ToInt32();
 				}
 				case UOAMessage.GET_POISON:
 				{
@@ -411,7 +411,7 @@ namespace Assistant
 		public static void PostStamUpdate()
 		{
 			if ( World.Player != null )
-				PostToWndReg( (uint)UOAMessage.DEX_STATUS, (IntPtr)World.Player.StamMax, (IntPtr)World.Player.Stam );	
+				PostToWndReg( (uint)UOAMessage.DEX_STATUS, (IntPtr)World.Player.StamMax, (IntPtr)World.Player.Stam );
 		}
 
 		private static void PostToWndReg( uint Msg, IntPtr wParam, IntPtr lParam )
@@ -464,13 +464,11 @@ namespace Assistant
 		}
 
 		[DllImport( "Crypt.dll" )]
-		private static unsafe extern int InstallLibrary( IntPtr thisWnd, int procid, int features );
+		private static unsafe extern int InstallLibrary(IntPtr razorWnd, IntPtr uoWnd, int flags);
 		[DllImport( "Crypt.dll" )]
 		private static unsafe extern void Shutdown( bool closeClient );
 		[DllImport( "Crypt.dll" )]
-		internal static unsafe extern IntPtr FindUOWindow();
-		[DllImport( "Crypt.dll" )]
-		private static unsafe extern IntPtr GetSharedAddress(); 
+		private static unsafe extern IntPtr GetSharedAddress();
 		[DllImport( "Crypt.dll" )]
 		internal static unsafe extern int GetPacketLength( byte *data, int bufLen );//GetPacketLength( [MarshalAs(UnmanagedType.LPArray, SizeParamIndex=1)] byte[] data, int bufLen );
 		[DllImport( "Crypt.dll" )]
@@ -550,16 +548,57 @@ namespace Assistant
         [DllImport( "user32.dll" )]
 		internal static extern bool SetForegroundWindow( IntPtr hWnd );
 
+		[DllImport("user32.dll", SetLastError = true)]
+		static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+		[DllImport("user32.dll", CharSet = CharSet.Unicode)]
+		static extern IntPtr FindWindowEx(IntPtr parentHandle, IntPtr childAfter, string lclassName, string windowTitle);
+		[DllImport("user32.dll", SetLastError = true)]
+		static extern int GetWindowThreadProcessId(IntPtr hWnd, out int lpdwProcessId);
+
 		[DllImport( "kernel32.dll" )]
 		private static extern ushort GlobalAddAtom( string str );
 		[DllImport( "kernel32.dll" )]
 		private static extern ushort GlobalDeleteAtom( ushort atom );
 		[DllImport( "kernel32.dll" )]
 		private static extern uint GlobalGetAtomName( ushort atom, StringBuilder buff, int bufLen );
-        
+
 		[DllImport( "Advapi32.dll" )]
 		private static extern int GetUserNameA( StringBuilder buff, int *len );
-	
+
+		public static IntPtr UOWindow { get; private set; } = IntPtr.Zero;
+
+		public static void FindUOWindow(int uoProcId)
+		{
+			IntPtr wnd;
+			int tid, pid;
+			string className;
+
+			className = "Ultima Online";
+			wnd = FindWindow(className, null);
+			if (wnd == IntPtr.Zero)
+			{
+				className = "Ultima Online Third Dawn";
+				wnd = FindWindow(className, null);
+			}
+
+			if (wnd == IntPtr.Zero)
+			{
+				return;
+			}
+
+			while (wnd != IntPtr.Zero)
+			{
+				tid = GetWindowThreadProcessId(wnd, out pid);
+				if (uoProcId == pid)
+				{
+					break;
+				}
+				wnd = FindWindowEx(IntPtr.Zero, wnd, className, null);
+			}
+
+			UOWindow = wnd;
+		}
+
 		public static string GetWindowsUserName()
 		{
 			int len = 1024;
@@ -599,16 +638,16 @@ namespace Assistant
 		public static Process ClientProcess{ get{ return ClientProc; } }
 
 		public static bool ClientRunning
-		{ 
+		{
 			get
-			{ 
+			{
 				try
 				{
 					return ClientProc != null && !ClientProc.HasExited;
 				}
 				catch
 				{
-					return ClientProc != null && FindUOWindow() != IntPtr.Zero;
+					return ClientProc != null && UOWindow != IntPtr.Zero;
 				}
 			}
 		}
@@ -617,20 +656,20 @@ namespace Assistant
 		{
 			m_WndReg = new ArrayList();
 		}
-		
+
 		public static void SetMapWndHandle( Form mapWnd )
 		{
-			PostMessage( FindUOWindow(), WM_UONETEVENT, (IntPtr)UONetMessage.SetMapHWnd, mapWnd.Handle );
+			PostMessage( UOWindow, WM_UONETEVENT, (IntPtr)UONetMessage.SetMapHWnd, mapWnd.Handle );
 		}
 
 		public static void RequestStatbarPatch( bool preAOS )
 		{
-			PostMessage( FindUOWindow(), WM_UONETEVENT, (IntPtr)UONetMessage.StatBar, preAOS ? (IntPtr)1 : IntPtr.Zero );
+			PostMessage( UOWindow, WM_UONETEVENT, (IntPtr)UONetMessage.StatBar, preAOS ? (IntPtr)1 : IntPtr.Zero );
 		}
 
 		public static void SetCustomNotoHue( int hue )
 		{
-			PostMessage( FindUOWindow(), WM_UONETEVENT, (IntPtr)UONetMessage.NotoHue, (IntPtr)hue );
+			PostMessage( UOWindow, WM_UONETEVENT, (IntPtr)UONetMessage.NotoHue, (IntPtr)hue );
 		}
 
 	    public static void SetSmartCPU(bool enabled)
@@ -638,13 +677,13 @@ namespace Assistant
 	        if (enabled)
 	            try { ClientCommunication.ClientProcess.PriorityClass = System.Diagnostics.ProcessPriorityClass.Normal; } catch { }
 
-	        PostMessage(FindUOWindow(), WM_UONETEVENT, (IntPtr)UONetMessage.SmartCPU, (IntPtr)(enabled ? 1 : 0));
+	        PostMessage(UOWindow, WM_UONETEVENT, (IntPtr)UONetMessage.SmartCPU, (IntPtr)(enabled ? 1 : 0));
         }
 
 		public static void SetGameSize( int x, int y )
 		{
-			PostMessage( FindUOWindow(), WM_UONETEVENT, (IntPtr)UONetMessage.SetGameSize, (IntPtr)((x&0xFFFF)|((y&0xFFFF)<<16)) );
-            //PostMessageA(FindUOWindow(), WM_UONETEVENT, (IntPtr)UONetMessage.SetGameSize, (IntPtr)((x & 0xFFFF) | ((y & 0xFFFF) << 16)));
+			PostMessage( UOWindow, WM_UONETEVENT, (IntPtr)UONetMessage.SetGameSize, (IntPtr)((x&0xFFFF)|((y&0xFFFF)<<16)) );
+            //PostMessageA(UOWindow, WM_UONETEVENT, (IntPtr)UONetMessage.SetGameSize, (IntPtr)((x & 0xFFFF) | ((y & 0xFFFF) << 16)));
         }
 
 		public static Loader_Error LaunchClient( string client )
@@ -697,7 +736,7 @@ namespace Assistant
 		private static bool m_ServerEnc = false;
 		internal static bool ServerEncrypted { get { return m_ServerEnc; } set { m_ServerEnc = value; } }
 
-		internal static bool InstallHooks( IntPtr mainWindow )
+		internal static bool InstallHooks( IntPtr razorWindow )
 		{
 			InitError error;
 			int flags = 0;
@@ -714,7 +753,9 @@ namespace Assistant
 			//ClientProc.WaitForInputIdle();
 			WaitForWindow( ClientProc.Id );
 
-			error = (InitError)InstallLibrary( mainWindow, ClientProc.Id, flags );
+			FindUOWindow(ClientProc.Id);
+
+			error = (InitError)InstallLibrary( razorWindow, UOWindow, flags );
 
 			if ( error != InitError.SUCCESS )
 			{
@@ -755,10 +796,10 @@ namespace Assistant
 
 			return true;
 		}
-		
+
 		private static uint m_ServerIP;
 		private static ushort m_ServerPort;
-		
+
 		internal static void SetConnectionInfo( IPAddress addr, int port )
 		{
 #pragma warning disable 618
@@ -766,10 +807,10 @@ namespace Assistant
 #pragma warning restore 618
 			m_ServerPort = (ushort)port;
 		}
-		
+
 		public static void SetNegotiate( bool negotiate )
 		{
-			PostMessage( FindUOWindow(), WM_UONETEVENT, (IntPtr)UONetMessage.Negotiate, (IntPtr)(negotiate ? 1 : 0) );
+			PostMessage( UOWindow, WM_UONETEVENT, (IntPtr)UONetMessage.Negotiate, (IntPtr)(negotiate ? 1 : 0) );
 		}
 
 		public static bool Attach( int pid )
@@ -837,7 +878,7 @@ namespace Assistant
 	            m_TBBuilder.Remove(0, m_TBBuilder.Length);
 	            m_TBBuilder.Insert(0, Config.GetString("TitleBarText"));
 	            StringBuilder sb = m_TBBuilder;
-	            //StringBuilder sb = new StringBuilder( Config.GetString( "TitleBarText" ) ); // m_TitleCapacity 
+	            //StringBuilder sb = new StringBuilder( Config.GetString( "TitleBarText" ) ); // m_TitleCapacity
 
 	            PlayerData p = World.Player;
 
@@ -930,14 +971,14 @@ namespace Assistant
 
 	                buffs.Length = buffs.Length - 2;
                      buffList = buffs.ToString();
-                     sb.Replace(@"{buffsdebuffs}", buffList);                     
+                     sb.Replace(@"{buffsdebuffs}", buffList);
 
                  }
 	            else
 	            {
 	                sb.Replace(@"{buffsdebuffs}", "-");
                      buffList = string.Empty;
-                 }                
+                 }
 
                  string statStr = String.Format("{0}{1:X2}{2:X2}{3:X2}",
 	                (int) (p.GetStatusCode()),
@@ -985,7 +1026,7 @@ namespace Assistant
 			*(m_TitleStr+clen) = 0;
 			CommMutex.ReleaseMutex();
 
-			PostMessage( FindUOWindow(), WM_CUSTOMTITLE, IntPtr.Zero, IntPtr.Zero );
+			PostMessage( UOWindow, WM_CUSTOMTITLE, IntPtr.Zero, IntPtr.Zero );
 		}
 
 		public static int GetZ( int x, int y, int z )
@@ -995,7 +1036,7 @@ namespace Assistant
 				if ( GetPosition( null, null, &z ) )
 					return z;
 			}
-				
+
 			return Map.ZTop( World.Player.Map, x, y, z );
 		}
 
@@ -1034,7 +1075,7 @@ namespace Assistant
 				m_CalTimer.Stop();
 
 			m_CalPos = new Point2D( World.Player.Position );
-			
+
 			m_CalTimer = Timer.DelayedCallback( TimeSpan.FromSeconds( 0.5 ), m_CalibrateNow );
 			m_CalTimer.Start();
 		}
@@ -1095,7 +1136,7 @@ namespace Assistant
 		internal static bool OnMessage( MainForm razor, uint wParam, int lParam )
 		{
 			bool retVal = true;
-			
+
 			switch ( (UONetMessage)(wParam&0xFFFF) )
 			{
 				case UONetMessage.Ready: //Patch status
@@ -1165,7 +1206,7 @@ namespace Assistant
 				case UONetMessage.KeyDown:
 					retVal = HotKey.OnKeyDown( lParam );
 					break;
-					
+
 					// Activation Tracking
 				case UONetMessage.Activate:
 					/*if ( Config.GetBool( "AlwaysOnTop" ) )
@@ -1184,7 +1225,7 @@ namespace Assistant
 								if ( !razor.ShowInTaskbar && !razor.Visible )
 									razor.Show();
 								razor.WindowState = FormWindowState.Normal;
-								//SetForegroundWindow( FindUOWindow() );
+								//SetForegroundWindow( UOWindow );
 							}
 							m_LastActivate = DateTime.UtcNow;
 						}
@@ -1197,7 +1238,7 @@ namespace Assistant
 						if ( lParam != 0 && !razor.TopMost )
 						{
 							razor.TopMost = true;
-							SetForegroundWindow( FindUOWindow() );
+							SetForegroundWindow( UOWindow );
 						}
 						else if ( lParam == 0 && razor.TopMost )
 						{
@@ -1212,7 +1253,7 @@ namespace Assistant
 						if ( lParam != 0 && !razor.MapWindow.TopMost )
 						{
 							razor.MapWindow.TopMost = true;
-							SetForegroundWindow( FindUOWindow() );
+							SetForegroundWindow( UOWindow );
 						}
 						else if ( lParam == 0 && razor.MapWindow.TopMost )
 						{
@@ -1227,7 +1268,7 @@ namespace Assistant
 				        if (lParam != 0 && !razor.JMap.TopMost)
 				        {
 				            razor.JMap.TopMost = true;
-				            SetForegroundWindow(FindUOWindow());
+				            SetForegroundWindow(UOWindow);
 				        }
 				        else if (lParam == 0 && razor.JMap.TopMost)
 				        {
@@ -1344,14 +1385,14 @@ namespace Assistant
 		private static void InitSendFlush()
 		{
 			if ( m_OutSend->Length == 0 )
-				PostMessage( FindUOWindow(), WM_UONETEVENT, (IntPtr)UONetMessage.Send, IntPtr.Zero );
+				PostMessage( UOWindow, WM_UONETEVENT, (IntPtr)UONetMessage.Send, IntPtr.Zero );
 		}
 
 		private static void CopyToBuffer( Buffer *buffer, byte *data, int len )
 		{
 			//if ( buffer->Length + buffer->Start + len >= SHARED_BUFF_SIZE )
 			//	throw new NullReferenceException( String.Format( "Buffer OVERFLOW in CopyToBuffer [{0} + {1}] <- {2}", buffer->Start, buffer->Length, len ) );
-			
+
 			memcpy( (&buffer->Buff0) + buffer->Start + buffer->Length, data, len );
 			buffer->Length += len;
 		}
@@ -1359,7 +1400,7 @@ namespace Assistant
 		internal static Packet MakePacketFrom( PacketReader pr )
 		{
 			byte[] data = pr.CopyBytes( 0, pr.Length );
-			return new Packet( data, pr.Length, pr.DynamicLength );	
+			return new Packet( data, pr.Length, pr.DynamicLength );
 		}
 
 		private static void HandleComm( Buffer *inBuff, Buffer *outBuff, Queue<Packet> queue, PacketPath path )

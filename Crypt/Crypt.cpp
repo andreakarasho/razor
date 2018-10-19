@@ -140,21 +140,6 @@ DLLFUNCTION void *GetSharedAddress()
 	return pShared;
 }
 
-DLLFUNCTION HWND FindUOWindow( void )
-{
-	if ( hUOWindow == NULL || !IsWindow(hUOWindow) )
-	{
-		HWND hWnd = FindWindow( "Ultima Online", NULL );
-		if (hWnd == NULL)
-			hWnd = FindWindow( "Ultima Online Third Dawn", NULL );
-		return hWnd;
-	}
-	else
-	{
-		return hUOWindow;
-	}
-}
-
 DLLFUNCTION void SetDataPath( const char *path )
 {
 	WaitForSingleObject( CommMutex, INFINITE );
@@ -183,48 +168,16 @@ void PatchDeathMsg()
 	}
 }
 
-DLLFUNCTION int InstallLibrary( HWND PostWindow, DWORD pid, int flags )
+DLLFUNCTION int InstallLibrary(HWND RazorWindow, HWND UOWindow, int flags)
 {
 	DWORD UOTId = 0;
 
 	Log( "Initialize library..." );
 
-	HWND hWnd = NULL;
-	if ( pid != 0 )
-	{
-		hWnd = FindWindow( "Ultima Online", NULL );
-		while ( hWnd != NULL )
-		{
-			UOTId = GetWindowThreadProcessId( hWnd, &UOProcId );
-			if ( UOProcId == pid )
-				break;
-			hWnd = FindWindowEx( NULL, hWnd, "Ultima Online", NULL );
-		}
+	UOTId = GetWindowThreadProcessId(UOWindow, &UOProcId);
 
-		if ( UOProcId != pid || hWnd == NULL )
-		{
-			hWnd = FindWindow( "Ultima Online Third Dawn", NULL );
-			while ( hWnd != NULL )
-			{
-				UOTId = GetWindowThreadProcessId( hWnd, &UOProcId );
-				if (UOProcId == pid)
-					break;
-				hWnd = FindWindowEx( NULL, hWnd, "Ultima Online Third Dawn", NULL );
-			}
-		}
-
-		if ( UOProcId != pid )
-			return NO_TID;
-	}
-	else
-	{
-		hWnd = FindUOWindow();
-		if ( hWnd != NULL )
-			UOTId = GetWindowThreadProcessId( hWnd, &UOProcId );
-	}
-
-	hUOWindow = hWnd;
-	hRazorWnd = PostWindow;
+	hUOWindow = UOWindow;
+	hRazorWnd = RazorWindow;
 
 	if ( hUOWindow == NULL )
 		return NO_UOWND;
