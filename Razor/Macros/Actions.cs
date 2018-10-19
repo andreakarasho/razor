@@ -1813,7 +1813,7 @@ namespace Assistant.Macros
                         break;
                 }
               
-                SendMessage(ClientCommunication.FindUOWindow(), WM_KEYDOWN, (IntPtr)direction, (IntPtr)1);
+                SendMessage(ClientCommunication.UOWindow, WM_KEYDOWN, (IntPtr)direction, (IntPtr)1);
 
                 return false;
             }

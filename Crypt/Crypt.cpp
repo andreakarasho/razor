@@ -141,21 +141,6 @@ DLLFUNCTION void *GetSharedAddress()
 	return pShared;
 }
 
-DLLFUNCTION HWND FindUOWindow( void )
-{
-	if ( hWatchWnd == NULL || !IsWindow( hWatchWnd ) )
-	{
-		HWND hWnd = FindWindow( "Ultima Online", NULL );
-		if (hWnd == NULL)
-			hWnd = FindWindow( "Ultima Online Third Dawn", NULL );
-		return hWnd;
-	}
-	else
-	{
-		return hWatchWnd;
-	}
-}
-
 DLLFUNCTION void SetDataPath( const char *path )
 {
 	WaitForSingleObject( CommMutex, INFINITE );
@@ -184,65 +169,28 @@ void PatchDeathMsg()
 	}
 }
 
-DLLFUNCTION int InstallLibrary( HWND PostWindow, DWORD pid, int flags )
+DLLFUNCTION int InstallLibrary(HWND RazorWindow, HWND UOWindow, int flags)
 {
-	DWORD UOTId = 0;
+	HWND hWnd = NULL;
 
 	Log( "Initialize library..." );
 
-	HWND hWnd = NULL;
-	if ( pid != 0 )
-	{
-		hWnd = FindWindow( "Ultima Online", NULL );
-		while ( hWnd != NULL )
-		{
-			UOTId = GetWindowThreadProcessId( hWnd, &UOProcId );
-			if ( UOProcId == pid )
-				break;
-			hWnd = FindWindowEx( NULL, hWnd, "Ultima Online", NULL );
-		}
-
-		if ( UOProcId != pid || hWnd == NULL )
-		{
-			hWnd = FindWindow( "Ultima Online Third Dawn", NULL );
-			while ( hWnd != NULL )
-			{
-				UOTId = GetWindowThreadProcessId( hWnd, &UOProcId );
-				if (UOProcId == pid)
-					break;
-				hWnd = FindWindowEx( NULL, hWnd, "Ultima Online Third Dawn", NULL );
-			}
-		}
-
-		if ( UOProcId != pid )
-			return NO_TID;
-	}
-	else 
-	{
-		hWnd = FindUOWindow();
-		if ( hWnd != NULL )
-			UOTId = GetWindowThreadProcessId( hWnd, &UOProcId );
-	}
-
-	hWatchWnd = hWnd;
-	hPostWnd = PostWindow;
+	hWatchWnd = UOWindow;
+	hPostWnd = RazorWindow;
 
 	if ( hWatchWnd == NULL )
 		return NO_UOWND;
-
-	if ( !UOTId || !UOProcId )
-		return NO_TID;
 
 	if ( !CreateSharedMemory() )
 		return NO_SHAREMEM;
 
 	pShared->Reserved0 = false;
 
-	hWndProcRetHook = SetWindowsHookEx( WH_CALLWNDPROCRET, WndProcRetHookFunc, hInstance, UOTId );
+	hWndProcRetHook = SetWindowsHookEx( WH_CALLWNDPROCRET, WndProcRetHookFunc, hInstance, 0);
 	if ( !hWndProcRetHook )
 		return NO_HOOK;
 
-	hGetMsgHook = SetWindowsHookEx( WH_GETMESSAGE, GetMsgHookFunc, hInstance, UOTId );
+	hGetMsgHook = SetWindowsHookEx( WH_GETMESSAGE, GetMsgHookFunc, hInstance, 0);
 	if ( !hGetMsgHook )
 		return NO_HOOK;
 
@@ -467,7 +415,7 @@ DLLFUNCTION void DoFeatures( int realFeatures )
 	memcpy( pShared->OutSend.Buff + pShared->OutSend.Start + pShared->OutSend.Length, pkt, size );
 	pShared->OutSend.Length += (int)size;
 	ReleaseMutex( CommMutex );
-	PostMessage( FindUOWindow(), WM_UONETEVENT, SEND, 0 );
+	PostMessage( hWatchWnd, WM_UONETEVENT, SEND, 0 );
 }
 
 DLLFUNCTION bool AllowBit( unsigned long bit )

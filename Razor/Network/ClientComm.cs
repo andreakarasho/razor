@@ -306,7 +306,7 @@ namespace Assistant
 				}
 				case UOAMessage.GET_UO_HWND:
 				{
-					return FindUOWindow().ToInt32();
+					return UOWindow.ToInt32();
 				}
 				case UOAMessage.GET_POISON:
 				{
@@ -464,11 +464,9 @@ namespace Assistant
 		}
 
 		[DllImport( "Crypt.dll" )]
-		private static unsafe extern int InstallLibrary( IntPtr thisWnd, int procid, int features );
+		private static unsafe extern int InstallLibrary(IntPtr razorWnd, IntPtr uoWnd, int flags);
 		[DllImport( "Crypt.dll" )]
 		private static unsafe extern void Shutdown( bool closeClient );
-		[DllImport( "Crypt.dll" )]
-		internal static unsafe extern IntPtr FindUOWindow();
 		[DllImport( "Crypt.dll" )]
 		private static unsafe extern IntPtr GetSharedAddress(); 
 		[DllImport( "Crypt.dll" )]
@@ -550,6 +548,13 @@ namespace Assistant
         [DllImport( "user32.dll" )]
 		internal static extern bool SetForegroundWindow( IntPtr hWnd );
 
+		[DllImport("user32.dll", SetLastError = true)]
+		static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+		[DllImport("user32.dll", CharSet = CharSet.Unicode)]
+		static extern IntPtr FindWindowEx(IntPtr parentHandle, IntPtr childAfter, string lclassName, string windowTitle);
+		[DllImport("user32.dll", SetLastError = true)]
+		static extern int GetWindowThreadProcessId(IntPtr hWnd, out int lpdwProcessId);
+
 		[DllImport( "kernel32.dll" )]
 		private static extern ushort GlobalAddAtom( string str );
 		[DllImport( "kernel32.dll" )]
@@ -559,7 +564,41 @@ namespace Assistant
         
 		[DllImport( "Advapi32.dll" )]
 		private static extern int GetUserNameA( StringBuilder buff, int *len );
-	
+
+		public static IntPtr UOWindow { get; private set; } = IntPtr.Zero;
+
+		public static void FindUOWindow(int uoProcId)
+		{
+			IntPtr wnd;
+			int tid, pid;
+			string className;
+
+			className = "Ultima Online";
+			wnd = FindWindow(className, null);
+			if (wnd == IntPtr.Zero)
+			{
+				className = "Ultima Online Third Dawn";
+				wnd = FindWindow(className, null);
+			}
+
+			if (wnd == IntPtr.Zero)
+			{
+				return;
+			}
+
+			while (wnd != IntPtr.Zero)
+			{
+				tid = GetWindowThreadProcessId(wnd, out pid);
+				if (uoProcId == pid)
+				{
+					break;
+				}
+				wnd = FindWindowEx(IntPtr.Zero, wnd, className, null);
+			}
+
+			UOWindow = wnd;
+		}
+
 		public static string GetWindowsUserName()
 		{
 			int len = 1024;
@@ -608,7 +647,7 @@ namespace Assistant
 				}
 				catch
 				{
-					return ClientProc != null && FindUOWindow() != IntPtr.Zero;
+					return ClientProc != null && UOWindow != IntPtr.Zero;
 				}
 			}
 		}
@@ -620,17 +659,17 @@ namespace Assistant
 		
 		public static void SetMapWndHandle( Form mapWnd )
 		{
-			PostMessage( FindUOWindow(), WM_UONETEVENT, (IntPtr)UONetMessage.SetMapHWnd, mapWnd.Handle );
+			PostMessage( UOWindow, WM_UONETEVENT, (IntPtr)UONetMessage.SetMapHWnd, mapWnd.Handle );
 		}
 
 		public static void RequestStatbarPatch( bool preAOS )
 		{
-			PostMessage( FindUOWindow(), WM_UONETEVENT, (IntPtr)UONetMessage.StatBar, preAOS ? (IntPtr)1 : IntPtr.Zero );
+			PostMessage( UOWindow, WM_UONETEVENT, (IntPtr)UONetMessage.StatBar, preAOS ? (IntPtr)1 : IntPtr.Zero );
 		}
 
 		public static void SetCustomNotoHue( int hue )
 		{
-			PostMessage( FindUOWindow(), WM_UONETEVENT, (IntPtr)UONetMessage.NotoHue, (IntPtr)hue );
+			PostMessage( UOWindow, WM_UONETEVENT, (IntPtr)UONetMessage.NotoHue, (IntPtr)hue );
 		}
 
 	    public static void SetSmartCPU(bool enabled)
@@ -638,13 +677,13 @@ namespace Assistant
 	        if (enabled)
 	            try { ClientCommunication.ClientProcess.PriorityClass = System.Diagnostics.ProcessPriorityClass.Normal; } catch { }
 
-	        PostMessage(FindUOWindow(), WM_UONETEVENT, (IntPtr)UONetMessage.SmartCPU, (IntPtr)(enabled ? 1 : 0));
+	        PostMessage(UOWindow, WM_UONETEVENT, (IntPtr)UONetMessage.SmartCPU, (IntPtr)(enabled ? 1 : 0));
         }
 
 		public static void SetGameSize( int x, int y )
 		{
-			PostMessage( FindUOWindow(), WM_UONETEVENT, (IntPtr)UONetMessage.SetGameSize, (IntPtr)((x&0xFFFF)|((y&0xFFFF)<<16)) );
-            //PostMessageA(FindUOWindow(), WM_UONETEVENT, (IntPtr)UONetMessage.SetGameSize, (IntPtr)((x & 0xFFFF) | ((y & 0xFFFF) << 16)));
+			PostMessage( UOWindow, WM_UONETEVENT, (IntPtr)UONetMessage.SetGameSize, (IntPtr)((x&0xFFFF)|((y&0xFFFF)<<16)) );
+            //PostMessageA(UOWindow, WM_UONETEVENT, (IntPtr)UONetMessage.SetGameSize, (IntPtr)((x & 0xFFFF) | ((y & 0xFFFF) << 16)));
         }
 
 		public static Loader_Error LaunchClient( string client )
@@ -697,7 +736,7 @@ namespace Assistant
 		private static bool m_ServerEnc = false;
 		internal static bool ServerEncrypted { get { return m_ServerEnc; } set { m_ServerEnc = value; } }
 
-		internal static bool InstallHooks( IntPtr mainWindow )
+		internal static bool InstallHooks( IntPtr razorWindow )
 		{
 			InitError error;
 			int flags = 0;
@@ -714,7 +753,9 @@ namespace Assistant
 			//ClientProc.WaitForInputIdle();
 			WaitForWindow( ClientProc.Id );
 
-			error = (InitError)InstallLibrary( mainWindow, ClientProc.Id, flags );
+			FindUOWindow(ClientProc.Id);
+
+			error = (InitError)InstallLibrary( razorWindow, UOWindow, flags );
 
 			if ( error != InitError.SUCCESS )
 			{
@@ -769,7 +810,7 @@ namespace Assistant
 		
 		public static void SetNegotiate( bool negotiate )
 		{
-			PostMessage( FindUOWindow(), WM_UONETEVENT, (IntPtr)UONetMessage.Negotiate, (IntPtr)(negotiate ? 1 : 0) );
+			PostMessage( UOWindow, WM_UONETEVENT, (IntPtr)UONetMessage.Negotiate, (IntPtr)(negotiate ? 1 : 0) );
 		}
 
 		public static bool Attach( int pid )
@@ -991,7 +1032,7 @@ namespace Assistant
 			*(m_TitleStr+clen) = 0;
 			CommMutex.ReleaseMutex();
 
-			PostMessage( FindUOWindow(), WM_CUSTOMTITLE, IntPtr.Zero, IntPtr.Zero );
+			PostMessage( UOWindow, WM_CUSTOMTITLE, IntPtr.Zero, IntPtr.Zero );
 		}
 
 		public static int GetZ( int x, int y, int z )
@@ -1111,7 +1152,7 @@ namespace Assistant
 						StringBuilder sb = new StringBuilder( 256 );
 						if ( GlobalGetAtomName( (ushort)lParam, sb, 256 ) == 0 )
 							return false;
-						BringToFront( FindUOWindow() );
+						BringToFront( UOWindow );
 						PacketPlayer.Open( sb.ToString() );
 						Engine.MainWindow.ShowMe();
 						Engine.MainWindow.SwitchToVidTab();
@@ -1206,7 +1247,7 @@ namespace Assistant
 								if ( !razor.ShowInTaskbar && !razor.Visible )
 									razor.Show();
 								razor.WindowState = FormWindowState.Normal;
-								//SetForegroundWindow( FindUOWindow() );
+								//SetForegroundWindow( UOWindow );
 							}
 							m_LastActivate = DateTime.UtcNow;
 						}
@@ -1219,7 +1260,7 @@ namespace Assistant
 						if ( lParam != 0 && !razor.TopMost )
 						{
 							razor.TopMost = true;
-							SetForegroundWindow( FindUOWindow() );
+							SetForegroundWindow( UOWindow );
 						}
 						else if ( lParam == 0 && razor.TopMost )
 						{
@@ -1234,7 +1275,7 @@ namespace Assistant
 						if ( lParam != 0 && !razor.MapWindow.TopMost )
 						{
 							razor.MapWindow.TopMost = true;
-							SetForegroundWindow( FindUOWindow() );
+							SetForegroundWindow( UOWindow );
 						}
 						else if ( lParam == 0 && razor.MapWindow.TopMost )
 						{
@@ -1249,7 +1290,7 @@ namespace Assistant
 				        if (lParam != 0 && !razor.JMap.TopMost)
 				        {
 				            razor.JMap.TopMost = true;
-				            SetForegroundWindow(FindUOWindow());
+				            SetForegroundWindow(UOWindow);
 				        }
 				        else if (lParam == 0 && razor.JMap.TopMost)
 				        {
@@ -1372,7 +1413,7 @@ namespace Assistant
 		private static void InitSendFlush()
 		{
 			if ( m_OutSend->Length == 0 )
-				PostMessage( FindUOWindow(), WM_UONETEVENT, (IntPtr)UONetMessage.Send, IntPtr.Zero );
+				PostMessage( UOWindow, WM_UONETEVENT, (IntPtr)UONetMessage.Send, IntPtr.Zero );
 		}
 
 		private static void CopyToBuffer( Buffer *buffer, byte *data, int len )

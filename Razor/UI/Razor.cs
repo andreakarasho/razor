@@ -7433,8 +7433,8 @@ namespace Assistant
             {
                 if (MapWindow == null)
                     MapWindow = new Assistant.MapUO.MapWindow();
-                //SetParent( MapWindow.Handle, ClientCommunication.FindUOWindow() );
-                //MapWindow.Owner = (Form)Form.FromHandle( ClientCommunication.FindUOWindow() );
+                //SetParent( MapWindow.Handle, ClientCommunication.UOWindow );
+                //MapWindow.Owner = (Form)Form.FromHandle( ClientCommunication.UOWindow );
                 MapWindow.Show();
                 MapWindow.BringToFront();
             }
@@ -7869,8 +7869,8 @@ namespace Assistant
             JMap.Enabled = true;
 
 
-            //SetParent(jMap.Handle, ClientCommunication.FindUOWindow());
-            //jMap.Owner = (Form)Form.FromHandle(ClientCommunication.FindUOWindow());
+            //SetParent(jMap.Handle, ClientCommunication.UOWindow);
+            //jMap.Owner = (Form)Form.FromHandle(ClientCommunication.UOWindow);
 
             //we handle showing in the jmap class due to map generation 
             //jMap.Show();
@@ -7884,8 +7884,8 @@ namespace Assistant
             {
                 if (MapWindow == null)
                     MapWindow = new Assistant.MapUO.MapWindow();
-                //SetParent( MapWindow.Handle, ClientCommunication.FindUOWindow() );
-                //MapWindow.Owner = (Form)Form.FromHandle( ClientCommunication.FindUOWindow() );
+                //SetParent( MapWindow.Handle, ClientCommunication.UOWindow );
+                //MapWindow.Owner = (Form)Form.FromHandle( ClientCommunication.UOWindow );
                 MapWindow.Show();
                 MapWindow.BringToFront();
             }*/
