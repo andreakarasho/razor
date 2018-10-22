@@ -99,8 +99,6 @@ namespace Assistant
 		[DllImport( "Crypt.dll" )]
 		private static unsafe extern int InstallLibrary(IntPtr razorWnd, IntPtr uoWnd, int flags);
 		[DllImport( "Crypt.dll" )]
-		private static unsafe extern void Shutdown( bool closeClient );
-		[DllImport( "Crypt.dll" )]
 		private static unsafe extern IntPtr GetSharedAddress(); 
 		[DllImport( "Crypt.dll" )]
 		internal static unsafe extern int GetPacketLength( byte *data, int bufLen );//GetPacketLength( [MarshalAs(UnmanagedType.LPArray, SizeParamIndex=1)] byte[] data, int bufLen );
@@ -457,7 +455,6 @@ namespace Assistant
 
 		public static void Close()
 		{
-			Shutdown( true );
 			if ( ClientProc != null && !ClientProc.HasExited )
 				ClientProc.CloseMainWindow();
 			ClientProc = null;

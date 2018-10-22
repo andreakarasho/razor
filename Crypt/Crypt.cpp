@@ -94,7 +94,7 @@ GetUOVersionFunc NativeGetUOVersion = NULL;
 
 BOOL APIENTRY DllMain( HANDLE hModule, DWORD dwReason, LPVOID )
 {
-	DWORD postID, thisID;
+	DWORD razorID, thisID;
 
 	hInstance = (HMODULE)hModule;
 	switch (dwReason)
@@ -106,22 +106,18 @@ BOOL APIENTRY DllMain( HANDLE hModule, DWORD dwReason, LPVOID )
 		break;
 
 	case DLL_PROCESS_DETACH:
-		postID = 0;
+		razorID = 0;
 		thisID = GetCurrentProcessId();
 		if ( IsWindow( hRazorWnd ) )
-			GetWindowThreadProcessId( hRazorWnd, &postID );
+			GetWindowThreadProcessId( hRazorWnd, &razorID );
 
-		if ( thisID == postID || thisID == UOProcId )
+		if (thisID == razorID) {
+			/* If Razor exits it will automatically attempt to close the UO client. */
+			break;
+		} else if (thisID == UOProcId)
 		{
 			if ( IsWindow( hRazorWnd ) )
 				PostMessage( hRazorWnd, WM_UONETEVENT, CLOSE, 0 );
-
-			if ( IsWindow( hUOWindow ) )
-			{
-				PostMessage( hUOWindow, WM_QUIT, 0, 0 );
-				SetForegroundWindow( hUOWindow );
-				SetFocus( hUOWindow );
-			}
 
 			CloseSharedMemory();
 		}
@@ -200,14 +196,6 @@ DLLFUNCTION int InstallLibrary(HWND RazorWindow, HWND UOWindow, int flags)
 	ClientEncrypted = (flags&0x08) != 0;
 	PostMessage( hUOWindow, WM_PROCREADY, (WPARAM)flags, (LPARAM)hRazorWnd );
 	return SUCCESS;
-}
-
-DLLFUNCTION void Shutdown( bool close )
-{
-	Log( "Shutdown" );
-
-	if ( hUOWindow && IsWindow( hUOWindow ) )
-		PostMessage( hUOWindow, WM_QUIT, 0, 0 );
 }
 
 DLLFUNCTION HANDLE GetCommMutex()
