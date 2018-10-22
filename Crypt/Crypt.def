@@ -12,8 +12,6 @@ EXPORTS
 	CaptureScreen
 	SetDataPath
 	CalibratePosition
-	IsCalibrated
-	GetPosition
 	BringToFront
 	DoFeatures
 	AllowBit

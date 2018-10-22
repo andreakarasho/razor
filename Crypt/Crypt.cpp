@@ -241,66 +241,70 @@ DLLFUNCTION unsigned int TotalIn()
 		return 0;
 }
 
-DLLFUNCTION bool IsCalibrated()
+DLLFUNCTION void CalibratePosition( uint16_t x, uint16_t y, uint16_t z )
 {
-	return pShared && pShared->Position[0] == 0xFFFFFFFF && pShared->Position[1] == 0xDEADBEEF && pShared->Position[2] != 0 && pShared->Position[2] != 0xFFFFFFFF;
+	Position pos;
+	COPYDATASTRUCT copydata;
+
+	pos.x = x;
+	pos.y = y;
+	pos.z = z;
+
+	copydata.dwData = (ULONG_PTR)UONET_MESSAGE_COPYDATA::POSITION;
+	copydata.cbData = sizeof(pos);
+	copydata.lpData = &pos;
+
+	SendMessage(hUOWindow, WM_COPYDATA, (WPARAM)hRazorWnd, (LPARAM)&copydata);
 }
 
-DLLFUNCTION void CalibratePosition( int x, int y, int z )
+/* These variables are used in the UO client process address space */
+Position g_TestPosition = {};
+Position g_LastPosition = {};
+Position *g_ClientMem = nullptr;
+
+VOID CALLBACK CheckPosition(HWND hwnd, UINT Message, UINT TimerId, DWORD dwTime)
 {
-	pShared->Position[2] = x;
-	pShared->Position[1] = y;
-	pShared->Position[0] = z;
+	if (g_ClientMem == nullptr) {
+		/* Scan the region of memory in the client known to hold the player's position */
+		Position p;
+		p.x = g_TestPosition.x;
+		p.y = g_TestPosition.y;
+		p.z = g_TestPosition.z;
 
-	PostMessage( hUOWindow, WM_UONETEVENT, CALIBRATE_POS, 0 );
-}
-
-DLLFUNCTION bool GetPosition( int *x, int *y, int *z )
-{
-	if ( IsCalibrated() )
-	{
-		int buffer[3];
-		DWORD Read = 0;
-		HANDLE hProc = OpenProcess( PROCESS_VM_READ, FALSE, UOProcId );
-		if ( !hProc )
-			return false;
-
-		if ( ReadProcessMemory( hProc, (void*)pShared->Position[2], buffer, sizeof(int)*3, &Read ) )
+		for (uintptr_t addr = 0x00500000; addr < 0x00C00000; addr += 2)
 		{
-			if ( Read == sizeof(int)*3 )
-			{
-				if ( x )
-					*x = buffer[2];
-				if ( y )
-					*y = buffer[1];
-				if ( z )
-					*z = buffer[0];
+			if (IsBadReadPtr((void*)addr, sizeof(Position))) {
+				break;
 			}
-			else
-			{
-				Read = 0;
+
+			Position* mem = (Position*)addr;
+
+			if (mem->x == g_TestPosition.x && mem->y == g_TestPosition.y && mem->z == g_TestPosition.z) {
+				g_ClientMem = mem;
+				break;
 			}
-		}
-		else
-		{
-			Read = 0;
-		}
-
-		CloseHandle( hProc );
-
-		if ( Read == sizeof(int)*3 && ( x == NULL || ( *x >= 0 && *x < 8192 ) ) && ( y == NULL || ( *y >= 0 && *y < 8192 ) ) )
-		{
-			return true;
-		}
-		else
-		{
-			memset( pShared->Position, 0, sizeof(int)*3 );
-			return false;
 		}
 	}
-	else
-	{
-		return false;
+
+	if (g_ClientMem != nullptr) {
+		Position pos;
+		pos.x = g_ClientMem->x;
+		pos.y = g_ClientMem->y;
+		pos.z = g_ClientMem->z;
+
+		if (pos.x != g_LastPosition.x || pos.y != g_LastPosition.y || pos.z != g_LastPosition.z) {
+			/* Inform Razor of a position change */
+
+			COPYDATASTRUCT copydata;
+
+			copydata.dwData = (ULONG_PTR)UONET_MESSAGE_COPYDATA::POSITION;
+			copydata.cbData = sizeof(pos);
+			copydata.lpData = &pos;
+
+			SendMessage(hRazorWnd, WM_COPYDATA, (WPARAM)hUOWindow, (LPARAM)&copydata);
+		}
+
+		g_LastPosition = pos;
 	}
 }
 
@@ -1288,7 +1292,6 @@ int HookCloseSocket( SOCKET sock )
 
 		WaitForSingleObject( CommMutex, INFINITE );
 		pShared->OutRecv.Length = pShared->InRecv.Length = pShared->OutSend.Length = pShared->InSend.Length = 0;
-		memset( pShared->Position, 0, 4*3 );
 		pShared->TotalSend = pShared->TotalRecv = 0;
 		pShared->ForceDisconn = false;
 		ReleaseMutex( CommMutex );
@@ -1663,23 +1666,6 @@ void MessageProc( HWND hWnd, UINT nMsg, WPARAM wParam, LPARAM lParam, MSG *pMsg 
 		case NOTO_HUE:
 			SetCustomNotoHue( (int)lParam );
 			break;
-		case CALIBRATE_POS:
-			WaitForSingleObject( CommMutex, INFINITE );
-			if ( pShared->Position[0] >= -255 && pShared->Position[0] <= 255 && pShared->Position[1] >= 0 && pShared->Position[1] <= 8192 && pShared->Position[2] >= 0 && pShared->Position[2] <= 8192 )
-			{
-				pShared->Position[2] = (int)MemFinder::Find( pShared->Position, sizeof(int)*3, 0x00500000, 0x00C00000 );
-				if ( pShared->Position[2] )
-				{
-					pShared->Position[0] = 0xFFFFFFFF;
-					pShared->Position[1] = 0xDEADBEEF;
-				}
-				else
-				{
-					memset( pShared->Position, 0, sizeof(int)*3 );
-				}
-			}
-			ReleaseMutex( CommMutex );
-			break;
 
 		case SETWNDSIZE:
 			DesiredSize.cx = LOWORD(lParam);
@@ -1704,6 +1690,22 @@ void MessageProc( HWND hWnd, UINT nMsg, WPARAM wParam, LPARAM lParam, MSG *pMsg 
 			break;
 		}
 		break;
+
+	case WM_COPYDATA: {
+		COPYDATASTRUCT *copydata = (COPYDATASTRUCT *)lParam;
+
+		switch ((UONET_MESSAGE_COPYDATA)copydata->dwData) {
+		case UONET_MESSAGE_COPYDATA::POSITION:
+			g_TestPosition = *(Position *)copydata->lpData;
+
+			/* Start (or restart) a timer that will keep searching client memory for the given position.
+			 * Once found, it will broadcast updates to the position any time it changes. */
+			SetTimer(hUOWindow, (UINT_PTR)0xAA, 50, CheckPosition);
+			break;
+
+		}
+		break;
+	}
 
 		// Macro stuff
 	case WM_SYSKEYDOWN:
