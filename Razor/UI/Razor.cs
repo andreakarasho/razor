@@ -292,6 +292,9 @@ namespace Assistant
         private CheckBox rangeCheckDoubleClick;
         private Button containerLabels;
         private CheckBox showContainerLabels;
+        private CheckBox realSeason;
+        private ComboBox seasonList;
+        private Label lblSeason;
         private TreeView _hotkeyTreeViewCache = new TreeView();
 
         [DllImport("User32.dll")]
@@ -375,6 +378,9 @@ namespace Assistant
             this.opacityLabel = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.moreOptTab = new System.Windows.Forms.TabPage();
+            this.realSeason = new System.Windows.Forms.CheckBox();
+            this.seasonList = new System.Windows.Forms.ComboBox();
+            this.lblSeason = new System.Windows.Forms.Label();
             this.blockOpenCorpsesTwice = new System.Windows.Forms.CheckBox();
             this.lightLevel = new System.Windows.Forms.Label();
             this.lightLevelBar = new System.Windows.Forms.TrackBar();
@@ -677,7 +683,7 @@ namespace Assistant
             this.tabs.Multiline = true;
             this.tabs.Name = "tabs";
             this.tabs.SelectedIndex = 0;
-            this.tabs.Size = new System.Drawing.Size(490, 508);
+            this.tabs.Size = new System.Drawing.Size(490, 497);
             this.tabs.SizeMode = System.Windows.Forms.TabSizeMode.FillToRight;
             this.tabs.TabIndex = 0;
             this.tabs.SelectedIndexChanged += new System.EventHandler(this.tabs_IndexChanged);
@@ -700,7 +706,7 @@ namespace Assistant
             this.generalTab.Controls.Add(this.label9);
             this.generalTab.Location = new System.Drawing.Point(4, 44);
             this.generalTab.Name = "generalTab";
-            this.generalTab.Size = new System.Drawing.Size(482, 460);
+            this.generalTab.Size = new System.Drawing.Size(482, 449);
             this.generalTab.TabIndex = 0;
             this.generalTab.Text = "General";
             // 
@@ -895,6 +901,9 @@ namespace Assistant
             // 
             // moreOptTab
             // 
+            this.moreOptTab.Controls.Add(this.realSeason);
+            this.moreOptTab.Controls.Add(this.seasonList);
+            this.moreOptTab.Controls.Add(this.lblSeason);
             this.moreOptTab.Controls.Add(this.blockOpenCorpsesTwice);
             this.moreOptTab.Controls.Add(this.lightLevel);
             this.moreOptTab.Controls.Add(this.lightLevelBar);
@@ -930,9 +939,45 @@ namespace Assistant
             this.moreOptTab.Controls.Add(this.incomingCorpse);
             this.moreOptTab.Location = new System.Drawing.Point(4, 44);
             this.moreOptTab.Name = "moreOptTab";
-            this.moreOptTab.Size = new System.Drawing.Size(482, 460);
+            this.moreOptTab.Size = new System.Drawing.Size(482, 449);
             this.moreOptTab.TabIndex = 5;
             this.moreOptTab.Text = "Options";
+            // 
+            // realSeason
+            // 
+            this.realSeason.Font = new System.Drawing.Font("Segoe UI Semilight", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.realSeason.Location = new System.Drawing.Point(61, 240);
+            this.realSeason.Name = "realSeason";
+            this.realSeason.Size = new System.Drawing.Size(49, 20);
+            this.realSeason.TabIndex = 87;
+            this.realSeason.Text = "Real";
+            this.realSeason.CheckedChanged += new System.EventHandler(this.realSeason_CheckedChanged);
+            // 
+            // seasonList
+            // 
+            this.seasonList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.seasonList.FormattingEnabled = true;
+            this.seasonList.Items.AddRange(new object[] {
+            "Spring",
+            "Summer",
+            "Fall",
+            "Winter",
+            "Desolation",
+            "(Server Default)"});
+            this.seasonList.Location = new System.Drawing.Point(116, 239);
+            this.seasonList.Name = "seasonList";
+            this.seasonList.Size = new System.Drawing.Size(111, 23);
+            this.seasonList.TabIndex = 86;
+            this.seasonList.SelectedIndexChanged += new System.EventHandler(this.seasonList_SelectedIndexChanged);
+            // 
+            // lblSeason
+            // 
+            this.lblSeason.AutoSize = true;
+            this.lblSeason.Location = new System.Drawing.Point(8, 242);
+            this.lblSeason.Name = "lblSeason";
+            this.lblSeason.Size = new System.Drawing.Size(47, 15);
+            this.lblSeason.TabIndex = 85;
+            this.lblSeason.Text = "Season:";
             // 
             // blockOpenCorpsesTwice
             // 
@@ -947,7 +992,7 @@ namespace Assistant
             // lightLevel
             // 
             this.lightLevel.AutoSize = true;
-            this.lightLevel.Location = new System.Drawing.Point(8, 239);
+            this.lightLevel.Location = new System.Drawing.Point(8, 268);
             this.lightLevel.Name = "lightLevel";
             this.lightLevel.Size = new System.Drawing.Size(67, 15);
             this.lightLevel.TabIndex = 83;
@@ -956,10 +1001,10 @@ namespace Assistant
             // lightLevelBar
             // 
             this.lightLevelBar.AutoSize = false;
-            this.lightLevelBar.Location = new System.Drawing.Point(91, 238);
+            this.lightLevelBar.Location = new System.Drawing.Point(91, 267);
             this.lightLevelBar.Maximum = 31;
             this.lightLevelBar.Name = "lightLevelBar";
-            this.lightLevelBar.Size = new System.Drawing.Size(146, 21);
+            this.lightLevelBar.Size = new System.Drawing.Size(148, 21);
             this.lightLevelBar.TabIndex = 82;
             this.lightLevelBar.TickStyle = System.Windows.Forms.TickStyle.None;
             this.lightLevelBar.Value = 15;
@@ -1273,7 +1318,7 @@ namespace Assistant
             this.moreMoreOptTab.Controls.Add(this.chkPartyOverhead);
             this.moreMoreOptTab.Location = new System.Drawing.Point(4, 44);
             this.moreMoreOptTab.Name = "moreMoreOptTab";
-            this.moreMoreOptTab.Size = new System.Drawing.Size(482, 460);
+            this.moreMoreOptTab.Size = new System.Drawing.Size(482, 449);
             this.moreMoreOptTab.TabIndex = 10;
             this.moreMoreOptTab.Text = "More Options";
             // 
@@ -1333,9 +1378,9 @@ namespace Assistant
             this.showBuffDebuffOverhead.AutoSize = true;
             this.showBuffDebuffOverhead.Location = new System.Drawing.Point(8, 263);
             this.showBuffDebuffOverhead.Name = "showBuffDebuffOverhead";
-            this.showBuffDebuffOverhead.Size = new System.Drawing.Size(175, 19);
+            this.showBuffDebuffOverhead.Size = new System.Drawing.Size(172, 19);
             this.showBuffDebuffOverhead.TabIndex = 77;
-            this.showBuffDebuffOverhead.Text = "Show Buff/Debuff Overhead";
+            this.showBuffDebuffOverhead.Text = "Show buff/debuff overhead";
             this.showBuffDebuffOverhead.UseVisualStyleBackColor = true;
             this.showBuffDebuffOverhead.CheckedChanged += new System.EventHandler(this.showBuffDebuffOverhead_CheckedChanged);
             // 
@@ -1628,7 +1673,7 @@ namespace Assistant
             this.displayTab.Controls.Add(this.groupBox2);
             this.displayTab.Location = new System.Drawing.Point(4, 44);
             this.displayTab.Name = "displayTab";
-            this.displayTab.Size = new System.Drawing.Size(482, 460);
+            this.displayTab.Size = new System.Drawing.Size(482, 449);
             this.displayTab.TabIndex = 1;
             this.displayTab.Text = "Display/Counters";
             // 
@@ -1864,7 +1909,7 @@ namespace Assistant
             this.dressTab.Controls.Add(this.groupBox5);
             this.dressTab.Location = new System.Drawing.Point(4, 44);
             this.dressTab.Name = "dressTab";
-            this.dressTab.Size = new System.Drawing.Size(482, 460);
+            this.dressTab.Size = new System.Drawing.Size(482, 449);
             this.dressTab.TabIndex = 3;
             this.dressTab.Text = "Arm/Dress";
             // 
@@ -2024,7 +2069,7 @@ namespace Assistant
             this.skillsTab.Controls.Add(this.skillList);
             this.skillsTab.Location = new System.Drawing.Point(4, 44);
             this.skillsTab.Name = "skillsTab";
-            this.skillsTab.Size = new System.Drawing.Size(482, 460);
+            this.skillsTab.Size = new System.Drawing.Size(482, 449);
             this.skillsTab.TabIndex = 2;
             this.skillsTab.Text = "Skills";
             // 
@@ -2177,7 +2222,7 @@ namespace Assistant
             this.agentsTab.Controls.Add(this.agentB3);
             this.agentsTab.Location = new System.Drawing.Point(4, 44);
             this.agentsTab.Name = "agentsTab";
-            this.agentsTab.Size = new System.Drawing.Size(482, 460);
+            this.agentsTab.Size = new System.Drawing.Size(482, 449);
             this.agentsTab.TabIndex = 6;
             this.agentsTab.Text = "Agents";
             // 
@@ -2267,7 +2312,7 @@ namespace Assistant
             this.hotkeysTab.Controls.Add(this.groupBox8);
             this.hotkeysTab.Location = new System.Drawing.Point(4, 44);
             this.hotkeysTab.Name = "hotkeysTab";
-            this.hotkeysTab.Size = new System.Drawing.Size(482, 460);
+            this.hotkeysTab.Size = new System.Drawing.Size(482, 449);
             this.hotkeysTab.TabIndex = 4;
             this.hotkeysTab.Text = "Hot Keys";
             // 
@@ -2418,7 +2463,7 @@ namespace Assistant
             this.macrosTab.Controls.Add(this.newMacro);
             this.macrosTab.Location = new System.Drawing.Point(4, 44);
             this.macrosTab.Name = "macrosTab";
-            this.macrosTab.Size = new System.Drawing.Size(482, 460);
+            this.macrosTab.Size = new System.Drawing.Size(482, 449);
             this.macrosTab.TabIndex = 7;
             this.macrosTab.Text = "Macros";
             // 
@@ -2656,7 +2701,7 @@ namespace Assistant
             this.mapTab.Controls.Add(this.groupMapPoints);
             this.mapTab.Location = new System.Drawing.Point(4, 44);
             this.mapTab.Name = "mapTab";
-            this.mapTab.Size = new System.Drawing.Size(482, 460);
+            this.mapTab.Size = new System.Drawing.Size(482, 449);
             this.mapTab.TabIndex = 13;
             this.mapTab.Text = "Map";
             // 
@@ -2761,7 +2806,7 @@ namespace Assistant
             this.videoTab.Controls.Add(this.groupBox9);
             this.videoTab.Location = new System.Drawing.Point(4, 44);
             this.videoTab.Name = "videoTab";
-            this.videoTab.Size = new System.Drawing.Size(482, 460);
+            this.videoTab.Size = new System.Drawing.Size(482, 449);
             this.videoTab.TabIndex = 11;
             this.videoTab.Text = "Video Capture";
             // 
@@ -3028,7 +3073,7 @@ namespace Assistant
             this.screenshotTab.Controls.Add(this.dispTime);
             this.screenshotTab.Location = new System.Drawing.Point(4, 44);
             this.screenshotTab.Name = "screenshotTab";
-            this.screenshotTab.Size = new System.Drawing.Size(482, 460);
+            this.screenshotTab.Size = new System.Drawing.Size(482, 449);
             this.screenshotTab.TabIndex = 8;
             this.screenshotTab.Text = "Screen Shots";
             // 
@@ -3195,7 +3240,7 @@ namespace Assistant
             this.advancedTab.Controls.Add(this.features);
             this.advancedTab.Location = new System.Drawing.Point(4, 44);
             this.advancedTab.Name = "advancedTab";
-            this.advancedTab.Size = new System.Drawing.Size(482, 460);
+            this.advancedTab.Size = new System.Drawing.Size(482, 449);
             this.advancedTab.TabIndex = 12;
             this.advancedTab.Text = "Advanced";
             // 
@@ -3307,7 +3352,7 @@ namespace Assistant
             this.aboutTab.Controls.Add(this.aboutVer);
             this.aboutTab.Location = new System.Drawing.Point(4, 44);
             this.aboutTab.Name = "aboutTab";
-            this.aboutTab.Size = new System.Drawing.Size(482, 460);
+            this.aboutTab.Size = new System.Drawing.Size(482, 449);
             this.aboutTab.TabIndex = 9;
             this.aboutTab.Text = "About";
             // 
@@ -3403,7 +3448,7 @@ namespace Assistant
             // MainForm
             // 
             this.AutoScaleBaseSize = new System.Drawing.Size(6, 16);
-            this.ClientSize = new System.Drawing.Size(541, 534);
+            this.ClientSize = new System.Drawing.Size(541, 450);
             this.Controls.Add(this.tabs);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -3754,7 +3799,7 @@ namespace Assistant
             lightLevelBar.Value = Config.GetInt("LightLevel");
             double percent = Math.Round((lightLevelBar.Value / (double)lightLevelBar.Maximum) * 100.0);
             lightLevel.Text = $"Light: {percent}%";
-            
+
             captureMibs.Checked = Config.GetBool("CaptureMibs");
 
             stealthOverhead.Checked = Config.GetBool("StealthOverhead");
@@ -3765,7 +3810,10 @@ namespace Assistant
             screenShotClipboard.Checked = Config.GetBool("ScreenshotUploadClipboard");
             screenShotNotification.Checked = Config.GetBool("ScreenshotUploadNotifications");
 
-            showContainerLabels.Checked = Config.GetBool("ShowContainerLabels");            
+            showContainerLabels.Checked = Config.GetBool("ShowContainerLabels");
+
+            realSeason.Checked = Config.GetBool("RealSeason");
+            seasonList.SelectedIndex = Config.GetInt("Season");
 
             if (screenShotNotification.Checked)
             {
@@ -3884,7 +3932,7 @@ namespace Assistant
             }
             else if (tabs.SelectedTab == moreOptTab)
             {
-                tabs.Size = new Size(tabs.Size.Width, 313);
+                tabs.Size = new Size(tabs.Size.Width, 346);
                 Size = new Size(tabs.Size.Width + 10, tabs.Size.Height + 33);
             }
         }
@@ -6502,7 +6550,8 @@ namespace Assistant
                     {
                         m_LastImgurUrl = jsonResponse["data"].link.Value;
 
-                        imgurUploads.Invoke((MethodInvoker)delegate {
+                        imgurUploads.Invoke((MethodInvoker)delegate
+                        {
                             // Running on the UI thread
                             LogImgurUpload(m_LastImgurUrl, jsonResponse["data"].deletehash.Value);
 
@@ -7698,7 +7747,7 @@ namespace Assistant
                 MacroManager.DisplayAbsoluteTargetsTo(absoluteTargets);
 
                 Engine.MainWindow.ShowMe();
-            }            
+            }
         }
 
         private void removeAbsoluteTarget_Click(object sender, EventArgs e)
@@ -7729,7 +7778,7 @@ namespace Assistant
                 // Save and reload the macros and vars
                 MacroManager.Save();
                 MacroManager.DisplayAbsoluteTargetsTo(absoluteTargets);
-            }   
+            }
         }
 
         private void linkLabel2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -8009,7 +8058,7 @@ namespace Assistant
         private void screenShotNotification_CheckedChanged(object sender, EventArgs e)
         {
             Config.SetProperty("ScreenshotUploadNotifications", screenShotNotification.Checked);
-            
+
 
             if (screenShotNotification.Checked)
             {
@@ -8084,7 +8133,7 @@ namespace Assistant
 
         private void OnAgentImport(object sender, System.EventArgs e)
         {
-            
+
         }
 
         private void showContainerLabels_CheckedChanged(object sender, EventArgs e)
@@ -8102,6 +8151,46 @@ namespace Assistant
             ContainerLabels form = new ContainerLabels();
             form.Show();
             form.BringToFront();
+        }
+
+        private void realSeason_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.SetProperty("RealSeason", realSeason.Checked);
+
+            if (realSeason.Checked)
+            {
+                seasonList.Enabled = false;
+
+                if (World.Player != null)
+                    seasonList.SelectedIndex = World.Player.WhichSeason();
+            }
+            else
+            {
+                seasonList.Enabled = true;
+                seasonList.SelectedIndex = Config.GetInt("Season");
+            }
+        }
+
+        private void seasonList_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            //Season Flag:
+            //0: Spring
+            //1: Summer
+            //2: Fall
+            //3: Winter
+            //4: Desolation
+            //Default server
+
+            Config.SetProperty("Season", seasonList.SelectedIndex);
+
+            if (seasonList.SelectedIndex < 5)
+            {
+                ClientCommunication.ForceSendToClient(new SeasonChange(seasonList.SelectedIndex, true));
+            }
+            else
+            {
+                MessageBox.Show(this, "Season will reset when you log out and back in.", "Default Season", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
     }
 }
