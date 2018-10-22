@@ -22,6 +22,8 @@ HMODULE hInstance = NULL;
 SOCKET CurrentConnection = 0;
 int ConnectedIP = 0;
 
+Position *CurrentPosition = nullptr;
+
 HANDLE CommMutex = NULL;
 
 char *tempBuff = NULL;
@@ -221,65 +223,35 @@ DLLFUNCTION unsigned int TotalIn()
 
 DLLFUNCTION bool IsCalibrated()
 {
-	return pShared && pShared->Position[0] == 0xFFFFFFFF && pShared->Position[1] == 0xDEADBEEF && pShared->Position[2] != 0 && pShared->Position[2] != 0xFFFFFFFF;
+	return pShared->PositionCalibrated;
 }
 
 DLLFUNCTION void CalibratePosition( int x, int y, int z )
 {
-	pShared->Position[2] = x;
-	pShared->Position[1] = y;
-	pShared->Position[0] = z;
+	if (!pShared->PositionCalibrated) {
+		WaitForSingleObject(CommMutex, 50);
+		pShared->PositionCalibrated = false;
+		pShared->Pos.x = x;
+		pShared->Pos.y = y;
+		pShared->Pos.z = z;
+		ReleaseMutex(CommMutex);
 
-	PostMessage( hUOWindow, WM_UONETEVENT, CALIBRATE_POS, 0 );
+		PostMessage(hUOWindow, WM_UONETEVENT, CALIBRATE_POS, 0);
+	}
 }
 
 DLLFUNCTION bool GetPosition( int *x, int *y, int *z )
 {
-	if ( IsCalibrated() )
-	{
-		int buffer[3];
-		DWORD Read = 0;
-		HANDLE hProc = OpenProcess( PROCESS_VM_READ, FALSE, UOProcId );
-		if ( !hProc )
-			return false;
-
-		if ( ReadProcessMemory( hProc, (void*)pShared->Position[2], buffer, sizeof(int)*3, &Read ) )
-		{
-			if ( Read == sizeof(int)*3 )
-			{
-				if ( x ) 
-					*x = buffer[2];
-				if ( y ) 
-					*y = buffer[1];
-				if ( z ) 
-					*z = buffer[0];
-			}
-			else
-			{
-				Read = 0;
-			}
-		}
-		else
-		{
-			Read = 0;
-		}
-
-		CloseHandle( hProc );
-
-		if ( Read == sizeof(int)*3 && ( x == NULL || ( *x >= 0 && *x < 8192 ) ) && ( y == NULL || ( *y >= 0 && *y < 8192 ) ) )
-		{
-			return true;
-		}
-		else
-		{
-			memset( pShared->Position, 0, sizeof(int)*3 );
-			return false;
-		}
+	if (pShared->PositionCalibrated) {
+		WaitForSingleObject(CommMutex, 50);
+		*x = pShared->Pos.x;
+		*y = pShared->Pos.y;
+		*z = pShared->Pos.z;
+		ReleaseMutex(CommMutex);
+		return true;
 	}
-	else
-	{
-		return false;
-	}
+
+	return false;
 }
 
 DLLFUNCTION void BringToFront( HWND hWnd )
@@ -749,6 +721,7 @@ bool CreateSharedMemory()
 	}
 
 	//memset( pShared, 0, sizeof(SharedMemory) );
+	pShared->PositionCalibrated = false;
 
 	return true;
 }
@@ -970,6 +943,9 @@ int HookRecv( SOCKET sock, char *buff, int len, int flags )
 		}
 		else
 		{
+			if (CurrentPosition) {
+				memcpy(&pShared->Pos, CurrentPosition, sizeof(pShared->Pos));
+			}
 			ackLen = 0;
 			while ( pShared->OutRecv.Length > 0 )
 			{
@@ -1096,6 +1072,9 @@ int HookSend( SOCKET sock, char *buff, int len, int flags )
 				memcpy( &pShared->InSend.Buff[pShared->InSend.Start+pShared->InSend.Length], buff, len );
 
 			pShared->InSend.Length += len;
+			if (CurrentPosition) {
+				memcpy(&pShared->Pos, CurrentPosition, sizeof(pShared->Pos));
+			}
 			ReleaseMutex( CommMutex );
 
 			SendMessage( hRazorWnd, WM_UONETEVENT, SEND, 0 );
@@ -1279,7 +1258,6 @@ int HookCloseSocket( SOCKET sock )
 
 		WaitForSingleObject( CommMutex, INFINITE );
 		pShared->OutRecv.Length = pShared->InRecv.Length = pShared->OutSend.Length = pShared->InSend.Length = 0;
-		memset( pShared->Position, 0, 4*3 );
 		pShared->TotalSend = pShared->TotalRecv = 0;
 		pShared->ForceDisconn = false;
 		ReleaseMutex( CommMutex );
@@ -1659,18 +1637,10 @@ void MessageProc( HWND hWnd, UINT nMsg, WPARAM wParam, LPARAM lParam, MSG *pMsg 
 			break;
 		case CALIBRATE_POS:
 			WaitForSingleObject( CommMutex, INFINITE );
-			if ( pShared->Position[0] >= -255 && pShared->Position[0] <= 255 && pShared->Position[1] >= 0 && pShared->Position[1] <= 8192 && pShared->Position[2] >= 0 && pShared->Position[2] <= 8192 )
-			{
-				pShared->Position[2] = (int)MemFinder::Find( pShared->Position, sizeof(int)*3, 0x00500000, 0x00C00000 );
-				if ( pShared->Position[2] )
-				{
-					pShared->Position[0] = 0xFFFFFFFF;
-					pShared->Position[1] = 0xDEADBEEF;
-				}
-				else
-				{
-					memset( pShared->Position, 0, sizeof(int)*3 );
-				}
+			/* Scan the region of memory in the client known to hold the player's position */
+			CurrentPosition = (Position *)MemFinder::Find(&pShared->Pos, sizeof(pShared->Pos), 0x00500000, 0x00C00000);
+			if (CurrentPosition != nullptr) {
+				pShared->PositionCalibrated = true;
 			}
 			ReleaseMutex( CommMutex );
 			break;

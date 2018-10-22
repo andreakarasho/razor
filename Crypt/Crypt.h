@@ -69,6 +69,13 @@ struct Buffer
 	BYTE Buff[SHARED_BUFF_SIZE];
 };
 
+/* The order of the fields here is important */
+struct Position {
+	int z;
+	int y;
+	int x;
+};
+
 struct SharedMemory
 {
 	// Do *not* mess with this struct.  Really.  I mean it.
@@ -85,7 +92,8 @@ struct SharedMemory
 	unsigned short PacketTable[256];
 	char DataPath[256];
 	char DeathMsg[16];
-	int Position[3];
+	Position Pos;
+	bool PositionCalibrated;
 	unsigned char CheatKey[16];
 	bool AllowNegotiate;
 	unsigned char AuthBits[16];
