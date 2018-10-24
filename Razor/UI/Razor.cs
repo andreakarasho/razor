@@ -655,6 +655,7 @@ namespace Assistant
             this.advancedTab.SuspendLayout();
             this.aboutTab.SuspendLayout();
             this.SuspendLayout();
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             // 
             // m_NotifyIcon
             // 
