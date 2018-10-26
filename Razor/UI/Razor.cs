@@ -5427,12 +5427,13 @@ namespace Assistant
                             string[] macroCommands = Clipboard.GetText().Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
 
                             File.WriteAllLines(path, macroCommands);
+
+                            Clipboard.Clear();
                         }
                         else
                         {
                             File.CreateText(path).Close();
                         }
-
                     }
 
                     // If they didn't create from clipboard, create empty macro
