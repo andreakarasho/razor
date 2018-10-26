@@ -655,7 +655,6 @@ namespace Assistant
             this.advancedTab.SuspendLayout();
             this.aboutTab.SuspendLayout();
             this.SuspendLayout();
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             // 
             // m_NotifyIcon
             // 
@@ -3448,7 +3447,9 @@ namespace Assistant
             // 
             // MainForm
             // 
-            this.AutoScaleBaseSize = new System.Drawing.Size(6, 16);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+            this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(541, 450);
             this.Controls.Add(this.tabs);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -5769,14 +5770,14 @@ namespace Assistant
                 }
 
                 /*Macro m = new Macro(newMacro);
-	            MacroManager.Add(m);
-	            TreeNode newNode = new TreeNode(Path.GetFileNameWithoutExtension(m.Filename));
-	            newNode.Tag = m;
-	            if (node == null)
-	                macroTree.Nodes.Add(newNode);
-	            else
-	                node.Nodes.Add(newNode);
-	            macroTree.SelectedNode = newNode;*/
+                MacroManager.Add(m);
+                TreeNode newNode = new TreeNode(Path.GetFileNameWithoutExtension(m.Filename));
+                newNode.Tag = m;
+                if (node == null)
+                    macroTree.Nodes.Add(newNode);
+                else
+                    node.Nodes.Add(newNode);
+                macroTree.SelectedNode = newNode;*/
 
                 RedrawMacros();
             }
