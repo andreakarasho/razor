@@ -141,6 +141,7 @@ DLLFUNCTION int InstallLibrary(HWND RazorWindow, HWND UOWindow, int flags);
 DLLFUNCTION void *GetSharedAddress();
 DLLFUNCTION int GetPacketLength( unsigned char *data, int len );
 DLLFUNCTION bool IsDynLength( unsigned char packet );
+DLLFUNCTION int GetUOProcId();
 DLLFUNCTION HANDLE GetCommMutex();
 DLLFUNCTION unsigned int TotalIn();
 DLLFUNCTION unsigned int TotalOut();

@@ -105,6 +105,8 @@ namespace Assistant
 		[DllImport( "Crypt.dll" )]
 		internal static unsafe extern bool IsDynLength(byte packetId);
 		[DllImport( "Crypt.dll" )]
+		internal static unsafe extern int GetUOProcId();
+		[DllImport( "Crypt.dll" )]
 		private static unsafe extern void SetCustomTitle( string title );
 		[DllImport( "Crypt.dll" )]
 		private static unsafe extern IntPtr GetCommMutex();
@@ -114,6 +116,8 @@ namespace Assistant
 		internal static unsafe extern uint TotalOut();
 		[DllImport( "Crypt.dll" )]
 		internal static unsafe extern IntPtr CaptureScreen(bool isFullScreen, string msgStr);
+		[DllImport( "Crypt.dll" )]
+		private static unsafe extern void WaitForWindow( int pid );
 		[DllImport( "Crypt.dll" )]
 		internal static unsafe extern void SetDataPath(string path);
 		[DllImport( "Crypt.dll" )]
@@ -180,12 +184,6 @@ namespace Assistant
 		[DllImport("user32.dll", SetLastError = true)]
 		static extern int GetWindowThreadProcessId(IntPtr hWnd, out int lpdwProcessId);
 
-		[DllImport("kernel32.dll", SetLastError = true)]
-		public static extern IntPtr OpenProcess(int dwDesiredAccess, bool bInheritHandle, int processId);
-		[DllImport("kernel32.dll", SetLastError = true)]
-		static extern bool CloseHandle(IntPtr hHandle);
-		[DllImport("kernel32.dll", SetLastError = true)]
-		public static extern bool GetExitCodeProcess(IntPtr hProcess, out uint ExitCode);
 		[DllImport( "kernel32.dll" )]
 		private static extern uint GlobalGetAtomName( ushort atom, StringBuilder buff, int bufLen );
         
@@ -196,55 +194,34 @@ namespace Assistant
 
 		public static void FindUOWindow(int uoProcId)
 		{
-			IntPtr process;
-			uint exitCode;
+			IntPtr wnd;
+			int tid, pid;
+			string className;
 
-			process = OpenProcess(0x400, false, uoProcId);
-
-			do
+			className = "Ultima Online";
+			wnd = FindWindow(className, null);
+			if (wnd == IntPtr.Zero)
 			{
-				int tid;
-				int pid = 0;
+				className = "Ultima Online Third Dawn";
+				wnd = FindWindow(className, null);
+			}
 
-				IntPtr wnd = FindWindow("Ultima Online", null);
-				while (wnd != IntPtr.Zero)
-				{
-					tid = GetWindowThreadProcessId(wnd, out pid);
-					if (uoProcId == pid)
-					{
-						break;
-					}
-					wnd = FindWindowEx(IntPtr.Zero, wnd, "Ultima Online", null);
-				}
+			if (wnd == IntPtr.Zero)
+			{
+				return;
+			}
 
+			while (wnd != IntPtr.Zero)
+			{
+				tid = GetWindowThreadProcessId(wnd, out pid);
 				if (uoProcId == pid)
 				{
-					UOWindow = wnd;
 					break;
 				}
+				wnd = FindWindowEx(IntPtr.Zero, wnd, className, null);
+			}
 
-				wnd = FindWindow("Ultima Online Third Dawn", null);
-				while (wnd != IntPtr.Zero)
-				{
-					tid = GetWindowThreadProcessId(wnd, out pid);
-					if (uoProcId == pid)
-					{
-						break;
-					}
-					wnd = FindWindowEx(IntPtr.Zero, wnd, "Ultima Online Third Dawn", null);
-				}
-
-				if (uoProcId == pid)
-				{
-					UOWindow = wnd;
-					break;
-				}
-
-				Thread.Sleep(500);
-				GetExitCodeProcess(process, out exitCode);
-			} while (exitCode == 0x00000103); // Still active
-
-			CloseHandle(process);
+			UOWindow = wnd;
 		}
 
 		public static string GetWindowsUserName()
@@ -385,6 +362,8 @@ namespace Assistant
 
 			if ( ServerEncrypted )
 				flags |= 0x10;
+
+			WaitForWindow(ClientProc.Id);
 
 			FindUOWindow(ClientProc.Id);
 

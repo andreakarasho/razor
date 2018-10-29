@@ -5,10 +5,12 @@ EXPORTS
 	GetSharedAddress
 	GetPacketLength
 	IsDynLength
+	GetUOProcId
 	GetCommMutex
 	TotalIn
 	TotalOut
 	CaptureScreen
+	WaitForWindow
 	SetDataPath
 	SetDeathMsg
 	CalibratePosition

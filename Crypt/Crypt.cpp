@@ -172,8 +172,6 @@ DLLFUNCTION int InstallLibrary(HWND RazorWindow, HWND UOWindow, int flags)
 
 	Log( "Initialize library..." );
 
-	GetWindowThreadProcessId(UOWindow, &UOProcId);
-
 	hUOWindow = UOWindow;
 	hRazorWnd = RazorWindow;
 
@@ -198,6 +196,50 @@ DLLFUNCTION int InstallLibrary(HWND RazorWindow, HWND UOWindow, int flags)
 	PostMessage( hUOWindow, WM_PROCREADY, (WPARAM)flags, (LPARAM)hRazorWnd );
 	return SUCCESS;
 }
+
+DLLFUNCTION void WaitForWindow( DWORD pid )
+{
+	DWORD UOTId = 0;
+	DWORD exitCode;
+	HANDLE hProc = OpenProcess( PROCESS_QUERY_INFORMATION, FALSE, pid );
+
+	UOProcId = 0;
+
+	do
+	{
+		Sleep( 10 );
+		HWND hWnd = FindWindow( "Ultima Online", NULL );
+		while ( hWnd != NULL )
+		{
+			UOTId = GetWindowThreadProcessId( hWnd, &UOProcId );
+			if ( UOProcId == pid )
+				break;
+			hWnd = FindWindowEx( NULL, hWnd, "Ultima Online", NULL );
+		}
+
+		if ( UOProcId != pid || hWnd == NULL )
+		{
+			hWnd = FindWindow( "Ultima Online Third Dawn", NULL );
+			while ( hWnd != NULL )
+			{
+				UOTId = GetWindowThreadProcessId( hWnd, &UOProcId );
+				if (UOProcId == pid)
+					break;
+				hWnd = FindWindowEx( NULL, hWnd, "Ultima Online Third Dawn", NULL );
+			}
+		}
+
+		GetExitCodeProcess( hProc, &exitCode );
+	} while ( UOProcId != pid && exitCode == STILL_ACTIVE );
+
+	CloseHandle( hProc );
+}
+
+DLLFUNCTION int GetUOProcId()
+{
+	return UOProcId;
+}
+
 
 DLLFUNCTION HANDLE GetCommMutex()
 {
