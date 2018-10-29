@@ -472,7 +472,7 @@ namespace Assistant
             return null;
         }
 
-        public override void OnPositionChanging(Point3D newPos)
+        public override void OnPositionChanging(Point3D oldPos)
         {
             if (this != World.Player && Engine.MainWindow.MapWindow != null)
                 Engine.MainWindow.MapWindow.CheckLocalUpdate(this);
@@ -480,7 +480,7 @@ namespace Assistant
             if (this != World.Player && Engine.MainWindow.JMap != null)
                 Engine.MainWindow.JMap.CheckLocalUpdate(this);
 
-            base.OnPositionChanging(newPos);
+            base.OnPositionChanging(oldPos);
         }
 
         public int GetPacketFlags()

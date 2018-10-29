@@ -655,7 +655,6 @@ namespace Assistant
             this.advancedTab.SuspendLayout();
             this.aboutTab.SuspendLayout();
             this.SuspendLayout();
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             // 
             // m_NotifyIcon
             // 
@@ -3448,7 +3447,9 @@ namespace Assistant
             // 
             // MainForm
             // 
-            this.AutoScaleBaseSize = new System.Drawing.Size(6, 16);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+            this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(541, 450);
             this.Controls.Add(this.tabs);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -3520,12 +3521,14 @@ namespace Assistant
 
         protected override void WndProc(ref Message msg)
         {
-            if (msg.Msg == ClientCommunication.WM_UONETEVENT)
-                msg.Result = (IntPtr)(ClientCommunication.OnMessage(this, (uint)msg.WParam.ToInt32(), msg.LParam.ToInt32()) ? 1 : 0);
-            else if (msg.Msg >= (int)UOAssist.UOAMessage.First && msg.Msg <= (int)UOAssist.UOAMessage.Last)
-                msg.Result = (IntPtr)UOAssist.OnUOAMessage(this, msg.Msg, msg.WParam.ToInt32(), msg.LParam.ToInt32());
-            else
-                base.WndProc(ref msg);
+			if (msg.Msg == ClientCommunication.WM_UONETEVENT)
+				msg.Result = (IntPtr)(ClientCommunication.OnMessage(this, (uint)msg.WParam.ToInt32(), msg.LParam.ToInt32()) ? 1 : 0);
+			else if (msg.Msg == ClientCommunication.WM_COPYDATA)
+				msg.Result = (IntPtr)(ClientCommunication.OnCopyData(msg.WParam, msg.LParam) ? 1 : 0);
+			else if (msg.Msg >= (int)UOAssist.UOAMessage.First && msg.Msg <= (int)UOAssist.UOAMessage.Last)
+				msg.Result = (IntPtr)UOAssist.OnUOAMessage(this, msg.Msg, msg.WParam.ToInt32(), msg.LParam.ToInt32());
+			else
+				base.WndProc(ref msg);
         }
 
         private void DisableCloseButton()
@@ -5767,14 +5770,14 @@ namespace Assistant
                 }
 
                 /*Macro m = new Macro(newMacro);
-	            MacroManager.Add(m);
-	            TreeNode newNode = new TreeNode(Path.GetFileNameWithoutExtension(m.Filename));
-	            newNode.Tag = m;
-	            if (node == null)
-	                macroTree.Nodes.Add(newNode);
-	            else
-	                node.Nodes.Add(newNode);
-	            macroTree.SelectedNode = newNode;*/
+                MacroManager.Add(m);
+                TreeNode newNode = new TreeNode(Path.GetFileNameWithoutExtension(m.Filename));
+                newNode.Tag = m;
+                if (node == null)
+                    macroTree.Nodes.Add(newNode);
+                else
+                    node.Nodes.Add(newNode);
+                macroTree.SelectedNode = newNode;*/
 
                 RedrawMacros();
             }
