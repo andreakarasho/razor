@@ -433,7 +433,10 @@ namespace Assistant
         ImportFromPrevious,
         SetOrganizerHB,
         SetContainerLabel,
-
+        AddToIgnore,
+        RemoveFromIgnore,
+        RazorIgnored,
+        IgnoreAgent,
 
         __End
     }
