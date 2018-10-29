@@ -14,8 +14,6 @@ EXPORTS
 	SetDataPath
 	SetDeathMsg
 	CalibratePosition
-	IsCalibrated
-	GetPosition
 	BringToFront
 	DoFeatures
 	AllowBit

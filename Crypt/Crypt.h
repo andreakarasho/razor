@@ -46,9 +46,6 @@ enum UONET_MESSAGE
 
 	DEATH_MSG = 15,
 
-	CALIBRATE_POS = 16,
-	GET_POS = 17,
-
 	OPEN_RPV = 18,
 
 	SETWNDSIZE = 19,
@@ -58,6 +55,11 @@ enum UONET_MESSAGE
 	SMART_CPU = 21,
 	NEGOTIATE = 22,
 	SET_MAP_HWND = 23
+};
+
+enum class UONET_MESSAGE_COPYDATA
+{
+	POSITION = 1,
 };
 
 //#define SHARED_BUFF_SIZE 0x80000 // Client's buffers are 500k
@@ -92,8 +94,6 @@ struct SharedMemory
 	unsigned short PacketTable[256];
 	char DataPath[256];
 	char DeathMsg[16];
-	Position Pos;
-	bool PositionCalibrated;
 	unsigned char CheatKey[16];
 	bool AllowNegotiate;
 	unsigned char AuthBits[16];
@@ -146,9 +146,7 @@ DLLFUNCTION HANDLE GetCommMutex();
 DLLFUNCTION unsigned int TotalIn();
 DLLFUNCTION unsigned int TotalOut();
 DLLFUNCTION HBITMAP CaptureScreen(BOOL full, const char *msg);
-DLLFUNCTION bool IsCalibrated();
 DLLFUNCTION void CalibratePosition(int x, int y, int z);
-DLLFUNCTION bool GetPosition(int *x, int *y, int *z);
 DLLFUNCTION void BringToFront(HWND hWnd);
 DLLFUNCTION void DoFeatures(int realFeatures);
 DLLFUNCTION bool AllowBit(unsigned long bit);
