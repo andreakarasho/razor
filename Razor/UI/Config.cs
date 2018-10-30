@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using Assistant.Core;
 using Microsoft.Win32;
 using Assistant.Filters;
+using Assistant.Macros;
 
 namespace Assistant
 {
@@ -322,6 +323,7 @@ namespace Assistant
             PasswordMemory.Load(root["passwords"]);
             OverheadMessages.Load(root["overheadmessages"]);
             ContainerLabels.Load(root["containerlabels"]);
+            AbsoluteTargets.Load(root["absolutetargets"]);
 
             GoldPerHourTimer.Stop();
 
@@ -465,6 +467,10 @@ namespace Assistant
 
             xml.WriteStartElement("containerlabels");
             ContainerLabels.Save(xml);
+            xml.WriteEndElement();
+
+            xml.WriteStartElement("absolutetargets");
+            AbsoluteTargets.Save(xml);
             xml.WriteEndElement();
 
             xml.WriteEndElement(); // end profile section
