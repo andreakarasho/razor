@@ -239,7 +239,6 @@
     <Compile Include="JMap\UIElements.cs" />
     <Compile Include="JMap\World.cs" />
     <Compile Include="Macros\AbsoluteTargets.cs" />
-    <Compile Include="Macros\AbsoluteTarget.cs" />
     <Compile Include="Macros\Actions.cs">
       <SubType>Component</SubType>
     </Compile>
