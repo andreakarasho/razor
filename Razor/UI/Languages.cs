@@ -437,6 +437,9 @@ namespace Assistant
         RemoveFromIgnore,
         RazorIgnored,
         IgnoreAgent,
+        PrevTarget,
+        PrevTargetEnemyHumanoid,
+        PrevTargetHumanoid,
 
         __End
     }
