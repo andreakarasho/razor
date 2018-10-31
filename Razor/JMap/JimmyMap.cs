@@ -403,7 +403,7 @@ namespace Assistant.JMap
                 e.Cancel = true;
                 Hide();
                 Engine.MainWindow.BringToFront();
-                ClientCommunication.BringToFront(ClientCommunication.UOWindow);
+                ClientCommunication.BringToFront(ClientCommunication.FindUOWindow());
             }
         }
 

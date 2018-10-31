@@ -12,8 +12,8 @@
 //*************************************************************************************
 HHOOK hWndProcRetHook = NULL;
 HHOOK hGetMsgHook = NULL;
-HWND hUOWindow = NULL;
-HWND hRazorWnd = NULL;
+HWND hWatchWnd = NULL;
+HWND hPostWnd = NULL;
 HWND hMapWnd = NULL;
 DWORD UOProcId = 0;
 
@@ -21,8 +21,6 @@ HANDLE hFileMap = NULL;
 HMODULE hInstance = NULL;
 SOCKET CurrentConnection = 0;
 int ConnectedIP = 0;
-
-Position *CurrentPosition = nullptr;
 
 HANDLE CommMutex = NULL;
 
@@ -78,24 +76,25 @@ bool CreateSharedMemory();
 void CloseSharedMemory();
 
 //Hooks:
-int HookRecv( SOCKET, char *, int, int );
-int HookSend( SOCKET, char *, int, int );
-int HookConnect( SOCKET, const sockaddr *, int );
-int HookCloseSocket( SOCKET );
-int HookSelect( int, fd_set*, fd_set*, fd_set*, const struct timeval * );
+int PASCAL HookRecv( SOCKET, char *, int, int );
+int PASCAL HookSend( SOCKET, char *, int, int );
+int PASCAL HookConnect( SOCKET, const sockaddr *, int );
+int PASCAL HookCloseSocket( SOCKET );
+int PASCAL HookSelect( int, fd_set*, fd_set*, fd_set*, const struct timeval * );
+//HANDLE WINAPI CreateFileAHook( LPCTSTR, DWORD, DWORD, LPSECURITY_ATTRIBUTES, DWORD, DWORD, HANDLE );
 
-typedef int (*NetIOFunc)(SOCKET, char *, int, int);
-typedef int (*ConnFunc)(SOCKET, const sockaddr *, int);
-typedef int (*CLSFunc)(SOCKET);
-typedef int (*SelectFunc)( int, fd_set*, fd_set*, fd_set*, const struct timeval* );
-typedef HANDLE (*CreateFileAFunc)(LPCTSTR,DWORD,DWORD,LPSECURITY_ATTRIBUTES,DWORD,DWORD,HANDLE);
+typedef int (PASCAL *NetIOFunc)(SOCKET, char *, int, int);
+typedef int (PASCAL *ConnFunc)(SOCKET, const sockaddr *, int);
+typedef int (PASCAL *CLSFunc)(SOCKET);
+typedef int (PASCAL *SelectFunc)( int, fd_set*, fd_set*, fd_set*, const struct timeval* );
+typedef HANDLE (WINAPI *CreateFileAFunc)(LPCTSTR,DWORD,DWORD,LPSECURITY_ATTRIBUTES,DWORD,DWORD,HANDLE);
 typedef char *(__cdecl *GetUOVersionFunc)();
 
 GetUOVersionFunc NativeGetUOVersion = NULL;
 
 BOOL APIENTRY DllMain( HANDLE hModule, DWORD dwReason, LPVOID )
 {
-	DWORD razorID, thisID;
+	DWORD postID, thisID;
 
 	hInstance = (HMODULE)hModule;
 	switch (dwReason)
@@ -107,18 +106,22 @@ BOOL APIENTRY DllMain( HANDLE hModule, DWORD dwReason, LPVOID )
 		break;
 
 	case DLL_PROCESS_DETACH:
-		razorID = 0;
+		postID = 0;
 		thisID = GetCurrentProcessId();
-		if ( IsWindow( hRazorWnd ) )
-			GetWindowThreadProcessId( hRazorWnd, &razorID );
+		if ( IsWindow( hPostWnd ) )
+			GetWindowThreadProcessId( hPostWnd, &postID );
 
-		if (thisID == razorID) {
-			/* If Razor exits it will automatically attempt to close the UO client. */
-			break;
-		} else if (thisID == UOProcId)
+		if ( thisID == postID || thisID == UOProcId )
 		{
-			if ( IsWindow( hRazorWnd ) )
-				PostMessage( hRazorWnd, WM_UONETEVENT, CLOSE, 0 );
+			if ( IsWindow( hPostWnd ) )
+				PostMessage( hPostWnd, WM_UONETEVENT, CLOSE, 0 );
+
+			if ( IsWindow( hWatchWnd ) )
+			{
+				PostMessage( hWatchWnd, WM_QUIT, 0, 0 );
+				SetForegroundWindow( hWatchWnd );
+				SetFocus( hWatchWnd );
+			}
 
 			CloseSharedMemory();
 		}
@@ -132,10 +135,30 @@ BOOL APIENTRY DllMain( HANDLE hModule, DWORD dwReason, LPVOID )
 	return TRUE;
 }
 
+DLLFUNCTION DWORD InitializeLibrary( const char *exeVer )
+{
+	return true;
+}
+
 DLLFUNCTION void *GetSharedAddress()
 {
 	Log( "Get shared address [0x%x]", pShared );
 	return pShared;
+}
+
+DLLFUNCTION HWND FindUOWindow( void )
+{
+	if ( hWatchWnd == NULL || !IsWindow( hWatchWnd ) )
+	{
+		HWND hWnd = FindWindow( "Ultima Online", NULL );
+		if (hWnd == NULL)
+			hWnd = FindWindow( "Ultima Online Third Dawn", NULL );
+		return hWnd;
+	}
+	else
+	{
+		return hWatchWnd;
+	}
 }
 
 DLLFUNCTION void SetDataPath( const char *path )
@@ -150,7 +173,7 @@ DLLFUNCTION void SetDeathMsg( const char *msg )
 	WaitForSingleObject( CommMutex, INFINITE );
 	strncpy( pShared->DeathMsg, msg, 16 );
 	ReleaseMutex( CommMutex );
-	PostMessage( hUOWindow, WM_UONETEVENT, DEATH_MSG, 0 );
+	PostMessage( hWatchWnd, WM_UONETEVENT, DEATH_MSG, 0 );
 }
 
 void PatchDeathMsg()
@@ -166,37 +189,123 @@ void PatchDeathMsg()
 	}
 }
 
-DLLFUNCTION int InstallLibrary(HWND RazorWindow, HWND UOWindow, int flags)
+DLLFUNCTION int InstallLibrary( HWND PostWindow, DWORD pid, int flags )
 {
-	HWND hWnd = NULL;
+	DWORD UOTId = 0;
 
 	Log( "Initialize library..." );
 
-	GetWindowThreadProcessId(UOWindow, &UOProcId);
+	HWND hWnd = NULL;
+	if ( pid != 0 )
+	{
+		hWnd = FindWindow( "Ultima Online", NULL );
+		while ( hWnd != NULL )
+		{
+			UOTId = GetWindowThreadProcessId( hWnd, &UOProcId );
+			if ( UOProcId == pid )
+				break;
+			hWnd = FindWindowEx( NULL, hWnd, "Ultima Online", NULL );
+		}
 
-	hUOWindow = UOWindow;
-	hRazorWnd = RazorWindow;
+		if ( UOProcId != pid || hWnd == NULL )
+		{
+			hWnd = FindWindow( "Ultima Online Third Dawn", NULL );
+			while ( hWnd != NULL )
+			{
+				UOTId = GetWindowThreadProcessId( hWnd, &UOProcId );
+				if (UOProcId == pid)
+					break;
+				hWnd = FindWindowEx( NULL, hWnd, "Ultima Online Third Dawn", NULL );
+			}
+		}
 
-	if ( hUOWindow == NULL )
+		if ( UOProcId != pid )
+			return NO_TID;
+	}
+	else 
+	{
+		hWnd = FindUOWindow();
+		if ( hWnd != NULL )
+			UOTId = GetWindowThreadProcessId( hWnd, &UOProcId );
+	}
+
+	hWatchWnd = hWnd;
+	hPostWnd = PostWindow;
+
+	if ( hWatchWnd == NULL )
 		return NO_UOWND;
+
+	if ( !UOTId || !UOProcId )
+		return NO_TID;
 
 	if ( !CreateSharedMemory() )
 		return NO_SHAREMEM;
 
 	pShared->Reserved0 = false;
 
-	hWndProcRetHook = SetWindowsHookEx( WH_CALLWNDPROCRET, WndProcRetHookFunc, hInstance, 0);
+	hWndProcRetHook = SetWindowsHookEx( WH_CALLWNDPROCRET, WndProcRetHookFunc, hInstance, UOTId );
 	if ( !hWndProcRetHook )
 		return NO_HOOK;
 
-	hGetMsgHook = SetWindowsHookEx( WH_GETMESSAGE, GetMsgHookFunc, hInstance, 0);
+	hGetMsgHook = SetWindowsHookEx( WH_GETMESSAGE, GetMsgHookFunc, hInstance, UOTId );
 	if ( !hGetMsgHook )
 		return NO_HOOK;
 
 	ServerEncrypted = (flags&0x10) != 0;
 	ClientEncrypted = (flags&0x08) != 0;
-	PostMessage( hUOWindow, WM_PROCREADY, (WPARAM)flags, (LPARAM)hRazorWnd );
+	PostMessage( hWatchWnd, WM_PROCREADY, (WPARAM)flags, (LPARAM)hPostWnd );
 	return SUCCESS;
+}
+
+DLLFUNCTION void WaitForWindow( DWORD pid )
+{
+	DWORD UOTId = 0;
+	DWORD exitCode;
+	HANDLE hProc = OpenProcess( PROCESS_QUERY_INFORMATION, FALSE, pid );
+
+	UOProcId = 0;
+
+	do
+	{
+		Sleep( 10 );
+		HWND hWnd = FindWindow( "Ultima Online", NULL );
+		while ( hWnd != NULL )
+		{
+			UOTId = GetWindowThreadProcessId( hWnd, &UOProcId );
+			if ( UOProcId == pid )
+				break;
+			hWnd = FindWindowEx( NULL, hWnd, "Ultima Online", NULL );
+		}
+
+		if ( UOProcId != pid || hWnd == NULL )
+		{
+			hWnd = FindWindow( "Ultima Online Third Dawn", NULL );
+			while ( hWnd != NULL )
+			{
+				UOTId = GetWindowThreadProcessId( hWnd, &UOProcId );
+				if (UOProcId == pid)
+					break;
+				hWnd = FindWindowEx( NULL, hWnd, "Ultima Online Third Dawn", NULL );
+			}
+		}
+
+		GetExitCodeProcess( hProc, &exitCode );
+	} while ( UOProcId != pid && exitCode == STILL_ACTIVE );
+
+	CloseHandle( hProc );
+}
+
+DLLFUNCTION void Shutdown( bool close )
+{
+	Log( "Shutdown" );
+
+	if ( hWatchWnd && IsWindow( hWatchWnd ) )
+		PostMessage( hWatchWnd, WM_QUIT, 0, 0 );
+}
+
+DLLFUNCTION int GetUOProcId()
+{
+	return UOProcId;
 }
 
 DLLFUNCTION HANDLE GetCommMutex()
@@ -223,35 +332,65 @@ DLLFUNCTION unsigned int TotalIn()
 
 DLLFUNCTION bool IsCalibrated()
 {
-	return pShared->PositionCalibrated;
+	return pShared && pShared->Position[0] == 0xFFFFFFFF && pShared->Position[1] == 0xDEADBEEF && pShared->Position[2] != 0 && pShared->Position[2] != 0xFFFFFFFF;
 }
 
 DLLFUNCTION void CalibratePosition( int x, int y, int z )
 {
-	if (!pShared->PositionCalibrated) {
-		WaitForSingleObject(CommMutex, 50);
-		pShared->PositionCalibrated = false;
-		pShared->Pos.x = x;
-		pShared->Pos.y = y;
-		pShared->Pos.z = z;
-		ReleaseMutex(CommMutex);
+	pShared->Position[2] = x;
+	pShared->Position[1] = y;
+	pShared->Position[0] = z;
 
-		PostMessage(hUOWindow, WM_UONETEVENT, CALIBRATE_POS, 0);
-	}
+	PostMessage( hWatchWnd, WM_UONETEVENT, CALIBRATE_POS, 0 );
 }
 
 DLLFUNCTION bool GetPosition( int *x, int *y, int *z )
 {
-	if (pShared->PositionCalibrated) {
-		WaitForSingleObject(CommMutex, 50);
-		*x = pShared->Pos.x;
-		*y = pShared->Pos.y;
-		*z = pShared->Pos.z;
-		ReleaseMutex(CommMutex);
-		return true;
-	}
+	if ( IsCalibrated() )
+	{
+		int buffer[3];
+		DWORD Read = 0;
+		HANDLE hProc = OpenProcess( PROCESS_VM_READ, FALSE, UOProcId );
+		if ( !hProc )
+			return false;
 
-	return false;
+		if ( ReadProcessMemory( hProc, (void*)pShared->Position[2], buffer, sizeof(int)*3, &Read ) )
+		{
+			if ( Read == sizeof(int)*3 )
+			{
+				if ( x ) 
+					*x = buffer[2];
+				if ( y ) 
+					*y = buffer[1];
+				if ( z ) 
+					*z = buffer[0];
+			}
+			else
+			{
+				Read = 0;
+			}
+		}
+		else
+		{
+			Read = 0;
+		}
+
+		CloseHandle( hProc );
+
+		if ( Read == sizeof(int)*3 && ( x == NULL || ( *x >= 0 && *x < 8192 ) ) && ( y == NULL || ( *y >= 0 && *y < 8192 ) ) )
+		{
+			return true;
+		}
+		else
+		{
+			memset( pShared->Position, 0, sizeof(int)*3 );
+			return false;
+		}
+	}
+	else
+	{
+		return false;
+	}
 }
 
 DLLFUNCTION void BringToFront( HWND hWnd )
@@ -313,6 +452,17 @@ DLLFUNCTION void DoFeatures( int realFeatures )
 		str[i] = str[i] ^ pShared->CheatKey[i & 0xF];
 	
 	size = 8+c;
+	
+	/*if ( !ServerEncrypted )
+	{
+		time_t now = time(NULL);
+
+		*((unsigned int*)&str[size]) = ~((unsigned int)now ^ 0x54494D45);
+		size += 4;
+
+		*((unsigned int*)&str[size]) = ~(ConnectedIP ^ (int)now);
+		size += 4;
+	}*/
 
 	// fill in size
 	pkt[1] = (BYTE)((size>>8)&0xFF);
@@ -322,7 +472,7 @@ DLLFUNCTION void DoFeatures( int realFeatures )
 	memcpy( pShared->OutSend.Buff + pShared->OutSend.Start + pShared->OutSend.Length, pkt, size );
 	pShared->OutSend.Length += (int)size;
 	ReleaseMutex( CommMutex );
-	PostMessage( hUOWindow, WM_UONETEVENT, SEND, 0 );
+	PostMessage( FindUOWindow(), WM_UONETEVENT, SEND, 0 );
 }
 
 DLLFUNCTION bool AllowBit( unsigned long bit )
@@ -358,7 +508,7 @@ DLLFUNCTION BOOL HandleNegotiate( __int64 features )
 }
 
 SIZE *SizePtr = NULL;
-void OnSetUOWindowSize( int width )
+void __stdcall OnSetUOWindowSize( int width )
 {
 	if ( width != 800 && width != 600 ) // in case it actually the height for some reason
 	{
@@ -371,7 +521,7 @@ void OnSetUOWindowSize( int width )
 	}
 }
 
-DLLFUNCTION void OnAttach( void *params, int paramsLen )
+DLLFUNCTION void __stdcall OnAttach( void *params, int paramsLen )
 {
 	int count = 0;
 	DWORD addr = 0, oldProt;
@@ -404,6 +554,10 @@ DLLFUNCTION void OnAttach( void *params, int paramsLen )
 		mf.AddEntry("CHEAT %s", 8, 0x00500000);
 		mf.AddEntry("UO Version %s", 12);
 		mf.AddEntry("Multiple Instances Running", 26, 0x00500000);
+
+		//mf.AddEntry(ANIM_PATTERN_6, ANIM_PATTERN_LENGTH_6);
+
+		//mf.AddEntry(SPEEDHACK_PATTERN_1, SPEEDHACK_PATTERN_LENGTH_1);
 
 	memcpy( pShared->PacketTable, StaticPacketTable, 256*sizeof(short) );
 
@@ -491,6 +645,42 @@ DLLFUNCTION void OnAttach( void *params, int paramsLen )
 		if (!addr)
 			CopyFailed = true;
 
+		/*
+		i = 0;
+		while ((addr = mf.GetAddress(ANIM_PATTERN_6, ANIM_PATTERN_LENGTH_6, i++)) != 0)
+		{
+			//char blah[256];
+			//sprintf_s(blah, 256, "%02X %02X %02X %02X", *(unsigned char*)(addr), *(unsigned char*)(addr + 1), *(unsigned char*)(addr - 14), *(unsigned char*)(addr - 5));
+			//MessageBox(NULL, blah, "ANIM_PATTERN_6", MB_OK);
+			if (memcmp((void*)(addr - 14), ANIM_PATTERN_4, ANIM_PATTERN_LENGTH_4) != 0)
+				continue;
+
+			//MessageBox(NULL, "Matched", "ANIM_PATTERN_6", MB_OK);
+			DWORD origAddr = addr - 30;
+			VirtualProtect((void*)origAddr, 128, PAGE_EXECUTE_READWRITE, &oldProt);
+			memcpy((void*)(origAddr + 11), "\x33\xC0\x90\x90\x90", 5);
+			memcpy((void*)(origAddr + 35), "\x08", 1);
+			memcpy((void*)(origAddr + 38), "\x04", 1);
+			VirtualProtect((void*)origAddr, 128, oldProt, &oldProt);
+		}
+
+		i = 0;
+		while ((addr = mf.GetAddress(SPEEDHACK_PATTERN_1, SPEEDHACK_PATTERN_LENGTH_1, i++)) != 0)
+		{
+			//char blah[256];
+			//sprintf_s(blah, 256, "%02X %02X %02X %02X", *(unsigned char*)(addr+8), *(unsigned char*)(addr + 9), *(unsigned char*)(addr +11), *(unsigned char*)(addr +12));
+			//MessageBox(NULL, blah, "SPEEDHACK_PATTERN_1", MB_OK);
+			if (memcmp((void*)(addr + 8), SPEEDHACK_PATTERN_2, SPEEDHACK_PATTERN_LENGTH_2) != 0)
+				continue;
+
+			//MessageBox(NULL, "Matched", "SPEEDHACK_PATTERN_1", MB_OK);
+			DWORD origAddr = addr;
+			VirtualProtect((void*)origAddr, 128, PAGE_EXECUTE_READWRITE, &oldProt);
+			memcpy((void*)(origAddr + 10), "\x26", 1);
+			VirtualProtect((void*)origAddr, 128, oldProt, &oldProt);
+		}
+		*/
+
 		addr = mf.GetAddress(CRYPT_KEY_STR, CRYPT_KEY_LEN);
 		if (!addr)
 		{
@@ -541,6 +731,29 @@ DLLFUNCTION void OnAttach( void *params, int paramsLen )
 			LoginEncryption::SetKeys((const DWORD*)(addr + CRYPT_KEY_LEN), (const DWORD*)(addr + CRYPT_KEY_LEN + 6));
 		}
 
+		/*addr = mf.GetAddress( CHEATPROC_STR, CHEATPROC_LEN );
+		if ( addr )
+		{
+			addr = MemFinder::Find( "\x8A\x91", 2, addr, addr + 0x80 );
+			if ( addr )
+			{
+				addr += 2;
+
+				if ( !IsBadReadPtr( (void*)(*((DWORD*)addr)), 16 ) )
+					memcpy( pShared->CheatKey, (void*)(*((DWORD*)addr)), 16 );
+			}
+		}
+		else
+		{
+			addr = mf.GetAddress( "CHEAT %s", 8 );
+			if ( addr )
+			{
+				addr -= 16;
+				if ( !IsBadReadPtr( (void*)(*((DWORD*)addr)), 16 ) )
+					memcpy( pShared->CheatKey, (void*)(*((DWORD*)addr)), 16 );
+				ClientType = THREED;
+			}
+		}*/
 		BYTE cheatKey[16] = { 0x98, 0x5B, 0x51, 0x7E, 0x11, 0x0C, 0x3D, 0x77, 0x2D, 0x28, 0x41, 0x22, 0x74, 0xAD, 0x5B, 0x39 };
 		memcpy(pShared->CheatKey, cheatKey, 16);
 
@@ -604,6 +817,9 @@ DLLFUNCTION void OnAttach( void *params, int paramsLen )
 		}
 
 		// Splash screen crap:
+		/*addr = mf.GetAddress( "\x00\x68\x88\x13\x00\x00\x56\xE8", 8 );
+		if ( addr )
+			MemoryPatch( addr+2, 0x00000005 ); // change 5000ms to 5ms*/
 		for (int i = 0; i < 16; i++)
 		{
 			addr = mf.GetAddress("\x68\x88\x13\x00\x00", 5, i);
@@ -661,6 +877,8 @@ DLLFUNCTION void OnAttach( void *params, int paramsLen )
 				}
 			}
 		}
+	
+	//HookFunction( "kernel32.dll", "CreateFileA", 0, (unsigned long)CreateFileAHook, &OldCreateFileA, &CreateFileAAddress );
 }
 
 DLLFUNCTION void SetServer( unsigned int addr, unsigned short port )
@@ -721,7 +939,6 @@ bool CreateSharedMemory()
 	}
 
 	//memset( pShared, 0, sizeof(SharedMemory) );
-	pShared->PositionCalibrated = false;
 
 	return true;
 }
@@ -900,13 +1117,13 @@ int RecvData()
 
 		ReleaseMutex( CommMutex );
 
-		SendMessage( hRazorWnd, WM_UONETEVENT, RECV, 0 );
+		SendMessage( hPostWnd, WM_UONETEVENT, RECV, 0 );
 	}
 
 	return ackLen;
 }
 
-int HookRecv( SOCKET sock, char *buff, int len, int flags )
+int PASCAL HookRecv( SOCKET sock, char *buff, int len, int flags )
 {
 	int ackLen;
 
@@ -943,9 +1160,6 @@ int HookRecv( SOCKET sock, char *buff, int len, int flags )
 		}
 		else
 		{
-			if (CurrentPosition) {
-				memcpy(&pShared->Pos, CurrentPosition, sizeof(pShared->Pos));
-			}
 			ackLen = 0;
 			while ( pShared->OutRecv.Length > 0 )
 			{
@@ -986,7 +1200,7 @@ int HookRecv( SOCKET sock, char *buff, int len, int flags )
 }
 
 int SkipSendData = 0;
-int HookSend( SOCKET sock, char *buff, int len, int flags )
+int PASCAL HookSend( SOCKET sock, char *buff, int len, int flags )
 {
 	int ackLen;
 
@@ -1072,12 +1286,9 @@ int HookSend( SOCKET sock, char *buff, int len, int flags )
 				memcpy( &pShared->InSend.Buff[pShared->InSend.Start+pShared->InSend.Length], buff, len );
 
 			pShared->InSend.Length += len;
-			if (CurrentPosition) {
-				memcpy(&pShared->Pos, CurrentPosition, sizeof(pShared->Pos));
-			}
 			ReleaseMutex( CommMutex );
 
-			SendMessage( hRazorWnd, WM_UONETEVENT, SEND, 0 );
+			SendMessage( hPostWnd, WM_UONETEVENT, SEND, 0 );
 
 			WaitForSingleObject( CommMutex, INFINITE );
 			FlushSendData();
@@ -1197,7 +1408,7 @@ void FlushSendData()
 	ReleaseMutex( CommMutex );
 }
 
-int HookConnect( SOCKET sock, const sockaddr *addr, int addrlen )
+int PASCAL HookConnect( SOCKET sock, const sockaddr *addr, int addrlen )
 {
 	int retVal;
 
@@ -1213,6 +1424,10 @@ int HookConnect( SOCKET sock, const sockaddr *addr, int addrlen )
 			useAddr.sin_addr.S_un.S_addr = pShared->ServerIP;
 			useAddr.sin_port = htons( pShared->ServerPort );
 		}
+		
+		/*char blah[256];
+		sprintf(blah, "%08X - %08X", useAddr.sin_addr.S_un.S_addr, pShared->ServerIP);
+		MessageBox(NULL, blah, "Connect To:", MB_OK);*/
 
 		retVal = (*(ConnFunc)OldConnect)( sock, (sockaddr*)&useAddr, sizeof(sockaddr_in) );
 
@@ -1236,7 +1451,7 @@ int HookConnect( SOCKET sock, const sockaddr *addr, int addrlen )
 			pShared->ForceDisconn = false;
 			ReleaseMutex( CommMutex );
 
-			PostMessage( hRazorWnd, WM_UONETEVENT, CONNECT, useAddr.sin_addr.S_un.S_addr );
+			PostMessage( hPostWnd, WM_UONETEVENT, CONNECT, useAddr.sin_addr.S_un.S_addr );
 		}
 	}
 	else
@@ -1247,7 +1462,7 @@ int HookConnect( SOCKET sock, const sockaddr *addr, int addrlen )
 	return retVal;
 }
 
-int HookCloseSocket( SOCKET sock )
+int PASCAL HookCloseSocket( SOCKET sock )
 {
 	int retVal = (*(CLSFunc)OldCloseSocket)( sock );
 
@@ -1258,6 +1473,7 @@ int HookCloseSocket( SOCKET sock )
 
 		WaitForSingleObject( CommMutex, INFINITE );
 		pShared->OutRecv.Length = pShared->InRecv.Length = pShared->OutSend.Length = pShared->InSend.Length = 0;
+		memset( pShared->Position, 0, 4*3 );
 		pShared->TotalSend = pShared->TotalRecv = 0;
 		pShared->ForceDisconn = false;
 		ReleaseMutex( CommMutex );
@@ -1267,13 +1483,13 @@ int HookCloseSocket( SOCKET sock )
 		
 		memset( pShared->AuthBits, 0, 8 );
 
-		PostMessage( hRazorWnd, WM_UONETEVENT, DISCONNECT, 0 );
+		PostMessage( hPostWnd, WM_UONETEVENT, DISCONNECT, 0 );
 	}
 
 	return retVal;
 }
 
-int HookSelect( int ndfs, fd_set *readfd, fd_set *writefd, fd_set *exceptfd, const struct timeval *timeout )
+int PASCAL HookSelect( int ndfs, fd_set *readfd, fd_set *writefd, fd_set *exceptfd, const struct timeval *timeout )
 {
 	bool checkRecv = false;
 	bool checkErr = false;
@@ -1501,6 +1717,8 @@ bool PatchMemory( void )
 		HookFunction( "wsock32.dll", "select", 18, (unsigned long)HookSelect, &OldSelect, &SelectAddress ) &&
 		HookFunction( "wsock32.dll", "send", 19, (unsigned long)HookSend, &OldSend, &SendAddress )
 		;
+	//HookFunction( "wsock32.dll", "socket", 23, (unsigned long)HookSocket, &OldSocket, &SocketAddress)
+	//HookFunction( "wsock32.dll", "WSAAsyncSelect", 101, (unsigned long)HookAsyncSelect, &OldAsyncSelect, &AsyncSelectAddress );
 }
 
 void MemoryPatch( unsigned long Address, unsigned long value )
@@ -1574,22 +1792,34 @@ void FindList( DWORD val, unsigned short size )
 		addrList = newList;
 	}
 
-	PostMessage( hRazorWnd, WM_UONETEVENT, MAKELONG(FINDDATA,0), addrList.size() );
+	PostMessage( hPostWnd, WM_UONETEVENT, MAKELONG(FINDDATA,0), addrList.size() );
 	for(unsigned int i=0;i<addrList.size() && i < 10;i++)
-		PostMessage( hRazorWnd, WM_UONETEVENT, MAKELONG(FINDDATA,i+1), addrList[i] );
+		PostMessage( hPostWnd, WM_UONETEVENT, MAKELONG(FINDDATA,i+1), addrList[i] );
 }
 
 void MessageProc( HWND hWnd, UINT nMsg, WPARAM wParam, LPARAM lParam, MSG *pMsg )
 {
+	/*if ( SizePtr && ( SizePtr->cx != DesiredSize.cx || SizePtr->cy != DesiredSize.cy ) )// && ( SizePtr->cx != 640 || SizePtr->cy != 480 ) )
+	{
+		SizePtr->cx = DesiredSize.cx;
+		SizePtr->cy = DesiredSize.cy;
+
+		if ( RedrawGameEdge )
+		{
+			RedrawGameEdge();
+			RedrawUOScreen();
+		}
+	}*/
+
 	HWND hFore;
 
 	switch ( nMsg )
 	{
 		// Custom messages
 	case WM_PROCREADY:
-		hRazorWnd = (HWND)lParam;
+		hPostWnd = (HWND)lParam;
 		UOProcId = GetCurrentProcessId();
-		hUOWindow = hWnd;
+		hWatchWnd = hWnd;
 
 		if (!pShared) // If this failed the first time or was not run at all, try it once more before panicing
 			OnAttach(NULL, 0);
@@ -1600,13 +1830,13 @@ void MessageProc( HWND hWnd, UINT nMsg, WPARAM wParam, LPARAM lParam, MSG *pMsg 
 		InitThemes();
 
 		if ( !pShared )
-			PostMessage( hRazorWnd, WM_UONETEVENT, NOT_READY, NO_SHAREMEM );
+			PostMessage( hPostWnd, WM_UONETEVENT, NOT_READY, NO_SHAREMEM );
 		else if ( CopyFailed )
-			PostMessage( hRazorWnd, WM_UONETEVENT, NOT_READY, NO_COPY );
+			PostMessage( hPostWnd, WM_UONETEVENT, NOT_READY, NO_COPY );
 		else if ( !PatchMemory() )
-			PostMessage( hRazorWnd, WM_UONETEVENT, NOT_READY, NO_PATCH );
+			PostMessage( hPostWnd, WM_UONETEVENT, NOT_READY, NO_PATCH );
 		else
-			PostMessage( hRazorWnd, WM_UONETEVENT, READY, SUCCESS );
+			PostMessage( hPostWnd, WM_UONETEVENT, READY, SUCCESS );
 
 		if ( pShared )
 		{
@@ -1637,16 +1867,24 @@ void MessageProc( HWND hWnd, UINT nMsg, WPARAM wParam, LPARAM lParam, MSG *pMsg 
 			break;
 		case CALIBRATE_POS:
 			WaitForSingleObject( CommMutex, INFINITE );
-			/* Scan the region of memory in the client known to hold the player's position */
-			CurrentPosition = (Position *)MemFinder::Find(&pShared->Pos, sizeof(pShared->Pos), 0x00500000, 0x00C00000);
-			if (CurrentPosition != nullptr) {
-				pShared->PositionCalibrated = true;
+			if ( pShared->Position[0] >= -255 && pShared->Position[0] <= 255 && pShared->Position[1] >= 0 && pShared->Position[1] <= 8192 && pShared->Position[2] >= 0 && pShared->Position[2] <= 8192 )
+			{
+				pShared->Position[2] = (int)MemFinder::Find( pShared->Position, sizeof(int)*3, 0x00500000, 0x00C00000 );
+				if ( pShared->Position[2] )
+				{
+					pShared->Position[0] = 0xFFFFFFFF;
+					pShared->Position[1] = 0xDEADBEEF;
+				}
+				else
+				{
+					memset( pShared->Position, 0, sizeof(int)*3 );
+				}
 			}
 			ReleaseMutex( CommMutex );
 			break;
 
 		case OPEN_RPV:
-			SendMessage( hRazorWnd, WM_UONETEVENT, OPEN_RPV, lParam );
+			SendMessage( hPostWnd, WM_UONETEVENT, OPEN_RPV, lParam );
 			break;
 
 		case SETWNDSIZE:
@@ -1673,10 +1911,25 @@ void MessageProc( HWND hWnd, UINT nMsg, WPARAM wParam, LPARAM lParam, MSG *pMsg 
 		}
 		break;
 
+		/*case WM_SIZE:
+		if ( wParam == 2 && pMsg && pMsg->hwnd == hWnd  )
+		pMsg->lParam = lParam = MAKELONG( 800, 600 );
+		break;
+		case WM_GETMINMAXINFO:
+		if ( SetMaxSize )
+		{
+		((MINMAXINFO *)lParam)->ptMaxSize.x = 800;
+		((MINMAXINFO *)lParam)->ptMaxSize.y = 600;
+		((MINMAXINFO *)lParam)->ptMaxTrackSize.x = 800;
+		((MINMAXINFO *)lParam)->ptMaxTrackSize.y = 600;
+		}
+		break;
+		*/
+
 		// Macro stuff
 	case WM_SYSKEYDOWN:
 	case WM_KEYDOWN:
-		if ( pMsg && !SendMessage( hRazorWnd, WM_UONETEVENT, KEYDOWN, wParam ) )
+		if ( pMsg && !SendMessage( hPostWnd, WM_UONETEVENT, KEYDOWN, wParam ) )
 		{
 			// dont give the key to the client
 			pMsg->message = WM_NULL;
@@ -1688,34 +1941,34 @@ void MessageProc( HWND hWnd, UINT nMsg, WPARAM wParam, LPARAM lParam, MSG *pMsg 
 	case WM_SYSKEYUP:
 	case WM_KEYUP:
 		if ( pMsg && wParam == VK_SNAPSHOT ) // VK_SNAPSHOT (Print Screen) Doesn't seem to send a KeyDown message
-			SendMessage( hRazorWnd, WM_UONETEVENT, KEYDOWN, wParam );
+			SendMessage( hPostWnd, WM_UONETEVENT, KEYDOWN, wParam );
 		break;
 
 	case WM_MOUSEWHEEL:
-		PostMessage( hRazorWnd, WM_UONETEVENT, MOUSE, MAKELONG( 0, (((short)HIWORD(wParam)) < 0 ? -1 : 1) ) );
+		PostMessage( hPostWnd, WM_UONETEVENT, MOUSE, MAKELONG( 0, (((short)HIWORD(wParam)) < 0 ? -1 : 1) ) );
 		break;
 	case WM_MBUTTONDOWN:
-		PostMessage( hRazorWnd, WM_UONETEVENT, MOUSE, MAKELONG( 1, 0 ) );
+		PostMessage( hPostWnd, WM_UONETEVENT, MOUSE, MAKELONG( 1, 0 ) );
 		break;
 	case WM_XBUTTONDOWN:
-		PostMessage( hRazorWnd, WM_UONETEVENT, MOUSE, MAKELONG( HIWORD(wParam) + 1, 0 ) );
+		PostMessage( hPostWnd, WM_UONETEVENT, MOUSE, MAKELONG( HIWORD(wParam) + 1, 0 ) );
 		break;
 
 		//Activation tracking : 
 	case WM_ACTIVATE:
 		Active = wParam;
-		PostMessage( hRazorWnd, WM_UONETEVENT, ACTIVATE, wParam );
+		PostMessage( hPostWnd, WM_UONETEVENT, ACTIVATE, wParam );
 		break;
 	case WM_KILLFOCUS:
 		hFore = GetForegroundWindow();
-		if ( ((HWND)wParam) != hRazorWnd && hFore != hRazorWnd && ((HWND)wParam) != hMapWnd && hFore != hMapWnd 
-			&& !CheckParent( hFore, hRazorWnd ) )
+		if ( ((HWND)wParam) != hPostWnd && hFore != hPostWnd && ((HWND)wParam) != hMapWnd && hFore != hMapWnd 
+			&& !CheckParent( hFore, hPostWnd ) )
 		{
-			PostMessage( hRazorWnd, WM_UONETEVENT, FOCUS, FALSE );
+			PostMessage( hPostWnd, WM_UONETEVENT, FOCUS, FALSE );
 		}
 		break;
 	case WM_SETFOCUS:
-		PostMessage( hRazorWnd, WM_UONETEVENT, FOCUS, TRUE );
+		PostMessage( hPostWnd, WM_UONETEVENT, FOCUS, TRUE );
 		break;
 
 		//Custom title bar:
@@ -1743,7 +1996,7 @@ LRESULT CALLBACK GetMsgHookFunc( int Code, WPARAM Flag, LPARAM pMsg )
 		Msg->message *= !(Disabled * 020);
 		Msg->message ^= 0x11;
 		*/
-		if ( Msg->hwnd == hUOWindow || ( hUOWindow == NULL && Msg->message == WM_PROCREADY ) )
+		if ( Msg->hwnd == hWatchWnd || ( hWatchWnd == NULL && Msg->message == WM_PROCREADY ) )
 			MessageProc( Msg->hwnd, Msg->message, Msg->wParam, Msg->lParam, Msg );
 	}
 
@@ -1761,7 +2014,7 @@ LRESULT CALLBACK WndProcRetHookFunc( int Code, WPARAM Flag, LPARAM pMsg )
 		Msg->message *= !(Disabled * 020);
 		Msg->message ^= 0x11;
 		*/
-		if ( Msg->hwnd == hUOWindow || ( hUOWindow == NULL && Msg->message == WM_PROCREADY ) )
+		if ( Msg->hwnd == hWatchWnd || ( hWatchWnd == NULL && Msg->message == WM_PROCREADY ) )
 			MessageProc( Msg->hwnd, Msg->message, Msg->wParam, Msg->lParam, NULL );
 	}
 

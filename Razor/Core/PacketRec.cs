@@ -784,7 +784,7 @@ namespace Assistant
 			m_Playing = true;
 			ClientCommunication.SetAllowDisconn( false );
 
-			ClientCommunication.BringToFront( ClientCommunication.UOWindow );
+			ClientCommunication.BringToFront( ClientCommunication.FindUOWindow() );
 
 			//ClientCommunication.SetDeathMsg( "Playing..." );
 			ClientCommunication.ForceSendToClient( new DeathStatus( true ) );
@@ -856,7 +856,7 @@ namespace Assistant
 			DoLogin( World.Player );
 
 			//ClientCommunication.SetDeathMsg( "You are dead." );
-			ClientCommunication.BringToFront( ClientCommunication.UOWindow );
+			ClientCommunication.BringToFront( ClientCommunication.FindUOWindow() );
 			
 			TimeSpan delay = TimeSpan.FromMilliseconds( m_GZIn.Compressed.ReadInt32() );
 			m_PlayTimer = Timer.DelayedCallback( delay, m_SendNext );

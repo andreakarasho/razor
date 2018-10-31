@@ -848,7 +848,7 @@ namespace Assistant
             if (Config.GetBool("AutoSearch") && Backpack != null)
                 PlayerData.DoubleClick(Backpack);
 
-            UOAssist.PostMapChange(cur);
+            ClientCommunication.PostMapChange(cur);
 
             if (Engine.MainWindow != null && Engine.MainWindow.MapWindow != null)
                 Engine.MainWindow.MapWindow.PlayerMoved();
@@ -867,7 +867,7 @@ namespace Assistant
 
              World.AddMobile( this );
 
-             UOAssist.PostMapChange( cur );
+             ClientCommunication.PostMapChange( cur );
         }*/
 
         protected override void OnNotoChange(byte old, byte cur)

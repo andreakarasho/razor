@@ -383,8 +383,8 @@ DLLFUNCTION HBITMAP CaptureScreen( BOOL full, const char *msg )
 	int destWidth, destHeight;
 	RECT rect;
 
-	//SetForegroundWindow( hUOWindow );
-	UpdateWindow( hUOWindow );
+	//SetForegroundWindow( hWatchWnd );
+	UpdateWindow( hWatchWnd );
 
 	if ( full )
 	{
@@ -396,8 +396,8 @@ DLLFUNCTION HBITMAP CaptureScreen( BOOL full, const char *msg )
 	}
 	else
 	{
-		hScreen = GetWindowDC( hUOWindow );
-		GetWindowRect( hUOWindow, &rect );
+		hScreen = GetWindowDC( hWatchWnd );
+		GetWindowRect( hWatchWnd, &rect );
 		destWidth = rect.right - rect.left;
 		destHeight = rect.bottom - rect.top;
 	}
@@ -442,7 +442,7 @@ DLLFUNCTION HBITMAP CaptureScreen( BOOL full, const char *msg )
 		TextOut( hCap, rect.left + 2, 2, msg, len );
 	}
 
-	ReleaseDC( full ? NULL : hUOWindow, hScreen );
+	ReleaseDC( full ? NULL : hWatchWnd, hScreen );
 	DeleteDC( hCap );
 
 	return hBMP;

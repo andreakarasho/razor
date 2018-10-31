@@ -305,7 +305,6 @@
     <Compile Include="Core\Player.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Network\UOAssist.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

@@ -921,7 +921,7 @@ namespace Assistant
                                 if (!World.Player.SkillsSent)
                                     skill.Delta = 0;
 
-                                UOAssist.PostSkillUpdate(i - 1, skill.FixedBase);
+                                ClientCommunication.PostSkillUpdate(i - 1, skill.FixedBase);
                             }
                             else
                             {
@@ -953,7 +953,7 @@ namespace Assistant
                                 if (!World.Player.SkillsSent)
                                     skill.Delta = 0;
 
-                                UOAssist.PostSkillUpdate(i - 1, skill.FixedBase);
+                                ClientCommunication.PostSkillUpdate(i - 1, skill.FixedBase);
                             }
                             else
                             {
@@ -987,7 +987,7 @@ namespace Assistant
                             if (Config.GetBool("DisplaySkillChanges") && skill.FixedBase != old)
                                 World.Player.SendMessage(MsgLevel.Force, LocString.SkillChanged, (SkillName)i, skill.Delta > 0 ? "+" : "", skill.Delta, skill.Value, skill.FixedBase - old > 0 ? "+" : "", ((double)(skill.FixedBase - old)) / 10.0);
 
-                            UOAssist.PostSkillUpdate(i, skill.FixedBase);
+                            ClientCommunication.PostSkillUpdate(i, skill.FixedBase);
                         }
                         break;
                     }
@@ -1012,7 +1012,7 @@ namespace Assistant
                             if (Config.GetBool("DisplaySkillChanges") && skill.FixedBase != old)
                                 World.Player.SendMessage(MsgLevel.Force, LocString.SkillChanged, (SkillName)i, skill.Delta > 0 ? "+" : "", skill.Delta, skill.Value, ((double)(skill.FixedBase - old)) / 10.0, skill.FixedBase - old > 0 ? "+" : "");
 
-                            UOAssist.PostSkillUpdate(i, skill.FixedBase);
+                            ClientCommunication.PostSkillUpdate(i, skill.FixedBase);
                         }
                         break;
                     }
@@ -1050,7 +1050,7 @@ namespace Assistant
             //ClientCommunication.SendToServer( new StatusQuery( m ) );
 
             ClientCommunication.RequestTitlebarUpdate();
-            UOAssist.PostLogin((int)serial.Value);
+            ClientCommunication.PostLogin((int)serial.Value);
             Engine.MainWindow.UpdateTitle(); // update player name & shard name
                                              /*
                                              //the rest of the packet: (total length: 37)
@@ -1129,7 +1129,7 @@ namespace Assistant
                 if (m == World.Player)
                 {
                     ClientCommunication.RequestTitlebarUpdate();
-                    UOAssist.PostHitsUpdate();
+                    ClientCommunication.PostHitsUpdate();
                 }
 
                 if (ClientCommunication.AllowBit(FeatureBit.OverheadHealth) && Config.GetBool("ShowHealth"))
@@ -1167,7 +1167,7 @@ namespace Assistant
                 if (m == World.Player)
                 {
                     ClientCommunication.RequestTitlebarUpdate();
-                    UOAssist.PostStamUpdate();
+                    ClientCommunication.PostStamUpdate();
                 }
 
                 if (m != World.Player && ClientCommunication.AllowBit(FeatureBit.OverheadHealth) && Config.GetBool("ShowPartyStats"))
@@ -1206,7 +1206,7 @@ namespace Assistant
                 if (m == World.Player)
                 {
                     ClientCommunication.RequestTitlebarUpdate();
-                    UOAssist.PostManaUpdate();
+                    ClientCommunication.PostManaUpdate();
                 }
 
                 if (m != World.Player && ClientCommunication.AllowBit(FeatureBit.OverheadHealth) && Config.GetBool("ShowPartyStats"))
@@ -1250,9 +1250,9 @@ namespace Assistant
             if (m == World.Player)
             {
                 ClientCommunication.RequestTitlebarUpdate();
-                UOAssist.PostHitsUpdate();
-                UOAssist.PostStamUpdate();
-                UOAssist.PostManaUpdate();
+                ClientCommunication.PostHitsUpdate();
+                ClientCommunication.PostStamUpdate();
+                ClientCommunication.PostManaUpdate();
             }
         }
 
@@ -1389,9 +1389,9 @@ namespace Assistant
 
                 ClientCommunication.RequestTitlebarUpdate();
 
-                UOAssist.PostHitsUpdate();
-                UOAssist.PostStamUpdate();
-                UOAssist.PostManaUpdate();
+                ClientCommunication.PostHitsUpdate();
+                ClientCommunication.PostStamUpdate();
+                ClientCommunication.PostManaUpdate();
 
                 Engine.MainWindow.UpdateTitle(); // update player name
             }
@@ -1719,7 +1719,7 @@ namespace Assistant
                 }
                 else if (item.IsMulti)
                 {
-                    UOAssist.PostAddMulti(item.ItemID, item.Position);
+                    ClientCommunication.PostAddMulti(item.ItemID, item.Position);
                 }
                 else
                 {
@@ -1843,7 +1843,7 @@ namespace Assistant
                 }
                 else if (item.IsMulti)
                 {
-                    UOAssist.PostAddMulti(item.ItemID, item.Position);
+                    ClientCommunication.PostAddMulti(item.ItemID, item.Position);
                 }
                 else
                 {

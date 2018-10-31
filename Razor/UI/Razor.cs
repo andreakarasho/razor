@@ -655,7 +655,6 @@ namespace Assistant
             this.advancedTab.SuspendLayout();
             this.aboutTab.SuspendLayout();
             this.SuspendLayout();
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             // 
             // m_NotifyIcon
             // 
@@ -3522,8 +3521,8 @@ namespace Assistant
         {
             if (msg.Msg == ClientCommunication.WM_UONETEVENT)
                 msg.Result = (IntPtr)(ClientCommunication.OnMessage(this, (uint)msg.WParam.ToInt32(), msg.LParam.ToInt32()) ? 1 : 0);
-            else if (msg.Msg >= (int)UOAssist.UOAMessage.First && msg.Msg <= (int)UOAssist.UOAMessage.Last)
-                msg.Result = (IntPtr)UOAssist.OnUOAMessage(this, msg.Msg, msg.WParam.ToInt32(), msg.LParam.ToInt32());
+            else if (msg.Msg >= (int)ClientCommunication.UOAMessage.First && msg.Msg <= (int)ClientCommunication.UOAMessage.Last)
+                msg.Result = (IntPtr)ClientCommunication.OnUOAMessage(this, msg.Msg, msg.WParam.ToInt32(), msg.LParam.ToInt32());
             else
                 base.WndProc(ref msg);
         }
@@ -7435,8 +7434,8 @@ namespace Assistant
             {
                 if (MapWindow == null)
                     MapWindow = new Assistant.MapUO.MapWindow();
-                //SetParent( MapWindow.Handle, ClientCommunication.UOWindow );
-                //MapWindow.Owner = (Form)Form.FromHandle( ClientCommunication.UOWindow );
+                //SetParent( MapWindow.Handle, ClientCommunication.FindUOWindow() );
+                //MapWindow.Owner = (Form)Form.FromHandle( ClientCommunication.FindUOWindow() );
                 MapWindow.Show();
                 MapWindow.BringToFront();
             }
@@ -7828,8 +7827,8 @@ namespace Assistant
             JMap.Enabled = true;
 
 
-            //SetParent(jMap.Handle, ClientCommunication.UOWindow);
-            //jMap.Owner = (Form)Form.FromHandle(ClientCommunication.UOWindow);
+            //SetParent(jMap.Handle, ClientCommunication.FindUOWindow());
+            //jMap.Owner = (Form)Form.FromHandle(ClientCommunication.FindUOWindow());
 
             //we handle showing in the jmap class due to map generation 
             //jMap.Show();
@@ -7843,8 +7842,8 @@ namespace Assistant
             {
                 if (MapWindow == null)
                     MapWindow = new Assistant.MapUO.MapWindow();
-                //SetParent( MapWindow.Handle, ClientCommunication.UOWindow );
-                //MapWindow.Owner = (Form)Form.FromHandle( ClientCommunication.UOWindow );
+                //SetParent( MapWindow.Handle, ClientCommunication.FindUOWindow() );
+                //MapWindow.Owner = (Form)Form.FromHandle( ClientCommunication.FindUOWindow() );
                 MapWindow.Show();
                 MapWindow.BringToFront();
             }*/
