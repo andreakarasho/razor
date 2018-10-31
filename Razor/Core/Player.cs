@@ -253,6 +253,18 @@ namespace Assistant
 
     public class PlayerData : Mobile
     {
+        public class MoveEntry
+        {
+            //public byte Seq;
+            public Direction Dir;
+            //public int x;
+            //public int y;
+            public Point3D Position;
+            public bool IsStep;
+
+            public bool FilterAck;
+        }
+
         public int VisRange = 18;
         public int MultiVisRange { get { return VisRange + 5; } }
 
@@ -280,8 +292,14 @@ namespace Assistant
 
 
         private bool m_SkillsSent;
+        //private Item m_Holding;
+        //private ushort m_HoldAmt;
+        private ConcurrentDictionary<byte, MoveEntry> m_MoveInfo;
         private Timer m_CriminalTime;
         private DateTime m_CriminalStart = DateTime.MinValue;
+        private byte m_WalkSeq;
+
+        public static int FastWalkKey = 0;
 
         internal List<BuffsDebuffs> m_BuffsDebuffs = new List<BuffsDebuffs>();
         internal List<BuffsDebuffs> BuffsDebuffs { get { return m_BuffsDebuffs; } }
@@ -347,6 +365,8 @@ namespace Assistant
             m_IntLock = (LockType)reader.ReadByte();
             m_Gold = reader.ReadUInt32();
             m_Weight = reader.ReadUInt16();
+
+            m_MoveInfo = new ConcurrentDictionary<byte, MoveEntry>();
 
             if (version >= 4)
             {
@@ -420,6 +440,7 @@ namespace Assistant
 
         public PlayerData(Serial serial) : base(serial)
         {
+            m_MoveInfo = new ConcurrentDictionary<byte, MoveEntry>();
             m_Skills = new Skill[Skill.Count];
             for (int i = 0; i < m_Skills.Length; i++)
                 m_Skills[i] = new Skill(i);
@@ -568,6 +589,8 @@ namespace Assistant
             set { m_SkillsSent = value; }
         }
 
+        public byte WalkSequence { get { return m_WalkSeq; } }
+
         public int CriminalTime
         {
             get
@@ -594,97 +617,177 @@ namespace Assistant
             }
         }
 
-        private Direction CalculateDirection(Point3D startPos, Point3D endPos)
+        public void Resync()
         {
-            int deltaX = endPos.X - startPos.X;
-            int deltaY = endPos.Y - startPos.Y;
-
-            if (deltaX > 0)
-            {
-                if (deltaY > 0)
-                {
-                    return Direction.Left;
-                }
-                else if (deltaY == 0)
-                {
-                    return Direction.East;
-                }
-                else
-                {
-                    return Direction.Up;
-                }
-            }
-            else if (deltaX == 0)
-            {
-                if (deltaY > 0)
-                {
-                    return Direction.South;
-                }
-                else if (deltaY == 0)
-                {
-                    /* Not moving */
-                    return Direction.ValueMask;
-                }
-                else
-                {
-                    return Direction.North;
-                }
-            }
-            else
-            {
-                if (deltaY > 0)
-                {
-                    return Direction.Down;
-                }
-                else if (deltaY == 0)
-                {
-                    return Direction.West;
-                }
-                else
-                {
-                    return Direction.Right;
-                }
-            }
+            m_OutstandingMoves = m_WalkSeq = 0;
+            m_MoveInfo.Clear();
         }
 
+        private int m_OutstandingMoves = 0;
 
-        public override void OnPositionChanging(Point3D oldPos)
+        public int OutstandingMoveReqs { get { return m_OutstandingMoves; } }
+
+        public MoveEntry GetMoveEntry(byte seq)
         {
-            Point3D newPos = Position;
-            Direction dir = CalculateDirection(oldPos, newPos);
+            MoveEntry me;
+            m_MoveInfo.TryGetValue(seq, out me);
+            return me;
+        }
 
-            if (dir == Direction.ValueMask)
+        private static Timer m_OpenDoorReq = Timer.DelayedCallback(TimeSpan.FromSeconds(0.005), new TimerCallback(OpenDoor));
+        private static void OpenDoor()
+        {
+            if (World.Player != null)
+                ClientCommunication.SendToServer(new OpenDoorMacro());
+        }
+
+        private Serial m_LastDoor = Serial.Zero;
+        private DateTime m_LastDoorTime = DateTime.MinValue;
+        public void MoveReq(Direction dir, byte seq)
+        {
+            m_OutstandingMoves++;
+            FastWalkKey++;
+
+            MoveEntry e = new MoveEntry();
+
+            if (!m_MoveInfo.ContainsKey(seq))
+                m_MoveInfo.TryAdd(seq, e);
+            else
+                m_MoveInfo[seq] = e;
+
+            e.IsStep = (dir & Direction.Mask) == (Direction & Direction.Mask);
+            e.Dir = dir;
+
+            ProcessMove(dir); // shouldnt this be in MoveAck?!?
+
+            e.Position = Position;
+
+            if (Body != 0x03DB && !IsGhost && ((int)(e.Dir & Direction.Mask)) % 2 == 0 && Config.GetBool("AutoOpenDoors") && ClientCommunication.AllowBit(FeatureBit.AutoOpenDoors))
             {
-                /* Only Z is changing. */
-                return;
-            }
+                int x = Position.X, y = Position.Y;
+                Utility.Offset(e.Dir, ref x, ref y);
 
-            if (!IsGhost)
-                StealthSteps.OnMove();
-
-            /* Auto open doors */
-            if (Body != 0x03DB && 
-                !IsGhost && 
-                ((int)(dir & Direction.Mask)) % 2 == 0 && 
-                Config.GetBool("AutoOpenDoors") && 
-                ClientCommunication.AllowBit(FeatureBit.AutoOpenDoors))
-            {
-                int x = newPos.X, y = newPos.Y, z = newPos.Z;
-
-                /* Check if one more tile in the direction we just moved is a door */
-                Utility.Offset(dir, ref x, ref y);
+                int z = CalcZ;
 
                 foreach (Item i in World.Items.Values)
                 {
-                    if (i.IsDoor && i.Position.X == x && i.Position.Y == y && i.Position.Z - 15 <= z && i.Position.Z + 15 >= z)
+                    if (i.Position.X == x && i.Position.Y == y && i.IsDoor && i.Position.Z - 15 <= z && i.Position.Z + 15 >= z && (m_LastDoor != i.Serial || m_LastDoorTime + TimeSpan.FromSeconds(1) < DateTime.UtcNow))
                     {
-                        ClientCommunication.SendToServer(new OpenDoorMacro());
+                        m_LastDoor = i.Serial;
+                        m_LastDoorTime = DateTime.UtcNow;
+                        m_OpenDoorReq.Start();
                         break;
                     }
                 }
             }
 
+            /*if ( m_OutstandingMoves < 5 && !Macros.WalkAction.IsMacroWalk( seq ) && Config.GetBool( "SmoothWalk" ) )
+            {
+                 e.FilterAck = true;
+                 ClientCommunication.SendToClient( new MoveAcknowledge( seq, Notoriety ) );
+            }
+            else
+            {
+                 e.FilterAck = false;
+            }*/
 
+            e.FilterAck = false;
+
+            m_WalkSeq = (byte)(seq >= 255 ? 1 : seq + 1);
+        }
+
+        public void ProcessMove(Direction dir)
+        {
+            if ((dir & Direction.Mask) == (this.Direction & Direction.Mask))
+            {
+                int x = Position.X, y = Position.Y;
+
+                Utility.Offset(dir & Direction.Mask, ref x, ref y);
+
+                int newZ = Position.Z;
+                try { newZ = Assistant.Map.ZTop(Map, x, y, newZ); }
+                catch { }
+                Position = new Point3D(x, y, newZ);
+            }
+            Direction = dir;
+        }
+
+        public bool HasWalkEntry(byte seq)
+        {
+            return m_MoveInfo.ContainsKey(seq);
+        }
+
+        public void MoveRej(byte seq, Direction dir, Point3D pos)
+        {
+            m_OutstandingMoves--;
+
+            Direction = dir;
+            Position = pos;
+            Resync();
+        }
+
+        public bool MoveAck(byte seq)
+        {
+            m_OutstandingMoves--;
+
+            MoveEntry e;
+            if (m_MoveInfo.TryGetValue(seq, out e) && e != null)
+            {
+                if (e.IsStep && !IsGhost)
+                    StealthSteps.OnMove();
+
+                return !e.FilterAck;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        private static bool m_ExternZ = false;
+        public static bool ExternalZ { get { return m_ExternZ; } set { m_ExternZ = value; } }
+
+        //private sbyte m_CalcZ = 0;
+        public int CalcZ
+        {
+            get
+            {
+                if (!m_ExternZ || !ClientCommunication.IsCalibrated())
+                    return Assistant.Map.ZTop(Map, Position.X, Position.Y, Position.Z);
+                else
+                    return Position.Z;
+            }
+        }
+
+        public override Point3D Position
+        {
+            get
+            {
+                if (m_ExternZ && ClientCommunication.IsCalibrated())
+                {
+                    Point3D p = new Point3D(base.Position);
+                    p.Z = ClientCommunication.GetZ(p.X, p.Y, p.Z);
+                    return p;
+                }
+                else
+                {
+                    return base.Position;
+                }
+            }
+            set
+            {
+                base.Position = value;
+
+                if (Engine.MainWindow != null && Engine.MainWindow.MapWindow != null)
+                    Engine.MainWindow.MapWindow.PlayerMoved();
+
+                if (Engine.MainWindow != null && Engine.MainWindow.JMap != null)
+                    Engine.MainWindow.JMap.PlayerMoved();
+            }
+        }
+
+        public override void OnPositionChanging(Point3D newPos)
+        {
             List<Mobile> mlist = new List<Mobile>(World.Mobiles.Values);
             for (int i = 0; i < mlist.Count; i++)
             {
@@ -718,13 +821,7 @@ namespace Assistant
 
             ilist = null;
 
-            if (Engine.MainWindow != null && Engine.MainWindow.MapWindow != null)
-                Engine.MainWindow.MapWindow.PlayerMoved();
-
-            if (Engine.MainWindow != null && Engine.MainWindow.JMap != null)
-                Engine.MainWindow.JMap.PlayerMoved();
-
-            base.OnPositionChanging(oldPos);
+            base.OnPositionChanging(newPos);
         }
 
         public override void OnMapChange(byte old, byte cur)

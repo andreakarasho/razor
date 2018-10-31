@@ -254,8 +254,11 @@ namespace Assistant
 					{
 						// replace movement ack with a force walk
 						byte seq = p.ReadByte();
-						/* TODO: This is definitely broken */
-						//WritePacket( new ForceWalk( World.Player.GetMoveEntry( seq ).Dir&Direction.Mask ) );
+						if ( World.Player.HasWalkEntry( seq ) )
+						{ 
+							WritePacket( new ForceWalk( World.Player.GetMoveEntry( seq ).Dir&Direction.Mask ) );
+							//WritePacket( new MobileUpdate( World.Player ) );
+						}
 						return true; 
 					}
 
@@ -347,6 +350,8 @@ namespace Assistant
 						Direction dir = (Direction)p.ReadByte();
 						byte seq = p.ReadByte();
 
+						ClientCommunication.ForceSendToClient( new MoveReject( seq, World.Player ) );
+						World.Player.Resync();
 						break;
 					}
 					case 0x06: // Double Click
@@ -597,6 +602,8 @@ namespace Assistant
 			if ( wasRunning )
 				m_PlayTimer.Stop();
 
+			PlayerData.ExternalZ = false;
+
 			int sleepCount = 0;
 			while ( m_Elapsed < target && !m_GZIn.EndOfFile )
 			{
@@ -647,6 +654,8 @@ namespace Assistant
 					Stop();
 				}
 			}
+
+			ClientCommunication.BeginCalibratePosition();
 		}
 
 		public static void Open( string filename )
@@ -889,9 +898,9 @@ namespace Assistant
 			m_Elapsed = TimeSpan.Zero;
 			UpdateTimeText();
 			
-			//ClientCommunication.SendToClient( new MoveReject( World.Player.WalkSequence, World.Player ) );
+			ClientCommunication.SendToClient( new MoveReject( World.Player.WalkSequence, World.Player ) );
 			ClientCommunication.SendToServer( new ResyncReq() );
-			//World.Player.Resync();
+			World.Player.Resync();
 			ClientCommunication.RequestTitlebarUpdate();
 
 			if ( ClientCommunication.AllowBit( FeatureBit.LightFilter ) && World.Player != null )
@@ -918,6 +927,8 @@ namespace Assistant
 
 		private static void DoLogin( PlayerData player )
 		{
+			PlayerData.ExternalZ = false;
+
 			ClientCommunication.ForceSendToClient( new LoginConfirm( player ) );
 			ClientCommunication.ForceSendToClient( new MapChange( player.Map ) );
 			ClientCommunication.ForceSendToClient( new MapPatches( player.MapPatches ) );
@@ -964,6 +975,8 @@ namespace Assistant
 			ClientCommunication.ForceSendToClient( new MobileIncoming( player ) );
 
 			PacketHandlers.PlayCharTime = DateTime.UtcNow;
+			
+			ClientCommunication.BeginCalibratePosition();
 		}
 
 		public static string ElapsedString

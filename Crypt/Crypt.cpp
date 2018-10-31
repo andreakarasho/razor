@@ -22,6 +22,8 @@ HMODULE hInstance = NULL;
 SOCKET CurrentConnection = 0;
 int ConnectedIP = 0;
 
+Position *CurrentPosition = nullptr;
+
 HANDLE CommMutex = NULL;
 
 char *tempBuff = NULL;
@@ -170,6 +172,8 @@ DLLFUNCTION int InstallLibrary(HWND RazorWindow, HWND UOWindow, int flags)
 
 	Log( "Initialize library..." );
 
+	GetWindowThreadProcessId(UOWindow, &UOProcId);
+
 	hUOWindow = UOWindow;
 	hRazorWnd = RazorWindow;
 
@@ -195,50 +199,6 @@ DLLFUNCTION int InstallLibrary(HWND RazorWindow, HWND UOWindow, int flags)
 	return SUCCESS;
 }
 
-DLLFUNCTION void WaitForWindow( DWORD pid )
-{
-	DWORD UOTId = 0;
-	DWORD exitCode;
-	HANDLE hProc = OpenProcess( PROCESS_QUERY_INFORMATION, FALSE, pid );
-
-	UOProcId = 0;
-
-	do
-	{
-		Sleep( 10 );
-		HWND hWnd = FindWindow( "Ultima Online", NULL );
-		while ( hWnd != NULL )
-		{
-			UOTId = GetWindowThreadProcessId( hWnd, &UOProcId );
-			if ( UOProcId == pid )
-				break;
-			hWnd = FindWindowEx( NULL, hWnd, "Ultima Online", NULL );
-		}
-
-		if ( UOProcId != pid || hWnd == NULL )
-		{
-			hWnd = FindWindow( "Ultima Online Third Dawn", NULL );
-			while ( hWnd != NULL )
-			{
-				UOTId = GetWindowThreadProcessId( hWnd, &UOProcId );
-				if (UOProcId == pid)
-					break;
-				hWnd = FindWindowEx( NULL, hWnd, "Ultima Online Third Dawn", NULL );
-			}
-		}
-
-		GetExitCodeProcess( hProc, &exitCode );
-	} while ( UOProcId != pid && exitCode == STILL_ACTIVE );
-
-	CloseHandle( hProc );
-}
-
-DLLFUNCTION int GetUOProcId()
-{
-	return UOProcId;
-}
-
-
 DLLFUNCTION HANDLE GetCommMutex()
 {
 	return CommMutex;
@@ -261,54 +221,37 @@ DLLFUNCTION unsigned int TotalIn()
 		return 0;
 }
 
-DLLFUNCTION void CalibratePosition( int x, int y, int z )
+DLLFUNCTION bool IsCalibrated()
 {
-	Position pos;
-	COPYDATASTRUCT copydata;
-
-	pos.x = x;
-	pos.y = y;
-	pos.z = z;
-
-	copydata.dwData = (ULONG_PTR)UONET_MESSAGE_COPYDATA::POSITION;
-	copydata.cbData = sizeof(pos);
-	copydata.lpData = &pos;
-
-	SendMessage(hUOWindow, WM_COPYDATA, (WPARAM)hRazorWnd, (LPARAM)&copydata);
+	return pShared->PositionCalibrated;
 }
 
-/* These variables are used in the UO client process address space */
-Position g_TestPosition = {};
-Position g_LastPosition = {};
-Position *g_ClientPosition = nullptr;
-
-VOID CALLBACK CheckPosition(HWND hwnd, UINT Message, UINT TimerId, DWORD dwTime)
+DLLFUNCTION void CalibratePosition( int x, int y, int z )
 {
-	if (g_ClientPosition == nullptr) {
-		/* Scan the region of memory in the client known to hold the player's position */
-		g_ClientPosition = (Position *)MemFinder::Find(&g_TestPosition, sizeof(g_TestPosition), 0x00500000, 0x00C00000);
+	if (!pShared->PositionCalibrated) {
+		WaitForSingleObject(CommMutex, 50);
+		pShared->PositionCalibrated = false;
+		pShared->Pos.x = x;
+		pShared->Pos.y = y;
+		pShared->Pos.z = z;
+		ReleaseMutex(CommMutex);
+
+		PostMessage(hUOWindow, WM_UONETEVENT, CALIBRATE_POS, 0);
+	}
+}
+
+DLLFUNCTION bool GetPosition( int *x, int *y, int *z )
+{
+	if (pShared->PositionCalibrated) {
+		WaitForSingleObject(CommMutex, 50);
+		*x = pShared->Pos.x;
+		*y = pShared->Pos.y;
+		*z = pShared->Pos.z;
+		ReleaseMutex(CommMutex);
+		return true;
 	}
 
-	if (g_ClientPosition != nullptr) {
-		Position pos;
-		pos.x = g_ClientPosition->x;
-		pos.y = g_ClientPosition->y;
-		pos.z = g_ClientPosition->z;
-
-		if (pos.x != g_LastPosition.x || pos.y != g_LastPosition.y || pos.z != g_LastPosition.z) {
-			/* Inform Razor of a position change */
-
-			COPYDATASTRUCT copydata;
-
-			copydata.dwData = (ULONG_PTR)UONET_MESSAGE_COPYDATA::POSITION;
-			copydata.cbData = sizeof(pos);
-			copydata.lpData = &pos;
-
-			SendMessage(hRazorWnd, WM_COPYDATA, (WPARAM)hUOWindow, (LPARAM)&copydata);
-		}
-
-		g_LastPosition = pos;
-	}
+	return false;
 }
 
 DLLFUNCTION void BringToFront( HWND hWnd )
@@ -778,6 +721,7 @@ bool CreateSharedMemory()
 	}
 
 	//memset( pShared, 0, sizeof(SharedMemory) );
+	pShared->PositionCalibrated = false;
 
 	return true;
 }
@@ -999,6 +943,9 @@ int HookRecv( SOCKET sock, char *buff, int len, int flags )
 		}
 		else
 		{
+			if (CurrentPosition) {
+				memcpy(&pShared->Pos, CurrentPosition, sizeof(pShared->Pos));
+			}
 			ackLen = 0;
 			while ( pShared->OutRecv.Length > 0 )
 			{
@@ -1125,6 +1072,9 @@ int HookSend( SOCKET sock, char *buff, int len, int flags )
 				memcpy( &pShared->InSend.Buff[pShared->InSend.Start+pShared->InSend.Length], buff, len );
 
 			pShared->InSend.Length += len;
+			if (CurrentPosition) {
+				memcpy(&pShared->Pos, CurrentPosition, sizeof(pShared->Pos));
+			}
 			ReleaseMutex( CommMutex );
 
 			SendMessage( hRazorWnd, WM_UONETEVENT, SEND, 0 );
@@ -1685,6 +1635,16 @@ void MessageProc( HWND hWnd, UINT nMsg, WPARAM wParam, LPARAM lParam, MSG *pMsg 
 		case DEATH_MSG:
 			PatchDeathMsg();
 			break;
+		case CALIBRATE_POS:
+			WaitForSingleObject( CommMutex, INFINITE );
+			/* Scan the region of memory in the client known to hold the player's position */
+			CurrentPosition = (Position *)MemFinder::Find(&pShared->Pos, sizeof(pShared->Pos), 0x00500000, 0x00C00000);
+			if (CurrentPosition != nullptr) {
+				pShared->PositionCalibrated = true;
+			}
+			ReleaseMutex( CommMutex );
+			break;
+
 		case OPEN_RPV:
 			SendMessage( hRazorWnd, WM_UONETEVENT, OPEN_RPV, lParam );
 			break;
@@ -1712,22 +1672,6 @@ void MessageProc( HWND hWnd, UINT nMsg, WPARAM wParam, LPARAM lParam, MSG *pMsg 
 			break;
 		}
 		break;
-
-	case WM_COPYDATA: {
-		COPYDATASTRUCT *copydata = (COPYDATASTRUCT *)lParam;
-
-		switch ((UONET_MESSAGE_COPYDATA)copydata->dwData) {
-		case UONET_MESSAGE_COPYDATA::POSITION:
-			g_TestPosition = *(Position *)copydata->lpData;
-
-			/* Start (or restart) a timer that will keep searching client memory for the given position.
-			 * Once found, it will broadcast updates to the position any time it changes. */
-			SetTimer(hUOWindow, (UINT_PTR)0xAA, 50, CheckPosition);
-			break;
-
-		}
-		break;
-	}
 
 		// Macro stuff
 	case WM_SYSKEYDOWN:

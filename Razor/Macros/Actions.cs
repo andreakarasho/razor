@@ -1747,7 +1747,7 @@ namespace Assistant.Macros
 
         public override bool PerformWait()
         {
-            if (m_LastWalk + TimeSpan.FromSeconds(0.4) >= DateTime.UtcNow)
+            if (m_LastWalk + TimeSpan.FromSeconds(0.4) >= DateTime.UtcNow || World.Player.OutstandingMoveReqs > 4)
             {
                 return true;
             }

@@ -181,7 +181,10 @@ namespace Assistant.HotKeys
             {
                 m_LastSync = DateTime.UtcNow;
 
+                //ClientCommunication.SendToClient( new MoveReject( World.Player.WalkSequence, World.Player ) );
+                ClientCommunication.SendToClient(new MobileUpdate(World.Player));
                 ClientCommunication.SendToServer(new ResyncReq());
+                World.Player.Resync();
             }
         }
 

@@ -297,9 +297,7 @@ namespace Assistant
             // WelcomeForm
             // 
             this.AcceptButton = this.okay;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.AutoSize = true;
+            this.AutoScaleBaseSize = new System.Drawing.Size(6, 16);
             this.CancelButton = this.quit;
             this.ClientSize = new System.Drawing.Size(367, 300);
             this.Controls.Add(this.groupBox3);
