@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Assistant.Core;
+using Assistant.Macros;
 using Ultima;
 
 namespace Assistant
@@ -981,6 +982,7 @@ namespace Assistant
         }
 
         public uint CurrentGumpS, CurrentGumpI;
+        public GumpResponseAction LastGumpResponseAction;
         public bool HasGump;
         public List<string> CurrentGumpStrings = new List<string>();
         public string CurrentGumpRawData;

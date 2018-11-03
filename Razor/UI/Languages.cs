@@ -440,6 +440,7 @@ namespace Assistant
         PrevTarget,
         PrevTargetEnemyHumanoid,
         PrevTargetHumanoid,
+        UseLastGumpResponse,
 
         __End
     }
