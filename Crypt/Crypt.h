@@ -130,7 +130,7 @@ extern SharedMemory *pShared;
 extern HANDLE CommMutex;
 
 DLLFUNCTION int InstallLibrary(HWND RazorWindow, HWND UOWindow, int flags);
-DLLFUNCTION void Shutdown( bool closeClient );
+DLLFUNCTION void Shutdown();
 DLLFUNCTION void *GetSharedAddress();
 DLLFUNCTION int GetPacketLength( unsigned char *data, int len );
 DLLFUNCTION bool IsDynLength( unsigned char packet );
@@ -231,6 +231,6 @@ key2 ^= 0xA31D527F;
 .text:0041C5C4 83 C5 01                          add     ebp, 1
 .text:0041C5C7 85 DB                             test    ebx, ebx
 */
-// E8 C1 E7 1F 0B C7 33 05 memoryloc_2 
+// E8 C1 E7 1F 0B C7 33 05 memoryloc_2
 #define CRYPT_KEY_STR_MORE_NEW "\xE8\xC1\xE7\x1F\x0B\xC7\x33\x05"
 #define CRYPT_KEY_MORE_NEW_LEN 8

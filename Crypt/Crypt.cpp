@@ -31,6 +31,7 @@ SharedMemory *pShared = NULL;
 LARGE_INTEGER PerfFreq, Counter;
 
 DWORD DeathMsgAddr = 0xFFFFFFFF;
+HWND hUOAWnd = NULL;
 
 SIZE DesiredSize = {800,600};
 
@@ -168,6 +169,15 @@ void PatchDeathMsg()
 	}
 }
 
+LRESULT CALLBACK UOAWndProc(HWND hWnd, UINT nMsg, WPARAM wParam, LPARAM lParam)
+{
+	if (nMsg >= WM_USER + 200 && nMsg < WM_USER + 315)
+		return SendMessage(hRazorWnd, nMsg, wParam, lParam);
+	else
+		return DefWindowProc(hWnd, nMsg, wParam, lParam);
+}
+
+
 DLLFUNCTION int InstallLibrary(HWND RazorWindow, HWND UOWindow, int flags)
 {
 	DWORD UOTId = 0;
@@ -198,18 +208,39 @@ DLLFUNCTION int InstallLibrary(HWND RazorWindow, HWND UOWindow, int flags)
 	if ( !hGetMsgHook )
 		return NO_HOOK;
 
+	WNDCLASS wc;
+	wc.style = 0;
+	wc.lpfnWndProc = (WNDPROC)UOAWndProc;
+	wc.cbClsExtra = 0;
+	wc.cbWndExtra = 0;
+	wc.hInstance = hInstance;
+	wc.hIcon = LoadIcon(NULL, IDI_WINLOGO);
+	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wc.hbrBackground = NULL;
+	wc.lpszMenuName = NULL;
+	wc.lpszClassName = "UOASSIST-TP-MSG-WND";
+	RegisterClass(&wc);
+	DWORD error = GetLastError();
+
+	hUOAWnd = CreateWindow("UOASSIST-TP-MSG-WND", "UOASSIST-TP-MSG-WND", WS_OVERLAPPEDWINDOW, 0, 0, 50, 50, NULL, NULL, hInstance, 0);
+	if (hUOAWnd)
+		ShowWindow(hUOAWnd, FALSE);
+
+
 	ServerEncrypted = (flags&0x10) != 0;
 	ClientEncrypted = (flags&0x08) != 0;
 	PostMessage( hUOWindow, WM_PROCREADY, (WPARAM)flags, (LPARAM)hRazorWnd );
 	return SUCCESS;
 }
 
-DLLFUNCTION void Shutdown( bool close )
+DLLFUNCTION void Shutdown()
 {
-	Log( "Shutdown" );
-
-	if ( hUOWindow && IsWindow( hUOWindow ) )
-		PostMessage( hUOWindow, WM_QUIT, 0, 0 );
+	if (hUOAWnd && IsWindow(hUOAWnd))
+	{
+		UnregisterClass("UOASSIST-TP-MSG-WND", hInstance);
+		PostQuitMessage(0);
+		hUOAWnd = NULL;
+	}
 }
 
 DLLFUNCTION HANDLE GetCommMutex()
