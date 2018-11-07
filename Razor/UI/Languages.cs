@@ -441,6 +441,7 @@ namespace Assistant
         PrevTargetEnemyHumanoid,
         PrevTargetHumanoid,
         UseLastGumpResponse,
+        CaptureBod,
 
         __End
     }
