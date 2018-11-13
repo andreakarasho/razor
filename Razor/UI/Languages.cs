@@ -442,6 +442,7 @@ namespace Assistant
         PrevTargetHumanoid,
         UseLastGumpResponse,
         SetContainerAlias,
+        Interrupt,
 
         __End
     }
