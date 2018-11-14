@@ -212,6 +212,8 @@ namespace Assistant
             AddProperty("BlockTradeRequests", false);
             AddProperty("BlockPartyInvites", false);
 
+            AddProperty("AutoAcceptParty", false);
+
             Counter.Default();
             Filter.DisableAll();
             DressList.ClearAll();

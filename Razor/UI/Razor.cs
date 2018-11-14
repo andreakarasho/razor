@@ -296,6 +296,7 @@ namespace Assistant
         private Label lblSeason;
         private CheckBox blockPartyInvites;
         private CheckBox blockTradeRequests;
+        private CheckBox autoAcceptParty;
         private TreeView _hotkeyTreeViewCache = new TreeView();
 
         [DllImport("User32.dll")]
@@ -379,6 +380,8 @@ namespace Assistant
             this.opacityLabel = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.moreOptTab = new System.Windows.Forms.TabPage();
+            this.blockPartyInvites = new System.Windows.Forms.CheckBox();
+            this.blockTradeRequests = new System.Windows.Forms.CheckBox();
             this.realSeason = new System.Windows.Forms.CheckBox();
             this.seasonList = new System.Windows.Forms.ComboBox();
             this.lblSeason = new System.Windows.Forms.Label();
@@ -621,8 +624,7 @@ namespace Assistant
             this.label21 = new System.Windows.Forms.Label();
             this.aboutVer = new System.Windows.Forms.Label();
             this.timerTimer = new System.Windows.Forms.Timer(this.components);
-            this.blockTradeRequests = new System.Windows.Forms.CheckBox();
-            this.blockPartyInvites = new System.Windows.Forms.CheckBox();
+            this.autoAcceptParty = new System.Windows.Forms.CheckBox();
             this.tabs.SuspendLayout();
             this.generalTab.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -685,7 +687,7 @@ namespace Assistant
             this.tabs.Multiline = true;
             this.tabs.Name = "tabs";
             this.tabs.SelectedIndex = 0;
-            this.tabs.Size = new System.Drawing.Size(490, 497);
+            this.tabs.Size = new System.Drawing.Size(490, 466);
             this.tabs.SizeMode = System.Windows.Forms.TabSizeMode.FillToRight;
             this.tabs.TabIndex = 0;
             this.tabs.SelectedIndexChanged += new System.EventHandler(this.tabs_IndexChanged);
@@ -945,6 +947,24 @@ namespace Assistant
             this.moreOptTab.Size = new System.Drawing.Size(482, 449);
             this.moreOptTab.TabIndex = 5;
             this.moreOptTab.Text = "Options";
+            // 
+            // blockPartyInvites
+            // 
+            this.blockPartyInvites.Location = new System.Drawing.Point(245, 187);
+            this.blockPartyInvites.Name = "blockPartyInvites";
+            this.blockPartyInvites.Size = new System.Drawing.Size(184, 20);
+            this.blockPartyInvites.TabIndex = 89;
+            this.blockPartyInvites.Text = "Block party invites";
+            this.blockPartyInvites.CheckedChanged += new System.EventHandler(this.blockPartyInvites_CheckedChanged);
+            // 
+            // blockTradeRequests
+            // 
+            this.blockTradeRequests.Location = new System.Drawing.Point(245, 161);
+            this.blockTradeRequests.Name = "blockTradeRequests";
+            this.blockTradeRequests.Size = new System.Drawing.Size(184, 20);
+            this.blockTradeRequests.TabIndex = 88;
+            this.blockTradeRequests.Text = "Block trade requests";
+            this.blockTradeRequests.CheckedChanged += new System.EventHandler(this.blockTradeRequests_CheckedChanged);
             // 
             // realSeason
             // 
@@ -1274,6 +1294,7 @@ namespace Assistant
             // 
             // moreMoreOptTab
             // 
+            this.moreMoreOptTab.Controls.Add(this.autoAcceptParty);
             this.moreMoreOptTab.Controls.Add(this.containerLabels);
             this.moreMoreOptTab.Controls.Add(this.showContainerLabels);
             this.moreMoreOptTab.Controls.Add(this.showAttackTarget);
@@ -1312,14 +1333,14 @@ namespace Assistant
             this.moreMoreOptTab.Controls.Add(this.chkPartyOverhead);
             this.moreMoreOptTab.Location = new System.Drawing.Point(4, 44);
             this.moreMoreOptTab.Name = "moreMoreOptTab";
-            this.moreMoreOptTab.Size = new System.Drawing.Size(482, 449);
+            this.moreMoreOptTab.Size = new System.Drawing.Size(482, 418);
             this.moreMoreOptTab.TabIndex = 10;
             this.moreMoreOptTab.Text = "More Options";
             // 
             // containerLabels
             // 
             this.containerLabels.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.containerLabels.Location = new System.Drawing.Point(425, 287);
+            this.containerLabels.Location = new System.Drawing.Point(425, 313);
             this.containerLabels.Name = "containerLabels";
             this.containerLabels.Size = new System.Drawing.Size(33, 19);
             this.containerLabels.TabIndex = 82;
@@ -1330,7 +1351,7 @@ namespace Assistant
             // showContainerLabels
             // 
             this.showContainerLabels.AutoSize = true;
-            this.showContainerLabels.Location = new System.Drawing.Point(245, 288);
+            this.showContainerLabels.Location = new System.Drawing.Point(245, 314);
             this.showContainerLabels.Name = "showContainerLabels";
             this.showContainerLabels.Size = new System.Drawing.Size(141, 19);
             this.showContainerLabels.TabIndex = 81;
@@ -1340,7 +1361,7 @@ namespace Assistant
             // 
             // showAttackTarget
             // 
-            this.showAttackTarget.Location = new System.Drawing.Point(245, 263);
+            this.showAttackTarget.Location = new System.Drawing.Point(245, 289);
             this.showAttackTarget.Name = "showAttackTarget";
             this.showAttackTarget.Size = new System.Drawing.Size(232, 19);
             this.showAttackTarget.TabIndex = 80;
@@ -1350,7 +1371,7 @@ namespace Assistant
             // 
             // lblBuffDebuff
             // 
-            this.lblBuffDebuff.Location = new System.Drawing.Point(5, 285);
+            this.lblBuffDebuff.Location = new System.Drawing.Point(8, 289);
             this.lblBuffDebuff.Name = "lblBuffDebuff";
             this.lblBuffDebuff.Size = new System.Drawing.Size(115, 18);
             this.lblBuffDebuff.TabIndex = 79;
@@ -1359,7 +1380,7 @@ namespace Assistant
             // 
             // buffDebuffFormat
             // 
-            this.buffDebuffFormat.Location = new System.Drawing.Point(124, 284);
+            this.buffDebuffFormat.Location = new System.Drawing.Point(127, 288);
             this.buffDebuffFormat.Name = "buffDebuffFormat";
             this.buffDebuffFormat.Size = new System.Drawing.Size(109, 23);
             this.buffDebuffFormat.TabIndex = 78;
@@ -1399,7 +1420,7 @@ namespace Assistant
             // stealthOverhead
             // 
             this.stealthOverhead.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.stealthOverhead.Location = new System.Drawing.Point(387, 49);
+            this.stealthOverhead.Location = new System.Drawing.Point(387, 75);
             this.stealthOverhead.Name = "stealthOverhead";
             this.stealthOverhead.Size = new System.Drawing.Size(92, 36);
             this.stealthOverhead.TabIndex = 76;
@@ -1410,7 +1431,7 @@ namespace Assistant
             // overHeadMessages
             // 
             this.overHeadMessages.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.overHeadMessages.Location = new System.Drawing.Point(425, 237);
+            this.overHeadMessages.Location = new System.Drawing.Point(425, 263);
             this.overHeadMessages.Name = "overHeadMessages";
             this.overHeadMessages.Size = new System.Drawing.Size(33, 19);
             this.overHeadMessages.TabIndex = 75;
@@ -1421,7 +1442,7 @@ namespace Assistant
             // showOverheadMessages
             // 
             this.showOverheadMessages.AutoSize = true;
-            this.showOverheadMessages.Location = new System.Drawing.Point(245, 238);
+            this.showOverheadMessages.Location = new System.Drawing.Point(245, 264);
             this.showOverheadMessages.Name = "showOverheadMessages";
             this.showOverheadMessages.Size = new System.Drawing.Size(161, 19);
             this.showOverheadMessages.TabIndex = 74;
@@ -1442,7 +1463,7 @@ namespace Assistant
             // 
             // forceSizeX
             // 
-            this.forceSizeX.Location = new System.Drawing.Point(369, 211);
+            this.forceSizeX.Location = new System.Drawing.Point(369, 237);
             this.forceSizeX.Name = "forceSizeX";
             this.forceSizeX.Size = new System.Drawing.Size(34, 23);
             this.forceSizeX.TabIndex = 63;
@@ -1450,7 +1471,7 @@ namespace Assistant
             // 
             // forceSizeY
             // 
-            this.forceSizeY.Location = new System.Drawing.Point(425, 211);
+            this.forceSizeY.Location = new System.Drawing.Point(425, 237);
             this.forceSizeY.Name = "forceSizeY";
             this.forceSizeY.Size = new System.Drawing.Size(33, 23);
             this.forceSizeY.TabIndex = 64;
@@ -1486,7 +1507,7 @@ namespace Assistant
             // 
             // blockHealPoison
             // 
-            this.blockHealPoison.Location = new System.Drawing.Point(245, 187);
+            this.blockHealPoison.Location = new System.Drawing.Point(245, 213);
             this.blockHealPoison.Name = "blockHealPoison";
             this.blockHealPoison.Size = new System.Drawing.Size(201, 20);
             this.blockHealPoison.TabIndex = 68;
@@ -1503,7 +1524,7 @@ namespace Assistant
             // 
             // potionEquip
             // 
-            this.potionEquip.Location = new System.Drawing.Point(245, 161);
+            this.potionEquip.Location = new System.Drawing.Point(245, 187);
             this.potionEquip.Name = "potionEquip";
             this.potionEquip.Size = new System.Drawing.Size(232, 20);
             this.potionEquip.TabIndex = 67;
@@ -1521,7 +1542,7 @@ namespace Assistant
             // 
             // spellUnequip
             // 
-            this.spellUnequip.Location = new System.Drawing.Point(245, 135);
+            this.spellUnequip.Location = new System.Drawing.Point(245, 161);
             this.spellUnequip.Name = "spellUnequip";
             this.spellUnequip.Size = new System.Drawing.Size(213, 20);
             this.spellUnequip.TabIndex = 39;
@@ -1530,7 +1551,7 @@ namespace Assistant
             // 
             // autoOpenDoors
             // 
-            this.autoOpenDoors.Location = new System.Drawing.Point(245, 109);
+            this.autoOpenDoors.Location = new System.Drawing.Point(245, 135);
             this.autoOpenDoors.Name = "autoOpenDoors";
             this.autoOpenDoors.Size = new System.Drawing.Size(190, 20);
             this.autoOpenDoors.TabIndex = 58;
@@ -1539,7 +1560,7 @@ namespace Assistant
             // 
             // alwaysStealth
             // 
-            this.alwaysStealth.Location = new System.Drawing.Point(245, 83);
+            this.alwaysStealth.Location = new System.Drawing.Point(245, 109);
             this.alwaysStealth.Name = "alwaysStealth";
             this.alwaysStealth.Size = new System.Drawing.Size(190, 20);
             this.alwaysStealth.TabIndex = 57;
@@ -1557,7 +1578,7 @@ namespace Assistant
             // 
             // chkStealth
             // 
-            this.chkStealth.Location = new System.Drawing.Point(245, 57);
+            this.chkStealth.Location = new System.Drawing.Point(245, 83);
             this.chkStealth.Name = "chkStealth";
             this.chkStealth.Size = new System.Drawing.Size(190, 20);
             this.chkStealth.TabIndex = 12;
@@ -1619,7 +1640,7 @@ namespace Assistant
             // label18
             // 
             this.label18.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label18.Location = new System.Drawing.Point(409, 214);
+            this.label18.Location = new System.Drawing.Point(409, 240);
             this.label18.Name = "label18";
             this.label18.Size = new System.Drawing.Size(10, 18);
             this.label18.TabIndex = 66;
@@ -1637,7 +1658,7 @@ namespace Assistant
             // 
             // gameSize
             // 
-            this.gameSize.Location = new System.Drawing.Point(245, 213);
+            this.gameSize.Location = new System.Drawing.Point(245, 239);
             this.gameSize.Name = "gameSize";
             this.gameSize.Size = new System.Drawing.Size(118, 18);
             this.gameSize.TabIndex = 65;
@@ -3439,28 +3460,19 @@ namespace Assistant
             this.timerTimer.Interval = 5;
             this.timerTimer.Tick += new System.EventHandler(this.timerTimer_Tick);
             // 
-            // blockTradeRequests
+            // autoAcceptParty
             // 
-            this.blockTradeRequests.Location = new System.Drawing.Point(245, 161);
-            this.blockTradeRequests.Name = "blockTradeRequests";
-            this.blockTradeRequests.Size = new System.Drawing.Size(184, 20);
-            this.blockTradeRequests.TabIndex = 88;
-            this.blockTradeRequests.Text = "Block trade requests";
-            this.blockTradeRequests.CheckedChanged += new System.EventHandler(this.blockTradeRequests_CheckedChanged);
-            // 
-            // blockPartyInvites
-            // 
-            this.blockPartyInvites.Location = new System.Drawing.Point(245, 187);
-            this.blockPartyInvites.Name = "blockPartyInvites";
-            this.blockPartyInvites.Size = new System.Drawing.Size(184, 20);
-            this.blockPartyInvites.TabIndex = 89;
-            this.blockPartyInvites.Text = "Block party invites";
-            this.blockPartyInvites.CheckedChanged += new System.EventHandler(this.blockPartyInvites_CheckedChanged);
+            this.autoAcceptParty.Location = new System.Drawing.Point(245, 57);
+            this.autoAcceptParty.Name = "autoAcceptParty";
+            this.autoAcceptParty.Size = new System.Drawing.Size(232, 20);
+            this.autoAcceptParty.TabIndex = 83;
+            this.autoAcceptParty.Text = "Auto-accept party invites from friends";
+            this.autoAcceptParty.CheckedChanged += new System.EventHandler(this.autoAcceptParty_CheckedChanged);
             // 
             // MainForm
             // 
             this.AutoScaleBaseSize = new System.Drawing.Size(6, 16);
-            this.ClientSize = new System.Drawing.Size(541, 450);
+            this.ClientSize = new System.Drawing.Size(541, 570);
             this.Controls.Add(this.tabs);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -3848,6 +3860,8 @@ namespace Assistant
             blockTradeRequests.Checked = Config.GetBool("BlockTradeRequests");
             blockPartyInvites.Checked = Config.GetBool("BlockPartyInvites");
 
+            autoAcceptParty.Checked = Config.GetBool("AutoAcceptParty");
+
             // Disable SmartCPU in case it was enabled before the feature was removed
             ClientCommunication.SetSmartCPU(false);
 
@@ -3941,7 +3955,7 @@ namespace Assistant
             }
             else if (tabs.SelectedTab == moreMoreOptTab)
             {
-                tabs.Size = new Size(tabs.Size.Width, 358);
+                tabs.Size = new Size(tabs.Size.Width, 392);
                 Size = new Size(tabs.Size.Width + 10, tabs.Size.Height + 33);
             }
             else if (tabs.SelectedTab == moreOptTab)
@@ -8207,6 +8221,11 @@ namespace Assistant
         private void blockTradeRequests_CheckedChanged(object sender, EventArgs e)
         {
             Config.SetProperty("BlockTradeRequests", blockTradeRequests.Checked);
+        }
+
+        private void autoAcceptParty_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.SetProperty("AutoAcceptParty", autoAcceptParty.Checked);
         }
     }
 }
