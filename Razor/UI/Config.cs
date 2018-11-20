@@ -211,8 +211,11 @@ namespace Assistant
             
             AddProperty("BlockTradeRequests", false);
             AddProperty("BlockPartyInvites", false);
-
             AddProperty("AutoAcceptParty", false);
+
+            AddProperty("MaxLightLevel", 31);
+            AddProperty("MinLightLevel", 0);
+            AddProperty("MinMaxLightLevelEnabled", false);
 
             Counter.Default();
             Filter.DisableAll();
