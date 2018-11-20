@@ -443,6 +443,7 @@ namespace Assistant
         UseLastGumpResponse,
         SetContainerAlias,
         Interrupt,
+        CaptureBod,
 
         __End
     }
