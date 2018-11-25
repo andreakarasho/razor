@@ -523,22 +523,6 @@ namespace Assistant
 
             m_Running = false;
 
-            try
-            {
-                PacketPlayer.Stop();
-            }
-            catch
-            {
-            }
-
-            try
-            {
-                AVIRec.Stop();
-            }
-            catch
-            {
-            }
-
             ClientCommunication.Close();
             Counter.Save();
             Macros.MacroManager.Save();

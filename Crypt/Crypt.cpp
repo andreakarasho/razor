@@ -1883,10 +1883,6 @@ void MessageProc( HWND hWnd, UINT nMsg, WPARAM wParam, LPARAM lParam, MSG *pMsg 
 			ReleaseMutex( CommMutex );
 			break;
 
-		case OPEN_RPV:
-			SendMessage( hPostWnd, WM_UONETEVENT, OPEN_RPV, lParam );
-			break;
-
 		case SETWNDSIZE:
 			DesiredSize.cx = LOWORD(lParam);
 			DesiredSize.cy = HIWORD(lParam);

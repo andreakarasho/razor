@@ -58,7 +58,7 @@ namespace Assistant
 			NotoHue = 13,
 			DLL_Error = 14,
 			DeathMsg = 15,
-			OpenRPV = 18,
+			Reserved0 = 18,
 			SetGameSize = 19,
 			FindData = 20,
 			SmartCPU = 21,
@@ -835,12 +835,6 @@ namespace Assistant
 
 	        if (World.Player != null && Config.GetBool("TitleBarDisplay"))
 	        {
-	            if (PacketPlayer.Playing)
-	            {
-	                SetTitleStr($"UO - Razor \"Video\" Playback in Progress... ({PacketPlayer.ElapsedString})");
-	                return;
-	            }
-
 	            // reuse the same sb each time for less damn allocations
 	            m_TBBuilder.Remove(0, m_TBBuilder.Length);
 	            m_TBBuilder.Insert(0, Config.GetString("TitleBarText"));
@@ -1106,20 +1100,6 @@ namespace Assistant
 			
 			switch ( (UONetMessage)(wParam&0xFFFF) )
 			{
-				case UONetMessage.OpenRPV:
-				{
-					if ( Engine.MainWindow != null )
-					{
-						StringBuilder sb = new StringBuilder( 256 );
-						if ( GlobalGetAtomName( (ushort)lParam, sb, 256 ) == 0 )
-							return false;
-						BringToFront( FindUOWindow() );
-						PacketPlayer.Open( sb.ToString() );
-						Engine.MainWindow.ShowMe();
-						Engine.MainWindow.SwitchToVidTab();
-					}
-					break;
-				}
 				case UONetMessage.Ready: //Patch status
 					if ( lParam == (int)InitError.NO_MEMCOPY )
 					{
@@ -1176,8 +1156,6 @@ namespace Assistant
 				case UONetMessage.Close:
 					OnLogout();
 					ClientProc = null;
-					try { PacketPlayer.Stop(); } catch {}
-					try { AVIRec.Stop(); } catch {}
 					Engine.MainWindow.CanClose = true;
 					Engine.MainWindow.Close();
 					break;
@@ -1291,14 +1269,11 @@ namespace Assistant
 
 		internal static void SendToServer( Packet p )
 		{
-			if ( !m_Ready || PacketPlayer.Playing )
+			if ( !m_Ready )
 				return;
 
 			if ( !m_QueueSend )
 			{
-				if ( PacketPlayer.Recording )
-					PacketPlayer.ClientPacket( p );
-
 				ForceSendToServer( p );
 			}
 			else
@@ -1309,7 +1284,7 @@ namespace Assistant
 
 		internal static void SendToServer( PacketReader pr )
 		{
-			if ( !m_Ready || PacketPlayer.Playing )
+			if ( !m_Ready )
 				return;
 
 			SendToServer( MakePacketFrom( pr ) );
@@ -1317,14 +1292,11 @@ namespace Assistant
 
 		internal static void SendToClient( Packet p )
 		{
-			if ( !m_Ready || PacketPlayer.Playing || p.Length <= 0 )
+			if ( !m_Ready || p.Length <= 0 )
 				return;
 
 			if ( !m_QueueRecv )
 			{
-				if ( PacketPlayer.Recording )
-					PacketPlayer.ServerPacket( p );
-
 				ForceSendToClient( p );
 			}
 			else
@@ -1335,7 +1307,7 @@ namespace Assistant
 
 		internal static void SendToClient( PacketReader pr )
 		{
-			if ( !m_Ready || PacketPlayer.Playing )
+			if ( !m_Ready )
 				return;
 
 			SendToClient( MakePacketFrom( pr ) );
@@ -1440,50 +1412,15 @@ namespace Assistant
 				bool blocked = false;
 				switch ( path )
 				{
-						// yes it should be this way
+					// yes it should be this way
 					case PacketPath.ClientToServer:
 					{
-						blocked = !PacketPlayer.ClientPacket( p );
-						if ( !blocked )
-							blocked = PacketHandler.OnClientPacket( buff[0], pr, p );
+						blocked = PacketHandler.OnClientPacket( buff[0], pr, p );
 						break;
 					}
 					case PacketPath.ServerToClient:
 					{
-						if ( !PacketPlayer.Playing )
-						{
-							blocked = PacketHandler.OnServerPacket( buff[0], pr, p );
-						}
-						else
-						{
-							blocked = true;
-							if ( p != null && p.PacketID == 0x1C )
-							{
-								// 0, 1, 2
-								Serial serial = p.ReadUInt32(); // 3, 4, 5, 6
-								ushort body = p.ReadUInt16(); // 7, 8
-								MessageType type = (MessageType)p.ReadByte(); // 9
-								ushort hue = p.ReadUInt16(); // 10, 11
-								ushort font = p.ReadUInt16();
-								string name = p.ReadStringSafe( 30 );
-								string text = p.ReadStringSafe();
-
-								if ( World.Player != null && serial == Serial.Zero && body == 0 && type == MessageType.Regular && hue == 0xFFFF && font == 0xFFFF && name == "SYSTEM" )
-								{
-									p.Seek( 3, SeekOrigin.Begin );
-									p.WriteAsciiFixed( "", (int)p.Length-3 );
-
-									// CHEAT UO.exe 1/2 251--
-									// 1 = 2d
-									// 2 = 3d!
-									
-									DoFeatures( World.Player.Features );
-								}
-							}
-						}
-
-						if ( !blocked )
-							blocked = !PacketPlayer.ServerPacket( p );
+						blocked = PacketHandler.OnServerPacket( buff[0], pr, p );
 						break;
 					}
 				}
@@ -1505,35 +1442,16 @@ namespace Assistant
 						CopyToBuffer( outBuff, buff, len );
 				}
 
-				if ( !PacketPlayer.Playing )
+				while ( queue.Count > 0 )
 				{
-					while ( queue.Count > 0 )
-					{
-						p = (Packet)queue.Dequeue();
-						if ( PacketPlayer.Recording )
-						{
-							switch ( path )
-							{
-								case PacketPath.ClientToServer:
-									PacketPlayer.ClientPacket( p );
-									break;
-								case PacketPath.ServerToClient:
-									PacketPlayer.ServerPacket( p );
-									break;
-							}
-						}
+					p = (Packet)queue.Dequeue();
 
-						byte[] data = p.Compile();
-						fixed ( byte *ptr = data )
-						{
-							CopyToBuffer( outBuff, ptr, data.Length );
-							Packet.Log( (PacketPath)(((int)path)+1), ptr, data.Length );
-						}
+					byte[] data = p.Compile();
+					fixed ( byte *ptr = data )
+					{
+						CopyToBuffer( outBuff, ptr, data.Length );
+						Packet.Log( (PacketPath)(((int)path)+1), ptr, data.Length );
 					}
-				}
-				else
-				{
-					queue.Clear();
 				}
 			}
 			CommMutex.ReleaseMutex();
@@ -1551,94 +1469,6 @@ namespace Assistant
 			m_QueueSend = true;
 			HandleComm( m_InSend, m_OutSend, m_SendQueue, PacketPath.ClientToServer );
 			m_QueueSend = false;
-		}
-
-		public static void ProcessPlaybackData( BinaryReader reader )
-		{
-			byte[] buff = reader.ReadBytes( 3 );
-			reader.BaseStream.Seek( -3, SeekOrigin.Current );
-
-			int maxLen = (int)(reader.BaseStream.Length - reader.BaseStream.Position);
-			int len;
-			fixed ( byte *temp = buff )
-				len = GetPacketLength( temp, maxLen );
-
-			if ( len > maxLen || len <= 0 )
-				return;
-
-			buff = reader.ReadBytes( len );
-
-			// too lazy to make proper...
-			if ( buff[0] == 0x6E && buff.Length >= 14 ) // mobile anim packet
-			{
-				double scalar = PacketPlayer.SpeedScalar();
-
-				if ( scalar != 1 )
-				{
-					if ( buff[13] == 0 )
-						buff[13] = 1;
-					buff[13] = (byte)(buff[13] * scalar);
-				}
-			}
-			else if ( buff[0] == 0xBF && buff.Length >= 5 )
-			{
-				if ( buff[4] == 0x10 && World.Player != null && World.Player.Features <= 3 ) 
-					return;// Object Property List
-				else if ( buff[4] == 0x06 ) 
-					return;// Party Packets
-			}
-			else if ( buff[0] == 0x6C || buff[0] == 0xBA || buff[0] == 0xB2 || buff[0] == 0xFF )
-			{
-				return;
-			}
-
-			bool viewer = PacketHandler.HasServerViewer( buff[0] );
-			bool filter = PacketHandler.HasServerFilter( buff[0] );
-	
-			if ( buff[0] == 0x25 )
-				buff = PacketHandlers.HandleRPVContainerContentUpdate( new Packet( buff, buff.Length, IsDynLength( buff[0] ) ) );
-			else if ( buff[1] == 0x3C )
-				buff = PacketHandlers.HandleRPVContainerContent( new Packet( buff, buff.Length, IsDynLength( buff[0] ) ) );
-
-			Packet p = null;
-			PacketReader pr = null;
-			if ( viewer )
-			{
-				pr = new PacketReader( buff, IsDynLength( buff[0] ) );
-				if ( filter )
-					p = MakePacketFrom( pr );
-			}
-			else if ( filter )
-			{
-				p = new Packet( buff, buff.Length, IsDynLength( buff[0] ) );
-			}
-
-			// prevent razor's default handlers from sending any data,
-			// we just want the handlers to have these packets so we can maintain internal info
-			// about mobs & items (we dont really want razor do do anything, just to know whats going on)
-			m_QueueRecv = true;
-			m_QueueSend = true;
-			PacketHandler.OnServerPacket( buff[0], pr, p );
-			m_QueueRecv = false;
-			m_QueueSend = false;
-
-			m_RecvQueue.Clear();
-			m_SendQueue.Clear();
-
-			CommMutex.WaitOne();
-			fixed ( byte *ptr = buff )
-			{
-				while ( m_OutRecv->Start + m_OutRecv->Length + buff.Length >= SHARED_BUFF_SIZE )
-				{
-					CommMutex.ReleaseMutex();
-					System.Threading.Thread.Sleep( 1 );
-					CommMutex.WaitOne();
-				}
-
-				Packet.Log( PacketPath.PacketVideo, ptr, buff.Length );
-				CopyToBuffer( m_OutRecv, ptr, buff.Length );
-			}
-			CommMutex.ReleaseMutex();
 		}
 	}
 

@@ -106,11 +106,6 @@ namespace Assistant
             //AddProperty("SmartCPU", false);
             AddProperty("LTHilight", (int)0);
 
-            AddProperty("RecFolder",
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "RazorScreenShots"));
-            AddProperty("AviFPS", 15);
-            AddProperty("AviRes", 1);
-
             AddProperty("AutoFriend", false);
 
             AddProperty("AutoOpenDoors", true);
@@ -123,9 +118,6 @@ namespace Assistant
             AddProperty("ForceSizeEnabled", false);
             AddProperty("ForceSizeX", 800);
             AddProperty("ForceSizeY", 600);
-
-            AddProperty("FlipVidH", false);
-            AddProperty("FlipVidV", false);
 
             AddProperty("PotionEquip", false);
             AddProperty("BlockHealPoison", false);
