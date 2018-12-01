@@ -30,7 +30,6 @@ SharedMemory *pShared = NULL;
 
 LARGE_INTEGER PerfFreq, Counter;
 
-DWORD DeathMsgAddr = 0xFFFFFFFF;
 HWND hUOAWnd = NULL;
 
 SIZE DesiredSize = {800,600};
@@ -146,27 +145,6 @@ DLLFUNCTION void SetDataPath( const char *path )
 	WaitForSingleObject( CommMutex, INFINITE );
 	strncpy( pShared->DataPath, path, MAX_PATH);
 	ReleaseMutex( CommMutex );
-}
-
-DLLFUNCTION void SetDeathMsg( const char *msg )
-{
-	WaitForSingleObject( CommMutex, INFINITE );
-	strncpy( pShared->DeathMsg, msg, 16 );
-	ReleaseMutex( CommMutex );
-	PostMessage( hUOWindow, WM_UONETEVENT, DEATH_MSG, 0 );
-}
-
-void PatchDeathMsg()
-{
-	if ( DeathMsgAddr == 0xFFFFFFFF )
-		DeathMsgAddr = MemFinder::Find( "You are dead.", 14 );
-
-	if ( DeathMsgAddr )
-	{
-		WaitForSingleObject( CommMutex, INFINITE );
-		strncpy( (char*)DeathMsgAddr, pShared->DeathMsg, 16 );
-		ReleaseMutex( CommMutex );
-	}
 }
 
 LRESULT CALLBACK UOAWndProc(HWND hWnd, UINT nMsg, WPARAM wParam, LPARAM lParam)
@@ -1699,9 +1677,6 @@ void MessageProc( HWND hWnd, UINT nMsg, WPARAM wParam, LPARAM lParam, MSG *pMsg 
 			break;
 		case NOTO_HUE:
 			SetCustomNotoHue( (int)lParam );
-			break;
-		case DEATH_MSG:
-			PatchDeathMsg();
 			break;
 		case CALIBRATE_POS:
 			WaitForSingleObject( CommMutex, INFINITE );

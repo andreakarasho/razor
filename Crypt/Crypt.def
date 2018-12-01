@@ -11,7 +11,6 @@ EXPORTS
 	TotalOut
 	CaptureScreen
 	SetDataPath
-	SetDeathMsg
 	CalibratePosition
 	IsCalibrated
 	GetPosition
@@ -23,4 +22,3 @@ EXPORTS
 	SetServer
 	HandleNegotiate
 	GetUOVersion
-	
