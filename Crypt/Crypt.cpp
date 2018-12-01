@@ -1589,9 +1589,6 @@ void MessageProc( HWND hWnd, UINT nMsg, WPARAM wParam, LPARAM lParam, MSG *pMsg 
 		case SEND:
 			FlushSendData();
 			break;
-		case STAT_BAR:
-			PatchStatusBar( (BOOL)lParam );
-			break;
 		case NOTO_HUE:
 			SetCustomNotoHue( (int)lParam );
 			break;

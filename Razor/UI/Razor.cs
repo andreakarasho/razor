@@ -153,7 +153,6 @@ namespace Assistant
         private System.Windows.Forms.TextBox warnNum;
         private System.Windows.Forms.CheckBox warnCount;
         private System.Windows.Forms.CheckBox showNotoHue;
-        private System.Windows.Forms.CheckBox preAOSstatbar;
         private System.Windows.Forms.ComboBox clientPrio;
         private System.Windows.Forms.Label label9;
         private LinkLabel linkGithub;
@@ -364,7 +363,6 @@ namespace Assistant
             this.blockOpenCorpsesTwice = new System.Windows.Forms.CheckBox();
             this.lightLevel = new System.Windows.Forms.Label();
             this.lightLevelBar = new System.Windows.Forms.TrackBar();
-            this.preAOSstatbar = new System.Windows.Forms.CheckBox();
             this.setLTHilight = new System.Windows.Forms.Button();
             this.lthilight = new System.Windows.Forms.CheckBox();
             this.filterSnoop = new System.Windows.Forms.CheckBox();
@@ -861,7 +859,6 @@ namespace Assistant
             this.moreOptTab.Controls.Add(this.blockOpenCorpsesTwice);
             this.moreOptTab.Controls.Add(this.lightLevel);
             this.moreOptTab.Controls.Add(this.lightLevelBar);
-            this.moreOptTab.Controls.Add(this.preAOSstatbar);
             this.moreOptTab.Controls.Add(this.setLTHilight);
             this.moreOptTab.Controls.Add(this.lthilight);
             this.moreOptTab.Controls.Add(this.filterSnoop);
@@ -999,15 +996,6 @@ namespace Assistant
             this.lightLevelBar.TickStyle = System.Windows.Forms.TickStyle.None;
             this.lightLevelBar.Value = 15;
             this.lightLevelBar.Scroll += new System.EventHandler(this.lightLevelBar_Scroll);
-            //
-            // preAOSstatbar
-            //
-            this.preAOSstatbar.Location = new System.Drawing.Point(245, 5);
-            this.preAOSstatbar.Name = "preAOSstatbar";
-            this.preAOSstatbar.Size = new System.Drawing.Size(190, 20);
-            this.preAOSstatbar.TabIndex = 57;
-            this.preAOSstatbar.Text = "Use Pre-AOS status window";
-            this.preAOSstatbar.CheckedChanged += new System.EventHandler(this.preAOSstatbar_CheckedChanged);
             //
             // setLTHilight
             //
@@ -3465,7 +3453,6 @@ namespace Assistant
             rememberPwds.Checked = Config.GetBool("RememberPwds");
             filterSnoop.Checked = Config.GetBool("FilterSnoopMsg");
 
-            preAOSstatbar.Checked = Config.GetBool("OldStatBar");
             showtargtext.Checked = Config.GetBool("LastTargTextFlags");
             smartLT.Checked = Config.GetBool("SmartLastTarget");
 
@@ -6721,14 +6708,6 @@ namespace Assistant
         private void filterSnoop_CheckedChanged(object sender, System.EventArgs e)
         {
             Config.SetProperty("FilterSnoopMsg", filterSnoop.Checked);
-        }
-
-        private void preAOSstatbar_CheckedChanged(object sender, System.EventArgs e)
-        {
-            Config.SetProperty("OldStatBar", preAOSstatbar.Checked);
-            ClientCommunication.RequestStatbarPatch(preAOSstatbar.Checked);
-            if (World.Player != null && !m_Initializing)
-                MessageBox.Show(this, "Close and re-open your status bar for the change to take effect.", "Status Window Note", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void smartLT_CheckedChanged(object sender, System.EventArgs e)

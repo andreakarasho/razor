@@ -42,7 +42,6 @@ enum UONET_MESSAGE
 	FOCUS = 10,
 
 	CLOSE = 11,
-	STAT_BAR = 12,
 	NOTO_HUE = 13,
 	DLL_ERROR = 14,
 
@@ -99,27 +98,6 @@ struct SharedMemory
 	char UOVersion[16];
 };
 
-class PatchInfo
-{
-public:
-	PatchInfo( DWORD addr, int len )
-	{
-		Address = addr;
-		Length = len;
-		Data = new char[Length];
-		memcpy( Data, (const void*)Address, Length );
-	}
-
-	~PatchInfo()
-	{
-		delete[] Data;
-	}
-
-	DWORD Address;
-	int Length;
-	char *Data;
-};
-
 #define WM_PROCREADY WM_USER
 #define WM_UONETEVENT WM_USER+1
 #define WM_CUSTOMTITLE WM_USER+2
@@ -160,7 +138,6 @@ void RedrawTitleBar( HWND, bool );
 void CheckTitlebarAttr(HWND);
 void FreeArt();
 void InitThemes();
-bool PatchStatusBar( BOOL preAOS );
 
 //#define PACKET_TBL_STR "Got Logout OK packet!\0\0\0"
 //#define PACKET_TS_LEN 24

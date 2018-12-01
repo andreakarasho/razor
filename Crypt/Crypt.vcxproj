@@ -129,7 +129,6 @@
       <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </DebugInformationFormat>
     </ClCompile>
-    <ClCompile Include="OldStatusBar.cpp" />
     <ClCompile Include="OSIEncryption.cpp" />
     <ClCompile Include="PacketInfo.cpp" />
     <ClCompile Include="stdafx.cpp" />

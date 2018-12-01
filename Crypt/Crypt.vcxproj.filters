@@ -27,9 +27,6 @@
     <ClCompile Include="MemFinder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OldStatusBar.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="OSIEncryption.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

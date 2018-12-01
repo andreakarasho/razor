@@ -54,7 +54,6 @@ namespace Assistant
 			Activate = 9,
 			Focus = 10,
 			Close = 11,
-			StatBar = 12,
 			NotoHue = 13,
 			DLL_Error = 14,
 			SetGameSize = 19,
@@ -289,11 +288,6 @@ namespace Assistant
 			PostMessage( UOWindow, WM_UONETEVENT, (IntPtr)UONetMessage.SetMapHWnd, mapWnd.Handle );
 		}
 
-		public static void RequestStatbarPatch( bool preAOS )
-		{
-			PostMessage( UOWindow, WM_UONETEVENT, (IntPtr)UONetMessage.StatBar, preAOS ? (IntPtr)1 : IntPtr.Zero );
-		}
-
 		public static void SetCustomNotoHue( int hue )
 		{
 			PostMessage( UOWindow, WM_UONETEVENT, (IntPtr)UONetMessage.NotoHue, (IntPtr)hue );
@@ -411,9 +405,6 @@ namespace Assistant
 			{
 				SetDataPath( "" );
 			}
-
-			if ( Config.GetBool( "OldStatBar" ) )
-				ClientCommunication.RequestStatbarPatch( true );
 
 			return true;
 		}
@@ -849,13 +840,6 @@ namespace Assistant
 				case UONetMessage.DLL_Error:
 				{
 					string error = "Unknown";
-					switch ( (UONetMessage)lParam )
-					{
-						case UONetMessage.StatBar:
-							error = "Unable to patch status bar.";
-							break;
-					}
-
 					MessageBox.Show( Engine.ActiveWindow, "An Error has occured : \n" + error, "Error Reported", MessageBoxButtons.OK, MessageBoxIcon.Warning );
 					break;
 				}
