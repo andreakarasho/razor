@@ -91,7 +91,6 @@ struct SharedMemory
 	unsigned int TotalRecv;
 	unsigned short PacketTable[256];
 	char DataPath[256];
-	unsigned char CheatKey[16];
 	bool AllowNegotiate;
 	unsigned char AuthBits[16];
 	bool Reserved0;
@@ -145,7 +144,6 @@ DLLFUNCTION unsigned int TotalOut();
 DLLFUNCTION HBITMAP CaptureScreen(BOOL full, const char *msg);
 DLLFUNCTION void CalibratePosition(uint16_t x, uint16_t y, uint16_t z);
 DLLFUNCTION void BringToFront(HWND hWnd);
-DLLFUNCTION void DoFeatures(int realFeatures);
 DLLFUNCTION bool AllowBit(unsigned long bit);
 DLLFUNCTION BOOL HandleNegotiate(__int64 features);
 DLLFUNCTION void OnAttach(void *params, int paramsLen);

@@ -125,8 +125,6 @@ namespace Assistant
 		[DllImport( "Crypt.dll" )]
 		internal static unsafe extern void BringToFront( IntPtr hWnd );
 		[DllImport( "Crypt.dll" )]
-		internal static unsafe extern void DoFeatures( int features );
-		[DllImport( "Crypt.dll" )]
 		internal static unsafe extern bool AllowBit( uint bit );
         [DllImport( "Crypt.dll" )]
 		private static unsafe extern void SetServer( uint ip, ushort port );

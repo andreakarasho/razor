@@ -1827,8 +1827,6 @@ namespace Assistant
 
                 p.Seek(3, SeekOrigin.Begin);
                 p.WriteAsciiFixed("", (int)p.Length - 3);
-
-                ClientCommunication.DoFeatures(World.Player.Features);
             }
             else
             {

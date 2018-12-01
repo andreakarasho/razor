@@ -13,7 +13,6 @@ EXPORTS
 	SetDataPath
 	CalibratePosition
 	BringToFront
-	DoFeatures
 	AllowBit
 	OnAttach
 	SetServer
