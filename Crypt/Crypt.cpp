@@ -304,29 +304,6 @@ VOID CALLBACK CheckPosition(HWND hwnd, UINT Message, UINT TimerId, DWORD dwTime)
 	}
 }
 
-static bool Negotiated = false;
-static uint8_t AuthBits[16] = {};
-
-DLLFUNCTION bool AllowBit( unsigned long bit )
-{
-	bit &= 0x0000003F; // limited to 64 bits
-	return Negotiated || ( AuthBits[7-(bit/8)] & (1<<(bit%8)) ) == 0;
-}
-
-DLLFUNCTION BOOL HandleNegotiate( __int64 features )
-{
-	if ( pShared )
-	{
-		memcpy( AuthBits, &features, 16 );
-		Negotiated = true;
-		return TRUE;
-	}
-	else
-	{
-		return FALSE;
-	}
-}
-
 SIZE *SizePtr = NULL;
 void OnSetUOWindowSize( int width )
 {

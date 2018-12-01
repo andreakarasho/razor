@@ -11,8 +11,6 @@ EXPORTS
 	TotalOut
 	SetDataPath
 	CalibratePosition
-	AllowBit
 	OnAttach
 	SetServer
-	HandleNegotiate
 	GetUOVersion
