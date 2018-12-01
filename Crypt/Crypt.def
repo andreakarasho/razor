@@ -9,7 +9,6 @@ EXPORTS
 	GetCommMutex
 	TotalIn
 	TotalOut
-	CaptureScreen
 	SetDataPath
 	CalibratePosition
 	BringToFront
