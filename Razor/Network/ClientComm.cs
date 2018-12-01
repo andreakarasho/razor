@@ -59,7 +59,6 @@ namespace Assistant
 			SetGameSize = 19,
 			FindData = 20,
 			SmartCPU = 21,
-			Negotiate = 22,
 			SetMapHWnd = 23
 		}
 
@@ -360,9 +359,6 @@ namespace Assistant
 			InitError error;
 			int flags = 0;
 
-			if ( Config.GetBool( "Negotiate" ) )
-				flags |= 0x04;
-
 			if ( ClientEncrypted )
 				flags |= 0x08;
 
@@ -419,11 +415,6 @@ namespace Assistant
 			m_ServerIP = (uint)addr.Address;
 #pragma warning restore 618
 			m_ServerPort = (ushort)port;
-		}
-
-		public static void SetNegotiate( bool negotiate )
-		{
-			PostMessage( UOWindow, WM_UONETEVENT, (IntPtr)UONetMessage.Negotiate, (IntPtr)(negotiate ? 1 : 0) );
 		}
 
 		public static bool Attach( int pid )

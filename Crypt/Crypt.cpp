@@ -41,7 +41,6 @@ bool FirstSend = true;
 bool LoginServer = false;
 bool Active = true;
 bool SmartCPU = false;
-bool ServerNegotiated = false;
 bool InGame = false;
 bool CopyFailed = true;
 bool Forwarding = false;
@@ -172,8 +171,6 @@ DLLFUNCTION int InstallLibrary(HWND RazorWindow, HWND UOWindow, int flags)
 
 	if ( !CreateSharedMemory() )
 		return NO_SHAREMEM;
-
-	pShared->Reserved0 = false;
 
 	hWndProcRetHook = SetWindowsHookEx( WH_CALLWNDPROCRET, WndProcRetHookFunc, hInstance, UOTId );
 	if ( !hWndProcRetHook )
@@ -307,20 +304,21 @@ VOID CALLBACK CheckPosition(HWND hwnd, UINT Message, UINT TimerId, DWORD dwTime)
 	}
 }
 
+static bool Negotiated = false;
+static uint8_t AuthBits[16] = {};
+
 DLLFUNCTION bool AllowBit( unsigned long bit )
 {
 	bit &= 0x0000003F; // limited to 64 bits
-	return !pShared || ( pShared->AuthBits[7-(bit/8)] & (1<<(bit%8)) ) == 0;
+	return Negotiated || ( AuthBits[7-(bit/8)] & (1<<(bit%8)) ) == 0;
 }
 
 DLLFUNCTION BOOL HandleNegotiate( __int64 features )
 {
-	if ( pShared && pShared->AuthBits && pShared->AllowNegotiate )
+	if ( pShared )
 	{
-		memcpy( pShared->AuthBits, &features, 16 );
-
-		ServerNegotiated = true;
-
+		memcpy( AuthBits, &features, 16 );
+		Negotiated = true;
 		return TRUE;
 	}
 	else
@@ -806,7 +804,7 @@ int RecvData()
 			int blen = Compression::Decompress( (char*)&pShared->InRecv.Buff[pShared->InRecv.Start+pShared->InRecv.Length], buff, ackLen );
 			pShared->InRecv.Length += blen;
 
-			if ( !ServerNegotiated && !InGame && pShared && pShared->AllowNegotiate )
+			if ( !InGame && pShared )
 			{
 				int pos = pShared->InRecv.Start;
 				unsigned char *p_buff = &pShared->InRecv.Buff[pos];
@@ -818,32 +816,7 @@ int RecvData()
 
 					if ( *p_buff == 0xA9 && p_len >= 1+2+1+30+30 && p_len <= left )
 					{
-						// character list
-
-						unsigned char hash[16], test[16];
-
-						memcpy( pShared->AuthBits, p_buff + 1+2+1+30+1, 8 );
-
-						if ( p_buff[3] > 1 )
-							memcpy( hash, p_buff + 1+2+1+30+30+30+1, 16 );
-						else
-							memcpy( hash, p_buff + 1+2+1+30+1+8, 16 );
-
-						for ( int i = 0; i < p_buff[3]; i++ )
-							memset( p_buff + 1+2+1+ 30 + 60*i, 0, 30 );
-
-						if ( memcmp( hash, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", 16 ) != 0 )
-						{
-							OSIEncryption::MD5( p_buff, p_len, test );
-
-							ServerNegotiated = memcmp( hash, test, 16 ) == 0;
-						}
-
-						if ( !ServerNegotiated )
-							memset( pShared->AuthBits, 0, 8 );
-
 						Forwarding = Forwarded = false;
-
 						break;
 					}
 
@@ -1080,28 +1053,11 @@ void FlushSendData()
 
 				if ( *buff == 0x5D && len >= 1+4+30+30 && len <= left )
 				{
-					// play character
-					if ( pShared->AllowNegotiate && ServerNegotiated )
-					{
-						// the first 2 bytes are 0
-						// the next 4 bytes are "flags" which say the user's client type (lbr,t2a,aos,etc)
-						// the rest are ignored, so we can use them for auth
-						memcpy( buff + 1 + 4 + 30 + 2 + 4, pShared->AuthBits, 8 );
-						memcpy( buff + 1 + 4 + 30 + 2 + 4 + 8, RAZOR_ID_KEY, RAZOR_ID_KEY_LEN );
-					}
-
 					InGame = true;
 					break;
 				}
 				else if ( *buff == 0x00 && (*((DWORD*)&buff[1])) == 0xEDEDEDED && len >= 1+4+4+1+30+30 && len <= left )
 				{
-					// char creation
-					if ( pShared->AllowNegotiate && ServerNegotiated )
-					{
-						memcpy( buff + 1 + 4 + 4 + 1 + 30 + 15, pShared->AuthBits, 8 );
-						memcpy( buff + 1 + 4 + 4 + 1 + 30 + 15 + 8, RAZOR_ID_KEY, min( 7, RAZOR_ID_KEY_LEN ) );
-					}
-
 					InGame = true;
 					break;
 				}
@@ -1216,10 +1172,7 @@ int HookCloseSocket( SOCKET sock )
 		pShared->ForceDisconn = false;
 		ReleaseMutex( CommMutex );
 
-		ServerNegotiated = false;
 		InGame = false;
-
-		memset( pShared->AuthBits, 0, 8 );
 
 		PostMessage( hRazorWnd, WM_UONETEVENT, DISCONNECT, 0 );
 	}
@@ -1564,8 +1517,6 @@ void MessageProc( HWND hWnd, UINT nMsg, WPARAM wParam, LPARAM lParam, MSG *pMsg 
 
 		if ( pShared )
 		{
-			pShared->AllowNegotiate = (wParam & 0x04) != 0;
-
 			pShared->UOVersion[0] = 0;
 
 			if ( NativeGetUOVersion != NULL )
@@ -1595,11 +1546,6 @@ void MessageProc( HWND hWnd, UINT nMsg, WPARAM wParam, LPARAM lParam, MSG *pMsg 
 
 		case SMART_CPU:
 			SmartCPU = lParam;
-			break;
-
-		case NEGOTIATE:
-			if ( pShared )
-				pShared->AllowNegotiate = (lParam != 0);
 			break;
 
 		case SET_MAP_HWND:

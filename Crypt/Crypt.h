@@ -50,7 +50,6 @@ enum UONET_MESSAGE
 	FINDDATA = 20,
 
 	SMART_CPU = 21,
-	NEGOTIATE = 22,
 	SET_MAP_HWND = 23
 };
 
@@ -90,9 +89,6 @@ struct SharedMemory
 	unsigned int TotalRecv;
 	unsigned short PacketTable[256];
 	char DataPath[256];
-	bool AllowNegotiate;
-	unsigned char AuthBits[16];
-	bool Reserved0;
 	unsigned int ServerIP;
 	unsigned short ServerPort;
 	char UOVersion[16];

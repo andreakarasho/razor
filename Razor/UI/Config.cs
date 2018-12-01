@@ -124,8 +124,6 @@ namespace Assistant
 
             AddProperty("SmoothWalk", false);
 
-            AddProperty("Negotiate", true);
-
             AddProperty("MapX", 200);
             AddProperty("MapY", 200);
             AddProperty("MapW", 200);

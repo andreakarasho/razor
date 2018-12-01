@@ -190,7 +190,6 @@ namespace Assistant
         private CheckBox logPackets;
         private TextBox statusBox;
         private TextBox features;
-        private CheckBox negotiate;
         private Label aboutSubInfo;
         private ComboBox titleBarParams;
         private Button expandAdvancedMacros;
@@ -557,7 +556,6 @@ namespace Assistant
             this.dispTime = new System.Windows.Forms.CheckBox();
             this.advancedTab = new System.Windows.Forms.TabPage();
             this.disableSmartCPU = new System.Windows.Forms.Button();
-            this.negotiate = new System.Windows.Forms.CheckBox();
             this.backupDataDir = new System.Windows.Forms.Button();
             this.openRazorDataDir = new System.Windows.Forms.Button();
             this.msglvl = new System.Windows.Forms.ComboBox();
@@ -2960,7 +2958,6 @@ namespace Assistant
             //
             this.advancedTab.BackColor = System.Drawing.SystemColors.Control;
             this.advancedTab.Controls.Add(this.disableSmartCPU);
-            this.advancedTab.Controls.Add(this.negotiate);
             this.advancedTab.Controls.Add(this.backupDataDir);
             this.advancedTab.Controls.Add(this.openRazorDataDir);
             this.advancedTab.Controls.Add(this.msglvl);
@@ -2983,15 +2980,6 @@ namespace Assistant
             this.disableSmartCPU.Text = "Disable SmartCPU";
             this.disableSmartCPU.UseVisualStyleBackColor = true;
             this.disableSmartCPU.Click += new System.EventHandler(this.disableSmartCPU_Click);
-            //
-            // negotiate
-            //
-            this.negotiate.Location = new System.Drawing.Point(202, 94);
-            this.negotiate.Name = "negotiate";
-            this.negotiate.Size = new System.Drawing.Size(197, 20);
-            this.negotiate.TabIndex = 72;
-            this.negotiate.Text = "Negotiate features with server";
-            this.negotiate.CheckedChanged += new System.EventHandler(this.negotiate_CheckedChanged);
             //
             // backupDataDir
             //
@@ -3475,8 +3463,6 @@ namespace Assistant
             potionEquip.Checked = Config.GetBool("PotionEquip");
             blockHealPoison.Checked = Config.GetBool("BlockHealPoison");
 
-            negotiate.Checked = Config.GetBool("Negotiate");
-
             logPackets.Checked = Config.GetBool("LogPacketsByDefault");
 
             healthFmt.Enabled = showHealthOH.Checked = Config.GetBool("ShowHealth");
@@ -3715,39 +3701,32 @@ namespace Assistant
 
             if (PacketHandlers.PlayCharTime < DateTime.UtcNow && PacketHandlers.PlayCharTime + TimeSpan.FromSeconds(30) < DateTime.UtcNow)
             {
-                if (Config.GetBool("Negotiate"))
+                bool allAllowed = true;
+                StringBuilder text = new StringBuilder();
+
+                text.Append(Language.GetString(LocString.NegotiateTitle));
+                text.Append("\r\n");
+
+                for (uint i = 0; i < FeatureBit.MaxBit; i++)
                 {
-                    bool allAllowed = true;
-                    StringBuilder text = new StringBuilder();
-
-                    text.Append(Language.GetString(LocString.NegotiateTitle));
-                    text.Append("\r\n");
-
-                    for (uint i = 0; i < FeatureBit.MaxBit; i++)
+                    if (!ClientCommunication.AllowBit(i))
                     {
-                        if (!ClientCommunication.AllowBit(i))
-                        {
-                            allAllowed = false;
+                        allAllowed = false;
 
-                            text.Append(Language.GetString((LocString)(((int)LocString.FeatureDescBase) + i)));
-                            text.Append(' ');
-                            text.Append(Language.GetString(LocString.NotAllowed));
-                            text.Append("\r\n");
-                        }
+                        text.Append(Language.GetString((LocString)(((int)LocString.FeatureDescBase) + i)));
+                        text.Append(' ');
+                        text.Append(Language.GetString(LocString.NotAllowed));
+                        text.Append("\r\n");
                     }
-
-                    if (allAllowed)
-                        text.Append(Language.GetString(LocString.AllFeaturesEnabled));
-
-                    text.Append("\r\n");
-
-                    features.Visible = true;
-                    features.Text = text.ToString();
                 }
-                else
-                {
-                    features.Visible = false;
-                }
+
+                if (allAllowed)
+                    text.Append(Language.GetString(LocString.AllFeaturesEnabled));
+
+                text.Append("\r\n");
+
+                features.Visible = true;
+                features.Text = text.ToString();
             }
         }
 
@@ -6869,15 +6848,6 @@ namespace Assistant
         private void blockHealPoison_CheckedChanged(object sender, System.EventArgs e)
         {
             Config.SetProperty("BlockHealPoison", blockHealPoison.Checked);
-        }
-
-        private void negotiate_CheckedChanged(object sender, System.EventArgs e)
-        {
-            if (!m_Initializing)
-            {
-                Config.SetProperty("Negotiate", negotiate.Checked);
-                ClientCommunication.SetNegotiate(negotiate.Checked);
-            }
         }
 
         private void wikiLink_LinkClicked(object sender, System.Windows.Forms.LinkLabelLinkClickedEventArgs e)
