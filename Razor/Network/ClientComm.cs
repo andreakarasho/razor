@@ -99,15 +99,11 @@ namespace Assistant
 		[DllImport("Crypt.dll")]
 		private static unsafe extern void Shutdown();
 		[DllImport( "Crypt.dll" )]
-		private static unsafe extern void Shutdown( bool closeClient );
-		[DllImport( "Crypt.dll" )]
 		private static unsafe extern IntPtr GetSharedAddress();
 		[DllImport( "Crypt.dll" )]
 		internal static unsafe extern int GetPacketLength( byte *data, int bufLen );//GetPacketLength( [MarshalAs(UnmanagedType.LPArray, SizeParamIndex=1)] byte[] data, int bufLen );
 		[DllImport( "Crypt.dll" )]
 		internal static unsafe extern bool IsDynLength(byte packetId);
-		[DllImport( "Crypt.dll" )]
-		private static unsafe extern void SetCustomTitle( string title );
 		[DllImport( "Crypt.dll" )]
 		private static unsafe extern IntPtr GetCommMutex();
 		[DllImport( "Crypt.dll" )]
@@ -130,14 +126,6 @@ namespace Assistant
 		internal static unsafe extern void DoFeatures( int features );
 		[DllImport( "Crypt.dll" )]
 		internal static unsafe extern bool AllowBit( uint bit );
-		[DllImport( "Crypt.dll" )]
-		internal static unsafe extern void SetAllowDisconn( bool allowed );
-        /*[DllImport( "Crypt.dll" )]
-		private static unsafe extern void TranslateSetup( IntPtr setupFunc );
-		[DllImport( "Crypt.dll" )]
-		private static unsafe extern void TranslateLogin( IntPtr loginFunc, string name, string shard );
-		[DllImport( "Crypt.dll" )]
-		private static unsafe extern void TranslateDo( IntPtr translateFunc, string inText, StringBuilder outText, ref uint outLen );*/
         [DllImport( "Crypt.dll" )]
 		private static unsafe extern void SetServer( uint ip, ushort port );
 		[DllImport( "Crypt.dll" )]
