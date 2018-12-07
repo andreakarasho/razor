@@ -7792,8 +7792,10 @@ namespace Assistant
                 return;
             }
 
+            string[] absTarName = {AbsoluteTargets.AbsoluteTargetList[absoluteTargets.SelectedIndex].TargetVariableName};
+
             m.Actions.Insert(a + 1,
-                new AbsoluteTargetVariableAction(AbsoluteTargets.AbsoluteTargetList[absoluteTargets.SelectedIndex].TargetVariableName));
+                new AbsoluteTargetVariableAction(absTarName));
 
             RedrawActionList(m);
         }
