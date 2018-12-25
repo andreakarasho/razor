@@ -1942,9 +1942,9 @@ namespace Assistant
 
                 if (Config.GetBool("ShowContainerLabels") && ser.IsItem)
                 {
-                     Item item = World.FindItem(ser);
+                    Item item = World.FindItem(ser);
                     
-                    if (!item.IsContainer)
+                    if (item == null || !item.IsContainer)
                         return;
 
                     foreach (ContainerLabels.ContainerLabel label in ContainerLabels.ContainerLabelList)
