@@ -149,7 +149,6 @@ namespace Assistant
 
             AddProperty("ShowTargetSelfLastClearOverhead", true);
             AddProperty("ShowOverheadMessages", false);
-            AddProperty("CaptureMibs", false);
 
             //OverheadFormat
             AddProperty("OverheadFormat", "[{msg}]");
@@ -161,19 +160,13 @@ namespace Assistant
             AddProperty("LogSkillChanges", false);
             AddProperty("StealthOverhead", false);
 
-            // JMap options
-            AddProperty("MapShowPlayerPosition", true);
-            AddProperty("MapShowPartyPositions", true);
-            AddProperty("MapShowPetPositions", true);
-            AddProperty("MapTrackPlayerPosition", true);
-
             AddProperty("MapGuardLines", true);
             AddProperty("MapGridLines", false);
             AddProperty("MapTilt", true);
             AddProperty("DisplayMarkerNames", true);
             AddProperty("DisplayMarkerCoords", true);
 
-            AddProperty("GuardLinesFile", "uorguardlines");
+            AddProperty("GuardLinesFile", "guardlines");
 
             AddProperty("MapSelectedPinList", "uopoints");
 

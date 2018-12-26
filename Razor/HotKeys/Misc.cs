@@ -10,7 +10,6 @@ namespace Assistant.HotKeys
         {
             HotKey.Add(HKCategory.Misc, LocString.Resync, new HotKeyCallback(Resync));
 
-            HotKey.Add(HKCategory.Misc, LocString.JMapHotkey, new HotKeyCallback(ToggleJMapVisibility));
             HotKey.Add(HKCategory.Misc, LocString.GoldPerHotkey, new HotKeyCallback(ToggleGoldPer));
 
             HotKey.Add(HKCategory.Misc, LocString.CaptureBod, new HotKeyCallback(CaptureBod));
@@ -42,31 +41,6 @@ namespace Assistant.HotKeys
             HotKey.Add(HKCategory.Items, HKSubCat.Potions, LocString.DrinkStr, call, (ushort) 3849);
             HotKey.Add(HKCategory.Items, HKSubCat.Potions, LocString.DrinkAg, call, (ushort) 3848);
             HotKey.Add(HKCategory.Items, HKSubCat.Potions, LocString.DrinkApple, new HotKeyCallback(OnDrinkApple));
-        }
-
-        private static void ToggleJMapVisibility()
-        {
-            if (Engine.MainWindow.JMap != null && Engine.MainWindow.JMap.Visible)
-            {
-                World.Player.SendMessage(MsgLevel.Force, "Hiding JMap");
-                Engine.MainWindow.JMap.Close();
-            }
-            else
-            {
-                World.Player.SendMessage(MsgLevel.Force, "Showing JMap");
-
-                if (Engine.MainWindow.JMap == null)
-                {
-                    Engine.MainWindow.JMap = new Assistant.JMap.JimmyMap()
-                    {
-                        mainForm = Engine.MainWindow
-                    };
-                }
-
-                Engine.MainWindow.JMap.Show();
-                Engine.MainWindow.JMap.BringToFront();
-                Engine.MainWindow.JMap.Enabled = true;
-            }
         }
 
         private static void ToggleGoldPer()

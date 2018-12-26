@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Assistant.Core;
 using Assistant.Macros;
-using Assistant.JMap;
 
 namespace Assistant
 {
@@ -2137,9 +2136,6 @@ namespace Assistant
                         if (Engine.MainWindow.MapWindow != null)
                             Engine.MainWindow.MapWindow.UpdateMap();
 
-                        if (Engine.MainWindow.JMap != null)
-                            Engine.MainWindow.JMap.UpdateMap();
-
                         break;
                     }
                 case 0xFE: // Begin Handshake/Features Negotiation
@@ -2226,8 +2222,6 @@ namespace Assistant
                                 string extraText = line[3];
 
                                 string markerOwner = name;
-
-                                PublicMarkers.ReceivePublicMarker(new System.Drawing.PointF(x, y), name, true, "PublicLocations", displayText, extraText);
                             }
                         }
                         break;
@@ -2270,9 +2264,6 @@ namespace Assistant
 
             if (Engine.MainWindow.MapWindow != null)
                 Engine.MainWindow.MapWindow.UpdateMap();
-
-            if (Engine.MainWindow.JMap != null)
-                Engine.MainWindow.JMap.UpdateMap();
         }
 
         private static void PartyAutoDecline()
@@ -2560,20 +2551,6 @@ namespace Assistant
                 if (TryParseGump(layout, out string[] gumpPieces))
                 {
                     gumpStrings.AddRange(ParseGumpString(gumpPieces, stringlistparse));
-                }
-
-                if (Config.GetBool("CaptureMibs") && MessageInBottleCapture.IsMibGump(layout))
-                {
-                    switch (gumpStrings.Count)
-                    {
-                        //Classic, non-custom MIB
-                        case 3:
-                            MessageInBottleCapture.CaptureMibCoordinates(gumpStrings[2], false);
-                            break;
-                        case 4:
-                            MessageInBottleCapture.CaptureMibCoordinates(gumpStrings[2], true);
-                            break;
-                    }
                 }
 
                 World.Player.CurrentGumpStrings.AddRange(gumpStrings);

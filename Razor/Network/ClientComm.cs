@@ -673,8 +673,6 @@ namespace Assistant
 			Engine.MainWindow.OnLogout();
 			if( Engine.MainWindow.MapWindow != null )
 				Engine.MainWindow.MapWindow.Close();
-            if (Engine.MainWindow.JMap != null)
-                Engine.MainWindow.JMap.Close();
             PacketHandlers.Party.Clear();
 			PacketHandlers.IgnoreGumps.Clear();
 			Config.Save();
@@ -811,21 +809,6 @@ namespace Assistant
 							razor.MapWindow.SendToBack();
 						}
 					}
-
-				    // always use smartness for the jmap window
-				    if (razor.JMap != null && razor.JMap.Visible)
-				    {
-				        if (lParam != 0 && !razor.JMap.TopMost)
-				        {
-				            razor.JMap.TopMost = true;
-				            SetForegroundWindow(UOWindow);
-				        }
-				        else if (lParam == 0 && razor.JMap.TopMost)
-				        {
-				            razor.JMap.TopMost = false;
-				            razor.JMap.SendToBack();
-				        }
-				    }
 
                     break;
 
