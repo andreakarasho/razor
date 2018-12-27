@@ -136,13 +136,6 @@ DLLFUNCTION void *GetSharedAddress()
 	return pShared;
 }
 
-DLLFUNCTION void SetDataPath( const char *path )
-{
-	WaitForSingleObject( CommMutex, INFINITE );
-	strncpy( pShared->DataPath, path, MAX_PATH);
-	ReleaseMutex( CommMutex );
-}
-
 LRESULT CALLBACK UOAWndProc(HWND hWnd, UINT nMsg, WPARAM wParam, LPARAM lParam)
 {
 	if (nMsg >= WM_USER + 200 && nMsg < WM_USER + 315)

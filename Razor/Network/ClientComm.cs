@@ -114,8 +114,6 @@ namespace Assistant
 		[DllImport( "Crypt.dll" )]
 		internal static unsafe extern uint TotalOut();
 		[DllImport( "Crypt.dll" )]
-		internal static unsafe extern void SetDataPath(string path);
-		[DllImport( "Crypt.dll" )]
 		internal static unsafe extern void CalibratePosition( uint x, uint y, uint z, byte dir );
         [DllImport( "Crypt.dll" )]
 		private static unsafe extern void SetServer( uint ip, ushort port );
@@ -399,18 +397,15 @@ namespace Assistant
                 if (path != null && path != string.Empty)
                 {
                     InitTitleBar(Path.GetDirectoryName(path));
-                    SetDataPath(Path.GetDirectoryName(path));
                 }
                 else
                 {
                     InitTitleBar(Ultima.Files.Directory);
-                    SetDataPath(Path.GetDirectoryName(Ultima.Files.Directory));
                 }
 			}
 			catch
 			{
                 InitTitleBar("");
-				SetDataPath( "" );
 			}
 
 			return true;
@@ -696,15 +691,6 @@ namespace Assistant
 							Engine.MainWindow.Close();
 							break;
 						}
-					}
-
-					try
-					{
-						SetDataPath(Ultima.Files.Directory);
-					}
-					catch
-					{
-						SetDataPath( "" );
 					}
 
 					m_Ready = true;

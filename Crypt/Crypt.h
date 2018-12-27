@@ -87,7 +87,6 @@ struct SharedMemory
 	unsigned int TotalSend;
 	unsigned int TotalRecv;
 	unsigned short PacketTable[256];
-	char DataPath[256];
 	unsigned int ServerIP;
 	unsigned short ServerPort;
 	char UOVersion[16];

@@ -9,7 +9,6 @@ EXPORTS
 	GetCommMutex
 	TotalIn
 	TotalOut
-	SetDataPath
 	CalibratePosition
 	OnAttach
 	SetServer
