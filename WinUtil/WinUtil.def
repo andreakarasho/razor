@@ -5,3 +5,6 @@ EXPORTS
 	BringToFront
 	AllowBit
 	HandleNegotiate
+	InitTitleBar
+	DrawTitleBar
+	FreeTitleBar

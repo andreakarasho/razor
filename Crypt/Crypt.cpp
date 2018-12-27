@@ -686,8 +686,6 @@ void CloseSharedMemory()
 	hWndProcRetHook = NULL;
 	hGetMsgHook = NULL;
 
-	FreeArt();
-
 	delete ClientCrypt;
 	delete ClientLogin;
 	delete ServerCrypt;
@@ -1481,8 +1479,6 @@ void MessageProc( HWND hWnd, UINT nMsg, WPARAM wParam, LPARAM lParam, MSG *pMsg 
 		ClientEncrypted = (wParam & 0x08) != 0;
 		ServerEncrypted = (wParam & 0x10) != 0;
 
-		InitThemes();
-
 		if ( !pShared )
 			PostMessage( hRazorWnd, WM_UONETEVENT, NOT_READY, NO_SHAREMEM );
 		else if ( CopyFailed )
@@ -1599,9 +1595,6 @@ void MessageProc( HWND hWnd, UINT nMsg, WPARAM wParam, LPARAM lParam, MSG *pMsg 
 	case WM_NCPAINT:
 	case WM_GETICON:
 	case WM_SETTEXT:
-	case WM_CUSTOMTITLE:
-		CheckTitlebarAttr(hWnd);
-		RedrawTitleBar( hWnd, Active );
 		break;
 	}
 }

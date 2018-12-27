@@ -71,7 +71,6 @@ namespace Assistant
 
 		public const int WM_COPYDATA = 0x4A;
 		public const int WM_UONETEVENT = WM_USER+1;
-		private const int WM_CUSTOMTITLE = WM_USER+2;
 
 		private enum InitError
 		{
@@ -131,6 +130,12 @@ namespace Assistant
 		internal static unsafe extern int HandleNegotiate(ulong word);
 		[DllImport("WinUtil.dll")]
 		internal static unsafe extern bool AllowBit(ulong bit);
+        [DllImport("WinUtil.dll")]
+        internal static unsafe extern void InitTitleBar(string path);
+        [DllImport("WinUtil.dll")]
+        internal static unsafe extern void DrawTitleBar(IntPtr handle, string path);
+        [DllImport("WinUtil.dll")]
+        internal static unsafe extern void FreeTitleBar();
 
 		public enum Loader_Error
 		{
@@ -254,7 +259,6 @@ namespace Assistant
 		private static Buffer *m_OutRecv;
 		private static Buffer *m_InSend;
 		private static Buffer *m_OutSend;
-		private static byte *m_TitleStr;
 		private static Mutex CommMutex;
 		private static Process ClientProc;
 
@@ -381,7 +385,6 @@ namespace Assistant
 			m_OutRecv = (Buffer*)(baseAddr+sizeof(Buffer));
 			m_InSend = (Buffer*)(baseAddr+sizeof(Buffer)*2);
 			m_OutSend = (Buffer*)(baseAddr+sizeof(Buffer)*3);
-			m_TitleStr = (byte*)(baseAddr+sizeof(Buffer)*4);
 
 			SetServer( m_ServerIP, m_ServerPort );
 
@@ -393,13 +396,20 @@ namespace Assistant
 			try
 			{
 				string path = Ultima.Files.GetFilePath("art.mul");
-				if ( path != null && path != string.Empty )
-					SetDataPath( Path.GetDirectoryName( path ) );
-				else
-					SetDataPath(Path.GetDirectoryName(Ultima.Files.Directory));
+                if (path != null && path != string.Empty)
+                {
+                    InitTitleBar(Path.GetDirectoryName(path));
+                    SetDataPath(Path.GetDirectoryName(path));
+                }
+                else
+                {
+                    InitTitleBar(Ultima.Files.Directory);
+                    SetDataPath(Path.GetDirectoryName(Ultima.Files.Directory));
+                }
 			}
 			catch
 			{
+                InitTitleBar("");
 				SetDataPath( "" );
 			}
 
@@ -426,6 +436,7 @@ namespace Assistant
 
 		public static void Close()
 		{
+            FreeTitleBar();
 			Shutdown();
 			if ( ClientProc != null && !ClientProc.HasExited )
 				ClientProc.CloseMainWindow();
@@ -616,22 +627,9 @@ namespace Assistant
 				return;
 
 			m_LastStr = str;
-			byte[] copy = System.Text.Encoding.ASCII.GetBytes( str );
-			int clen = copy.Length;
-			if ( clen >= 512 )
-				clen = 511;
 
-			CommMutex.WaitOne();
-			if ( clen > 0 )
-			{
-				fixed( byte *array = copy )
-					memcpy( m_TitleStr, array, clen );
-			}
-			*(m_TitleStr+clen) = 0;
-			CommMutex.ReleaseMutex();
-
-			PostMessage( UOWindow, WM_CUSTOMTITLE, IntPtr.Zero, IntPtr.Zero );
-		}
+            DrawTitleBar(UOWindow, str);
+        }
 
 		private static void FatalInit( InitError error )
 		{

@@ -18,9 +18,6 @@
     <ClCompile Include="Crypt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="gfx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="LoginEncryption.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -42,18 +39,12 @@
     <ClCompile Include="uo_huffman.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="UOArt.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Crypt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="debug.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="gfx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="LoginEncryption.h">
@@ -84,9 +75,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="uo_huffman.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="UOArt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

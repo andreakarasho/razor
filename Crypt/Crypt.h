@@ -83,7 +83,6 @@ struct SharedMemory
 	Buffer InSend;
 	Buffer OutSend;
 
-	char TitleBar[1024];
 	bool ForceDisconn;
 	unsigned int TotalSend;
 	unsigned int TotalRecv;
@@ -96,7 +95,6 @@ struct SharedMemory
 
 #define WM_PROCREADY WM_USER
 #define WM_UONETEVENT WM_USER+1
-#define WM_CUSTOMTITLE WM_USER+2
 
 #ifndef WM_XBUTTONDOWN
 #define WM_XBUTTONDOWN                  0x020B
@@ -125,10 +123,6 @@ void Log( const char *format, ... );
 void MemoryPatch( unsigned long, unsigned long );
 void MemoryPatch( unsigned long, int, int );
 void MemoryPatch( unsigned long, const void *, int );
-void RedrawTitleBar( HWND, bool );
-void CheckTitlebarAttr(HWND);
-void FreeArt();
-void InitThemes();
 
 //#define PACKET_TBL_STR "Got Logout OK packet!\0\0\0"
 //#define PACKET_TS_LEN 24

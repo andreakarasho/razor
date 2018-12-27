@@ -113,7 +113,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Crypt.cpp" />
-    <ClCompile Include="gfx.cpp" />
     <ClCompile Include="LoginEncryption.cpp" />
     <ClCompile Include="MemFinder.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Full</Optimization>
@@ -137,12 +136,10 @@
       </PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="uo_huffman.cpp" />
-    <ClCompile Include="UOArt.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Crypt.h" />
     <ClInclude Include="debug.h" />
-    <ClInclude Include="gfx.h" />
     <ClInclude Include="LoginEncryption.h" />
     <ClInclude Include="MemFinder.h" />
     <ClInclude Include="OSIEncryption.h" />
@@ -153,7 +150,6 @@
     <ClInclude Include="table.h" />
     <ClInclude Include="twofish.h" />
     <ClInclude Include="uo_huffman.h" />
-    <ClInclude Include="UOArt.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Crypt.def" />
