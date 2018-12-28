@@ -18,7 +18,6 @@ namespace Assistant
     public class WelcomeForm : System.Windows.Forms.Form
     {
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.CheckBox patchEncy;
         private System.Windows.Forms.Button okay;
         private System.Windows.Forms.Button quit;
         private System.Windows.Forms.Label label3;
@@ -41,10 +40,8 @@ namespace Assistant
 
         public string ClientPath { get { return m_ClientPath; } }
         public ClientLaunch Client { get { return m_Launch; } }
-        public bool PatchEncryption { get { return m_PatchEncy; } }
         public string DataDirectory { get { if (m_DataDir == "" || m_DataDir == "(Auto Detect)") m_DataDir = null; return m_DataDir; } }
 
-        private bool m_PatchEncy = false;
         private string m_ClientPath = "";
         private ClientLaunch m_Launch = ClientLaunch.Custom;
         private TextBox uoClient;
@@ -79,239 +76,228 @@ namespace Assistant
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(WelcomeForm));
-            this.label1 = new System.Windows.Forms.Label();
-            this.browse = new System.Windows.Forms.Button();
-            this.patchEncy = new System.Windows.Forms.CheckBox();
-            this.okay = new System.Windows.Forms.Button();
-            this.quit = new System.Windows.Forms.Button();
-            this.label3 = new System.Windows.Forms.Label();
-            this.showAtStart = new System.Windows.Forms.CheckBox();
-            this.serverList = new System.Windows.Forms.ComboBox();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.uoClient = new System.Windows.Forms.TextBox();
-            this.makeDef = new System.Windows.Forms.Button();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.serverInfo = new System.Windows.Forms.Label();
-            this.openFile = new System.Windows.Forms.OpenFileDialog();
-            this.label5 = new System.Windows.Forms.Label();
-            this.langSel = new System.Windows.Forms.ComboBox();
-            this.dataBrowse = new System.Windows.Forms.Button();
-            this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.dataDir = new System.Windows.Forms.TextBox();
-            this.groupBox1.SuspendLayout();
-            this.groupBox2.SuspendLayout();
-            this.groupBox3.SuspendLayout();
-            this.SuspendLayout();
-            // 
-            // label1
-            // 
-            this.label1.Location = new System.Drawing.Point(8, 20);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(79, 19);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "Load Client:";
-            // 
-            // browse
-            // 
-            this.browse.Location = new System.Drawing.Point(289, 16);
-            this.browse.Name = "browse";
-            this.browse.Size = new System.Drawing.Size(64, 23);
-            this.browse.TabIndex = 2;
-            this.browse.Text = "Browse...";
-            this.browse.Click += new System.EventHandler(this.browse_Click);
-            // 
-            // patchEncy
-            // 
-            this.patchEncy.Location = new System.Drawing.Point(8, 45);
-            this.patchEncy.Name = "patchEncy";
-            this.patchEncy.Size = new System.Drawing.Size(171, 20);
-            this.patchEncy.TabIndex = 3;
-            this.patchEncy.Text = "Patch client encryption";
-            this.patchEncy.CheckedChanged += new System.EventHandler(this.patchEncy_CheckedChanged);
-            // 
-            // okay
-            // 
-            this.okay.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.okay.Location = new System.Drawing.Point(9, 257);
-            this.okay.Name = "okay";
-            this.okay.Size = new System.Drawing.Size(72, 34);
-            this.okay.TabIndex = 6;
-            this.okay.Text = "&Launch";
-            this.okay.Click += new System.EventHandler(this.okay_Click);
-            // 
-            // quit
-            // 
-            this.quit.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.quit.Location = new System.Drawing.Point(89, 257);
-            this.quit.Name = "quit";
-            this.quit.Size = new System.Drawing.Size(72, 34);
-            this.quit.TabIndex = 7;
-            this.quit.Text = "&Quit";
-            this.quit.Click += new System.EventHandler(this.quit_Click);
-            // 
-            // label3
-            // 
-            this.label3.Location = new System.Drawing.Point(8, 20);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(44, 16);
-            this.label3.TabIndex = 9;
-            this.label3.Text = "Server:";
-            // 
-            // showAtStart
-            // 
-            this.showAtStart.Location = new System.Drawing.Point(187, 265);
-            this.showAtStart.Name = "showAtStart";
-            this.showAtStart.Size = new System.Drawing.Size(176, 20);
-            this.showAtStart.TabIndex = 10;
-            this.showAtStart.Text = "Show this when Razor starts";
-            this.showAtStart.CheckedChanged += new System.EventHandler(this.showAtStart_CheckedChanged);
-            // 
-            // serverList
-            // 
-            this.serverList.Location = new System.Drawing.Point(52, 16);
-            this.serverList.Name = "serverList";
-            this.serverList.Size = new System.Drawing.Size(284, 23);
-            this.serverList.TabIndex = 11;
-            this.serverList.SelectedIndexChanged += new System.EventHandler(this.serverList_SelectedIndexChanged);
-            // 
-            // groupBox1
-            // 
-            this.groupBox1.Controls.Add(this.uoClient);
-            this.groupBox1.Controls.Add(this.makeDef);
-            this.groupBox1.Controls.Add(this.browse);
-            this.groupBox1.Controls.Add(this.label1);
-            this.groupBox1.Controls.Add(this.patchEncy);
-            this.groupBox1.Location = new System.Drawing.Point(4, 4);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(359, 97);
-            this.groupBox1.TabIndex = 14;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Client Options";
-            // 
-            // uoClient
-            // 
-            this.uoClient.Location = new System.Drawing.Point(81, 16);
-            this.uoClient.Name = "uoClient";
-            this.uoClient.ReadOnly = true;
-            this.uoClient.Size = new System.Drawing.Size(202, 23);
-            this.uoClient.TabIndex = 6;
-            // 
-            // makeDef
-            // 
-            this.makeDef.Location = new System.Drawing.Point(169, 56);
-            this.makeDef.Name = "makeDef";
-            this.makeDef.Size = new System.Drawing.Size(184, 35);
-            this.makeDef.TabIndex = 4;
-            this.makeDef.Text = "Make These Settings Default";
-            this.makeDef.Click += new System.EventHandler(this.makeDef_Click);
-            // 
-            // groupBox2
-            // 
-            this.groupBox2.Controls.Add(this.serverInfo);
-            this.groupBox2.Controls.Add(this.label3);
-            this.groupBox2.Controls.Add(this.serverList);
-            this.groupBox2.Location = new System.Drawing.Point(4, 161);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(344, 66);
-            this.groupBox2.TabIndex = 15;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Server";
-            // 
-            // serverInfo
-            // 
-            this.serverInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.serverInfo.Font = new System.Drawing.Font("Segoe UI Semilight", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.serverInfo.ForeColor = System.Drawing.Color.MidnightBlue;
-            this.serverInfo.Location = new System.Drawing.Point(52, 42);
-            this.serverInfo.Name = "serverInfo";
-            this.serverInfo.Size = new System.Drawing.Size(284, 21);
-            this.serverInfo.TabIndex = 12;
-            this.serverInfo.Text = "login.server.com,2593";
-            this.serverInfo.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // openFile
-            // 
-            this.openFile.DefaultExt = "exe";
-            this.openFile.FileName = "client.exe";
-            this.openFile.Filter = "Executable Files|*.exe";
-            this.openFile.Title = "Select Client";
-            // 
-            // label5
-            // 
-            this.label5.Location = new System.Drawing.Point(210, 236);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(90, 20);
-            this.label5.TabIndex = 17;
-            this.label5.Text = "Language:";
-            // 
-            // langSel
-            // 
-            this.langSel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.langSel.Location = new System.Drawing.Point(276, 233);
-            this.langSel.Name = "langSel";
-            this.langSel.Size = new System.Drawing.Size(72, 23);
-            this.langSel.TabIndex = 18;
-            this.langSel.SelectedIndexChanged += new System.EventHandler(this.langSel_SelectedIndexChanged);
-            // 
-            // dataBrowse
-            // 
-            this.dataBrowse.Location = new System.Drawing.Point(272, 18);
-            this.dataBrowse.Name = "dataBrowse";
-            this.dataBrowse.Size = new System.Drawing.Size(64, 23);
-            this.dataBrowse.TabIndex = 21;
-            this.dataBrowse.Text = "Browse...";
-            this.dataBrowse.Click += new System.EventHandler(this.dataBrowse_Click);
-            // 
-            // groupBox3
-            // 
-            this.groupBox3.Controls.Add(this.dataDir);
-            this.groupBox3.Controls.Add(this.dataBrowse);
-            this.groupBox3.Location = new System.Drawing.Point(4, 107);
-            this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(344, 48);
-            this.groupBox3.TabIndex = 23;
-            this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "UO Data Directory";
-            // 
-            // dataDir
-            // 
-            this.dataDir.Location = new System.Drawing.Point(7, 19);
-            this.dataDir.Name = "dataDir";
-            this.dataDir.ReadOnly = true;
-            this.dataDir.Size = new System.Drawing.Size(261, 23);
-            this.dataDir.TabIndex = 22;
-            // 
-            // WelcomeForm
-            // 
-            this.AcceptButton = this.okay;
-            this.AutoScaleBaseSize = new System.Drawing.Size(6, 16);
-            this.CancelButton = this.quit;
-            this.ClientSize = new System.Drawing.Size(367, 300);
-            this.Controls.Add(this.groupBox3);
-            this.Controls.Add(this.langSel);
-            this.Controls.Add(this.label5);
-            this.Controls.Add(this.groupBox2);
-            this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.showAtStart);
-            this.Controls.Add(this.quit);
-            this.Controls.Add(this.okay);
-            this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.Name = "WelcomeForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Welcome to Razor: UOR Community Edition!";
-            this.Closing += new System.ComponentModel.CancelEventHandler(this.WelcomeForm_Closing);
-            this.Load += new System.EventHandler(this.WelcomeForm_Load);
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox3.ResumeLayout(false);
-            this.groupBox3.PerformLayout();
-            this.ResumeLayout(false);
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(WelcomeForm));
+			this.label1 = new System.Windows.Forms.Label();
+			this.browse = new System.Windows.Forms.Button();
+			this.okay = new System.Windows.Forms.Button();
+			this.quit = new System.Windows.Forms.Button();
+			this.label3 = new System.Windows.Forms.Label();
+			this.showAtStart = new System.Windows.Forms.CheckBox();
+			this.serverList = new System.Windows.Forms.ComboBox();
+			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.uoClient = new System.Windows.Forms.TextBox();
+			this.makeDef = new System.Windows.Forms.Button();
+			this.groupBox2 = new System.Windows.Forms.GroupBox();
+			this.serverInfo = new System.Windows.Forms.Label();
+			this.openFile = new System.Windows.Forms.OpenFileDialog();
+			this.label5 = new System.Windows.Forms.Label();
+			this.langSel = new System.Windows.Forms.ComboBox();
+			this.dataBrowse = new System.Windows.Forms.Button();
+			this.groupBox3 = new System.Windows.Forms.GroupBox();
+			this.dataDir = new System.Windows.Forms.TextBox();
+			this.groupBox1.SuspendLayout();
+			this.groupBox2.SuspendLayout();
+			this.groupBox3.SuspendLayout();
+			this.SuspendLayout();
+			// 
+			// label1
+			// 
+			this.label1.Location = new System.Drawing.Point(8, 20);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(79, 19);
+			this.label1.TabIndex = 0;
+			this.label1.Text = "Load Client:";
+			// 
+			// browse
+			// 
+			this.browse.Location = new System.Drawing.Point(289, 16);
+			this.browse.Name = "browse";
+			this.browse.Size = new System.Drawing.Size(64, 23);
+			this.browse.TabIndex = 2;
+			this.browse.Text = "Browse...";
+			this.browse.Click += new System.EventHandler(this.browse_Click);
+			// 
+			// okay
+			// 
+			this.okay.DialogResult = System.Windows.Forms.DialogResult.OK;
+			this.okay.Location = new System.Drawing.Point(9, 257);
+			this.okay.Name = "okay";
+			this.okay.Size = new System.Drawing.Size(72, 34);
+			this.okay.TabIndex = 6;
+			this.okay.Text = "&Launch";
+			this.okay.Click += new System.EventHandler(this.okay_Click);
+			// 
+			// quit
+			// 
+			this.quit.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+			this.quit.Location = new System.Drawing.Point(89, 257);
+			this.quit.Name = "quit";
+			this.quit.Size = new System.Drawing.Size(72, 34);
+			this.quit.TabIndex = 7;
+			this.quit.Text = "&Quit";
+			this.quit.Click += new System.EventHandler(this.quit_Click);
+			// 
+			// label3
+			// 
+			this.label3.Location = new System.Drawing.Point(8, 20);
+			this.label3.Name = "label3";
+			this.label3.Size = new System.Drawing.Size(44, 16);
+			this.label3.TabIndex = 9;
+			this.label3.Text = "Server:";
+			// 
+			// showAtStart
+			// 
+			this.showAtStart.Location = new System.Drawing.Point(187, 265);
+			this.showAtStart.Name = "showAtStart";
+			this.showAtStart.Size = new System.Drawing.Size(176, 20);
+			this.showAtStart.TabIndex = 10;
+			this.showAtStart.Text = "Show this when Razor starts";
+			this.showAtStart.CheckedChanged += new System.EventHandler(this.showAtStart_CheckedChanged);
+			// 
+			// serverList
+			// 
+			this.serverList.Location = new System.Drawing.Point(52, 16);
+			this.serverList.Name = "serverList";
+			this.serverList.Size = new System.Drawing.Size(284, 23);
+			this.serverList.TabIndex = 11;
+			this.serverList.SelectedIndexChanged += new System.EventHandler(this.serverList_SelectedIndexChanged);
+			// 
+			// groupBox1
+			// 
+			this.groupBox1.Controls.Add(this.uoClient);
+			this.groupBox1.Controls.Add(this.makeDef);
+			this.groupBox1.Controls.Add(this.browse);
+			this.groupBox1.Controls.Add(this.label1);
+			this.groupBox1.Location = new System.Drawing.Point(4, 4);
+			this.groupBox1.Name = "groupBox1";
+			this.groupBox1.Size = new System.Drawing.Size(359, 97);
+			this.groupBox1.TabIndex = 14;
+			this.groupBox1.TabStop = false;
+			this.groupBox1.Text = "Client Options";
+			// 
+			// uoClient
+			// 
+			this.uoClient.Location = new System.Drawing.Point(81, 16);
+			this.uoClient.Name = "uoClient";
+			this.uoClient.ReadOnly = true;
+			this.uoClient.Size = new System.Drawing.Size(202, 23);
+			this.uoClient.TabIndex = 6;
+			// 
+			// makeDef
+			// 
+			this.makeDef.Location = new System.Drawing.Point(169, 56);
+			this.makeDef.Name = "makeDef";
+			this.makeDef.Size = new System.Drawing.Size(184, 35);
+			this.makeDef.TabIndex = 4;
+			this.makeDef.Text = "Make These Settings Default";
+			this.makeDef.Click += new System.EventHandler(this.makeDef_Click);
+			// 
+			// groupBox2
+			// 
+			this.groupBox2.Controls.Add(this.serverInfo);
+			this.groupBox2.Controls.Add(this.label3);
+			this.groupBox2.Controls.Add(this.serverList);
+			this.groupBox2.Location = new System.Drawing.Point(4, 161);
+			this.groupBox2.Name = "groupBox2";
+			this.groupBox2.Size = new System.Drawing.Size(344, 66);
+			this.groupBox2.TabIndex = 15;
+			this.groupBox2.TabStop = false;
+			this.groupBox2.Text = "Server";
+			// 
+			// serverInfo
+			// 
+			this.serverInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.serverInfo.Font = new System.Drawing.Font("Segoe UI Semilight", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.serverInfo.ForeColor = System.Drawing.Color.MidnightBlue;
+			this.serverInfo.Location = new System.Drawing.Point(52, 42);
+			this.serverInfo.Name = "serverInfo";
+			this.serverInfo.Size = new System.Drawing.Size(284, 21);
+			this.serverInfo.TabIndex = 12;
+			this.serverInfo.Text = "login.server.com,2593";
+			this.serverInfo.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+			// 
+			// openFile
+			// 
+			this.openFile.DefaultExt = "exe";
+			this.openFile.FileName = "client.exe";
+			this.openFile.Filter = "Executable Files|*.exe";
+			this.openFile.Title = "Select Client";
+			// 
+			// label5
+			// 
+			this.label5.Location = new System.Drawing.Point(210, 236);
+			this.label5.Name = "label5";
+			this.label5.Size = new System.Drawing.Size(90, 20);
+			this.label5.TabIndex = 17;
+			this.label5.Text = "Language:";
+			// 
+			// langSel
+			// 
+			this.langSel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.langSel.Location = new System.Drawing.Point(276, 233);
+			this.langSel.Name = "langSel";
+			this.langSel.Size = new System.Drawing.Size(72, 23);
+			this.langSel.TabIndex = 18;
+			this.langSel.SelectedIndexChanged += new System.EventHandler(this.langSel_SelectedIndexChanged);
+			// 
+			// dataBrowse
+			// 
+			this.dataBrowse.Location = new System.Drawing.Point(272, 18);
+			this.dataBrowse.Name = "dataBrowse";
+			this.dataBrowse.Size = new System.Drawing.Size(64, 23);
+			this.dataBrowse.TabIndex = 21;
+			this.dataBrowse.Text = "Browse...";
+			this.dataBrowse.Click += new System.EventHandler(this.dataBrowse_Click);
+			// 
+			// groupBox3
+			// 
+			this.groupBox3.Controls.Add(this.dataDir);
+			this.groupBox3.Controls.Add(this.dataBrowse);
+			this.groupBox3.Location = new System.Drawing.Point(4, 107);
+			this.groupBox3.Name = "groupBox3";
+			this.groupBox3.Size = new System.Drawing.Size(344, 48);
+			this.groupBox3.TabIndex = 23;
+			this.groupBox3.TabStop = false;
+			this.groupBox3.Text = "UO Data Directory";
+			// 
+			// dataDir
+			// 
+			this.dataDir.Location = new System.Drawing.Point(7, 19);
+			this.dataDir.Name = "dataDir";
+			this.dataDir.ReadOnly = true;
+			this.dataDir.Size = new System.Drawing.Size(261, 23);
+			this.dataDir.TabIndex = 22;
+			// 
+			// WelcomeForm
+			// 
+			this.AcceptButton = this.okay;
+			this.AutoScaleBaseSize = new System.Drawing.Size(6, 16);
+			this.CancelButton = this.quit;
+			this.ClientSize = new System.Drawing.Size(367, 300);
+			this.Controls.Add(this.groupBox3);
+			this.Controls.Add(this.langSel);
+			this.Controls.Add(this.label5);
+			this.Controls.Add(this.groupBox2);
+			this.Controls.Add(this.groupBox1);
+			this.Controls.Add(this.showAtStart);
+			this.Controls.Add(this.quit);
+			this.Controls.Add(this.okay);
+			this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+			this.MaximizeBox = false;
+			this.MinimizeBox = false;
+			this.Name = "WelcomeForm";
+			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+			this.Text = "Welcome to Razor: UOR Community Edition!";
+			this.Closing += new System.ComponentModel.CancelEventHandler(this.WelcomeForm_Closing);
+			this.Load += new System.EventHandler(this.WelcomeForm_Load);
+			this.groupBox1.ResumeLayout(false);
+			this.groupBox1.PerformLayout();
+			this.groupBox2.ResumeLayout(false);
+			this.groupBox3.ResumeLayout(false);
+			this.groupBox3.PerformLayout();
+			this.ResumeLayout(false);
 
         }
         #endregion
@@ -484,8 +470,6 @@ namespace Assistant
 
             IsValidClientAndDataDir();
 
-            patchEncy.Checked = Config.GetAppSetting<int>("PatchEncy") != 0;
-
             LoginCFG_SE lse = new LoginCFG_SE();
             Custom_SE cse;
 
@@ -581,9 +565,6 @@ namespace Assistant
 
         private void makeDef_Click(object sender, System.EventArgs e)
         {
-
-            Config.SetAppSetting("PatchEncy", patchEncy.Checked ? "1" : "0");
-
             MessageBox.Show(this, Language.GetString(LocString.SaveOK), "Done", MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
         }
@@ -597,8 +578,6 @@ namespace Assistant
 
         private void okay_Click(object sender, System.EventArgs e)
         {
-            m_PatchEncy = patchEncy.Checked;
-
             m_Launch = ClientLaunch.TwoD;
             m_ClientPath = uoClient.Text;
 
@@ -706,15 +685,6 @@ namespace Assistant
                     Config.SetAppSetting("DefaultLanguage", Language.Current);
                     Language.LoadControlNames(this);
                 }
-            }
-        }
-
-        private void patchEncy_CheckedChanged(object sender, System.EventArgs e)
-        {
-            if (!patchEncy.Checked)
-            {
-                if (MessageBox.Show(this, Language.GetString(LocString.NoPatchWarning), Language.GetString(LocString.Confirm), MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
-                    patchEncy.Checked = true;
             }
         }
 

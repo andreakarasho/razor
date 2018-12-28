@@ -2,8 +2,6 @@
 #include "Crypt.h"
 #include "uo_huffman.h"
 #include "PacketInfo.h"
-#include "OSIEncryption.h"
-#include "LoginEncryption.h"
 #include "MemFinder.h"
 
 //*************************************************************************************
@@ -43,18 +41,9 @@ bool Active = true;
 bool SmartCPU = false;
 bool InGame = false;
 bool CopyFailed = true;
-bool Forwarding = false;
-bool Forwarded = false;
-bool ClientEncrypted = false;
 
 enum CLIENT_TYPE { TWOD = 1, THREED = 2 };
 CLIENT_TYPE ClientType = TWOD;
-
-//**************************************OSI Only Stuff*********************************
-DWORD CryptSeed = 0x7f000001;
-OSIEncryption *ClientCrypt = NULL;
-LoginEncryption *ClientLogin = NULL;
-//*************************************************************************************
 
 //*************************************************************************************
 //**************************************Functions**************************************
@@ -188,7 +177,6 @@ DLLFUNCTION int InstallLibrary(HWND RazorWindow, HWND UOWindow, int flags)
 	if (hUOAWnd)
 		ShowWindow(hUOAWnd, FALSE);
 
-	ClientEncrypted = (flags&0x08) != 0;
 	PostMessage( hUOWindow, WM_PROCREADY, (WPARAM)flags, (LPARAM)hRazorWnd );
 	return SUCCESS;
 }
@@ -330,10 +318,6 @@ DLLFUNCTION void OnAttach( void *params, int paramsLen )
 		mf.AddEntry("\x8B\x44\x24\x04\xBA\x80\x02\x00\x00\x3B\xC2\xB9\xE0\x01\x00\x00", 16); // resize screen function
 		mf.AddEntry("\x57\x56\x6A\x00\x6A\x00\xE8", 7); // redraw screen/edge function
 		mf.AddEntry(PACKET_TBL_STR, PACKET_TS_LEN, 10, 0x00500000);
-		mf.AddEntry(CRYPT_KEY_STR, CRYPT_KEY_LEN);
-		mf.AddEntry(CRYPT_KEY_STR_3D, CRYPT_KEY_3D_LEN);
-		mf.AddEntry(CRYPT_KEY_STR_NEW, CRYPT_KEY_NEW_LEN);
-		mf.AddEntry(CRYPT_KEY_STR_MORE_NEW, CRYPT_KEY_MORE_NEW_LEN);
 		mf.AddEntry("UO Version %s", 12);
 		mf.AddEntry("Multiple Instances Running", 26, 0x00500000);
 
@@ -419,56 +403,6 @@ DLLFUNCTION void OnAttach( void *params, int paramsLen )
 
 		if (!addr)
 			CopyFailed = true;
-
-		addr = mf.GetAddress(CRYPT_KEY_STR, CRYPT_KEY_LEN);
-		if (!addr)
-		{
-			addr = mf.GetAddress(CRYPT_KEY_STR_NEW, CRYPT_KEY_NEW_LEN);
-
-			if (!addr)
-			{
-				addr = mf.GetAddress(CRYPT_KEY_STR_MORE_NEW, CRYPT_KEY_MORE_NEW_LEN);
-				if (!addr)
-				{
-					addr = mf.GetAddress(CRYPT_KEY_STR_3D, CRYPT_KEY_3D_LEN);
-					if (addr)
-					{
-						LoginEncryption::SetKeys((const DWORD*)(addr + CRYPT_KEY_3D_LEN), (const DWORD*)(addr + CRYPT_KEY_3D_LEN + 19));
-						ClientType = THREED;
-					}
-					else
-					{
-					CopyFailed = true;
-					}
-				}
-				else
-				{
-					addr += CRYPT_KEY_MORE_NEW_LEN;
-
-					const DWORD *pKey1 = *((DWORD**)addr);
-					const DWORD *pKey2 = pKey1 + 1;
-					if (IsBadReadPtr(pKey2, 4) || IsBadReadPtr(pKey1, 4))
-						CopyFailed = true;
-					else
-						LoginEncryption::SetKeys(pKey1, pKey2);
-				}
-			}
-			else
-			{
-				addr += CRYPT_KEY_NEW_LEN;
-
-				const DWORD *pKey1 = *((DWORD**)addr);
-				const DWORD *pKey2 = pKey1 - 1;
-				if (IsBadReadPtr(pKey2, 4) || IsBadReadPtr(pKey1, 4))
-					CopyFailed = true;
-				else
-					LoginEncryption::SetKeys(pKey1, pKey2);
-			}
-		}
-		else
-		{
-			LoginEncryption::SetKeys((const DWORD*)(addr + CRYPT_KEY_LEN), (const DWORD*)(addr + CRYPT_KEY_LEN + 6));
-		}
 
 		// Multi UO
 		addr = mf.GetAddress("UoClientApp", 12);
@@ -673,24 +607,6 @@ void CloseSharedMemory()
 	//these are shared vars
 	hWndProcRetHook = NULL;
 	hGetMsgHook = NULL;
-
-	delete ClientCrypt;
-	delete ClientLogin;
-
-	ClientCrypt = NULL;
-	ClientLogin = NULL;
-}
-
-void CreateEncryption()
-{
-	delete ClientCrypt;
-	delete ClientLogin;
-
-	if ( ClientEncrypted )
-	{
-		ClientCrypt = new OSIEncryption();
-		ClientLogin = new LoginEncryption();
-	}
 }
 
 inline void Maintenance( Buffer &buff )
@@ -764,7 +680,6 @@ int RecvData()
 
 					if ( *p_buff == 0xA9 && p_len >= 1+2+1+30+30 && p_len <= left )
 					{
-						Forwarding = Forwarded = false;
 						break;
 					}
 
@@ -813,8 +728,7 @@ int HookRecv( SOCKET sock, char *buff, int len, int flags )
 				if ( ((BYTE)buff[0]) == 0x8C )
 					LoginServer = false;
 
-				if ( Forwarding )
-					Seeded = Forwarded = true;
+				Seeded = true;
 
 				pShared->OutRecv.Start += ackLen;
 				pShared->OutRecv.Length -= ackLen;
@@ -839,9 +753,6 @@ int HookRecv( SOCKET sock, char *buff, int len, int flags )
 				pShared->OutRecv.Start += blen;
 				pShared->OutRecv.Length -= blen;
 			}
-
-			if ( ClientEncrypted && ackLen > 0 )
-				ClientCrypt->EncryptForClient( (BYTE*)buff, (BYTE*)buff, ackLen );
 		}
 
 		Maintenance( pShared->InRecv );
@@ -881,14 +792,6 @@ int HookSend( SOCKET sock, char *buff, int len, int flags )
 			{
 				Seeded = true;
 
-				CryptSeed = *((DWORD*)buff);
-
-				if ( ClientEncrypted )
-				{
-					ClientCrypt->Initialize( CryptSeed );
-					ClientLogin->Initialize( (BYTE*)&CryptSeed );
-				}
-
 				Compression::Reset();
 			}
 
@@ -903,48 +806,11 @@ int HookSend( SOCKET sock, char *buff, int len, int flags )
 			{
 				FirstSend = false;
 
-				if ( ClientEncrypted )
-					LoginServer = ClientLogin->TestForLogin( (BYTE)buff[0] );
-				else
-					LoginServer = LoginEncryption::IsLoginByte( (BYTE)buff[0] );
-
-				if ( LoginServer )
-					Forwarding = Forwarded = false;
+				LoginServer = ((BYTE)buff[0] == 0x80 || (BYTE)buff[0] == 0x48);
 			}
 
 			WaitForSingleObject( CommMutex, INFINITE );
-
-			if (ClientEncrypted)
-			{
-				if ( Forwarded )
-				{
-					CryptSeed = LoginEncryption::GenerateBadSeed( CryptSeed );
-
-					ClientCrypt->Initialize( CryptSeed );
-
-					ClientCrypt->DecryptFromClient( (BYTE*)buff, (BYTE*)(&pShared->InSend.Buff[pShared->InSend.Start+pShared->InSend.Length]), len );
-					ClientLogin->Decrypt( (BYTE*)(&pShared->InSend.Buff[pShared->InSend.Start+pShared->InSend.Length]), (BYTE*)(&pShared->InSend.Buff[pShared->InSend.Start+pShared->InSend.Length]), len );
-
-					LoginServer = Forwarding = Forwarded = false;
-				}
-				else
-				{
-					if ( LoginServer )
-					{
-						ClientLogin->Decrypt( (BYTE*)(buff), (BYTE*)(&pShared->InSend.Buff[pShared->InSend.Start+pShared->InSend.Length]), len );
-
-						if ( ((BYTE)pShared->InSend.Buff[pShared->InSend.Start+pShared->InSend.Length]) == 0xA0 )
-							Forwarding = true;
-					}
-					else
-					{
-						ClientCrypt->DecryptFromClient((BYTE*)(buff), (BYTE*)(&pShared->InSend.Buff[pShared->InSend.Start + pShared->InSend.Length]), len);
-					}
-				}
-			}
-			else
-				memcpy( &pShared->InSend.Buff[pShared->InSend.Start+pShared->InSend.Length], buff, len );
-
+			memcpy( &pShared->InSend.Buff[pShared->InSend.Start+pShared->InSend.Length], buff, len );
 			pShared->InSend.Length += len;
 			ReleaseMutex( CommMutex );
 
@@ -1047,7 +913,7 @@ int HookConnect( SOCKET sock, const sockaddr *addr, int addrlen )
 
 		memcpy( &useAddr, old_addr, sizeof(sockaddr_in) );
 
-		if ( !Forwarded && pShared->ServerIP != 0 )
+		if ( pShared->ServerIP != 0 )
 		{
 			useAddr.sin_addr.S_un.S_addr = pShared->ServerIP;
 			useAddr.sin_port = htons( pShared->ServerPort );
@@ -1059,13 +925,10 @@ int HookConnect( SOCKET sock, const sockaddr *addr, int addrlen )
 		{
 			Log( "Connecting to %i", sock );
 
-			CreateEncryption();
-
 			Seeded = false;
 			LoginServer = false;
 			FirstRecv = true;
 			FirstSend = true;
-			Forwarding = Forwarded = false;
 
 			WaitForSingleObject( CommMutex, INFINITE );
 			CurrentConnection = sock;
@@ -1427,8 +1290,6 @@ void MessageProc( HWND hWnd, UINT nMsg, WPARAM wParam, LPARAM lParam, MSG *pMsg 
 
 		if (!pShared) // If this failed the first time or was not run at all, try it once more before panicing
 			OnAttach(NULL, 0);
-
-		ClientEncrypted = (wParam & 0x08) != 0;
 
 		if ( !pShared )
 			PostMessage( hRazorWnd, WM_UONETEVENT, NOT_READY, NO_SHAREMEM );

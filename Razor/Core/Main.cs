@@ -250,33 +250,19 @@ namespace Assistant
             {
             }
 
-            bool patch = Config.GetAppSetting<int>("PatchEncy") != 0;
             bool showWelcome = Config.GetAppSetting<int>("ShowWelcome") != 0;
             ClientLaunch launch = ClientLaunch.TwoD;
 
             int attPID = -1;
             string dataDir;
 
-            ClientCommunication.ClientEncrypted = false;
-
             dataDir = null;
-
-            bool advCmdLine = false;
 
             for (int i = 0; i < Args.Length; i++)
             {
                 string arg = Args[i].ToLower();
-                if (arg == "--nopatch")
-                {
-                    patch = false;
-                }
-                else if (arg == "--clientenc")
-                {
-                    ClientCommunication.ClientEncrypted = true;
-                    advCmdLine = true;
-                    patch = false;
-                }
-                else if (arg == "--welcome")
+
+                if (arg == "--welcome")
                 {
                     showWelcome = true;
                 }
@@ -287,12 +273,10 @@ namespace Assistant
                 else if (arg == "--pid" && i + 1 < Args.Length)
                 {
                     i++;
-                    patch = false;
                     attPID = Utility.ToInt32(Args[i], 0);
                 }
                 else if (arg.Substring(0, 5) == "--pid" && arg.Length > 5) //support for uog 1.8 (damn you fixit)
                 {
-                    patch = false;
                     attPID = Utility.ToInt32(arg.Substring(5), 0);
                 }
                 else if (arg == "--uodata" && i + 1 < Args.Length)
@@ -317,11 +301,6 @@ namespace Assistant
                     ScavengerAgent.Debug = true;
                     DragDropManager.Debug = true;
                 }
-            }
-
-            if (attPID > 0 && !advCmdLine)
-            {
-                ClientCommunication.ClientEncrypted = false;
             }
 
             if (!Language.Load("ENU"))
@@ -369,7 +348,6 @@ namespace Assistant
                     m_ActiveWnd = welcome;
                     if (welcome.ShowDialog() == DialogResult.Cancel)
                         return;
-                    patch = welcome.PatchEncryption;
                     launch = welcome.Client;
                     dataDir = welcome.DataDirectory;
                     if (launch == ClientLaunch.Custom)
@@ -413,9 +391,6 @@ namespace Assistant
                     clientPath = Ultima.Files.GetFilePath("client.exe");
                 else if (launch == ClientLaunch.ThirdDawn)
                     clientPath = Ultima.Files.GetFilePath("uotd.exe");
-
-                if (!advCmdLine)
-                    ClientCommunication.ClientEncrypted = patch;
 
                 if (clientPath != null && File.Exists(clientPath))
                     result = ClientCommunication.LaunchClient(clientPath);

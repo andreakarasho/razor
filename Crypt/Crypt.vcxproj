@@ -113,7 +113,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Crypt.cpp" />
-    <ClCompile Include="LoginEncryption.cpp" />
     <ClCompile Include="MemFinder.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Full</Optimization>
       <InlineFunctionExpansion Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AnySuitable</InlineFunctionExpansion>
@@ -128,27 +127,17 @@
       <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </DebugInformationFormat>
     </ClCompile>
-    <ClCompile Include="OSIEncryption.cpp" />
     <ClCompile Include="PacketInfo.cpp" />
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="twofish.c">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="uo_huffman.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Crypt.h" />
     <ClInclude Include="debug.h" />
-    <ClInclude Include="LoginEncryption.h" />
     <ClInclude Include="MemFinder.h" />
-    <ClInclude Include="OSIEncryption.h" />
     <ClInclude Include="PacketInfo.h" />
-    <ClInclude Include="platform.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="table.h" />
-    <ClInclude Include="twofish.h" />
     <ClInclude Include="uo_huffman.h" />
   </ItemGroup>
   <ItemGroup>

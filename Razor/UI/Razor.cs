@@ -149,7 +149,6 @@ namespace Assistant
 
         private int m_LastKV = 0;
         private bool m_ProfileConfirmLoad;
-        private System.Windows.Forms.Label label19;
         private System.Windows.Forms.TextBox warnNum;
         private System.Windows.Forms.CheckBox warnCount;
         private System.Windows.Forms.CheckBox showNotoHue;

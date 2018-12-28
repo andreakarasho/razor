@@ -18,22 +18,13 @@
     <ClCompile Include="Crypt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LoginEncryption.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="MemFinder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OSIEncryption.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PacketInfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="twofish.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="uo_huffman.cpp">
@@ -47,31 +38,16 @@
     <ClInclude Include="debug.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LoginEncryption.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="MemFinder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="OSIEncryption.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="PacketInfo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="platform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="table.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="twofish.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="uo_huffman.h">
