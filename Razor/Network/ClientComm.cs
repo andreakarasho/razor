@@ -353,9 +353,6 @@ namespace Assistant
 		private static bool m_ClientEnc = false;
 		internal static bool ClientEncrypted { get { return m_ClientEnc; } set { m_ClientEnc = value; } }
 
-		private static bool m_ServerEnc = false;
-		internal static bool ServerEncrypted { get { return m_ServerEnc; } set { m_ServerEnc = value; } }
-
 		internal static bool InstallHooks( IntPtr razorWindow )
 		{
 			InitError error;
@@ -363,9 +360,6 @@ namespace Assistant
 
 			if ( ClientEncrypted )
 				flags |= 0x08;
-
-			if ( ServerEncrypted )
-				flags |= 0x10;
 
 			FindUOWindow(ClientProc.Id);
 

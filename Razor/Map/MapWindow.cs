@@ -268,13 +268,6 @@ namespace Assistant.MapUO
 
 			protected override void OnTick()
 			{
-				// never send this packet to encrypted servers (could lead to OSI detecting razor)
-				if ( ClientCommunication.ServerEncrypted )
-				{
-					Stop();
-					return;
-				}
-
 				if ( Engine.MainWindow == null || Engine.MainWindow.MapWindow == null || !Engine.MainWindow.MapWindow.Visible )
 					return; // don't bother when the map window isnt visible
 

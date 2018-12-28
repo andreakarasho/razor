@@ -46,7 +46,6 @@ bool CopyFailed = true;
 bool Forwarding = false;
 bool Forwarded = false;
 bool ClientEncrypted = false;
-bool ServerEncrypted = false;
 
 enum CLIENT_TYPE { TWOD = 1, THREED = 2 };
 CLIENT_TYPE ClientType = TWOD;
@@ -54,9 +53,7 @@ CLIENT_TYPE ClientType = TWOD;
 //**************************************OSI Only Stuff*********************************
 DWORD CryptSeed = 0x7f000001;
 OSIEncryption *ClientCrypt = NULL;
-OSIEncryption *ServerCrypt = NULL;
 LoginEncryption *ClientLogin = NULL;
-LoginEncryption *ServerLogin = NULL;
 //*************************************************************************************
 
 //*************************************************************************************
@@ -191,8 +188,6 @@ DLLFUNCTION int InstallLibrary(HWND RazorWindow, HWND UOWindow, int flags)
 	if (hUOAWnd)
 		ShowWindow(hUOAWnd, FALSE);
 
-
-	ServerEncrypted = (flags&0x10) != 0;
 	ClientEncrypted = (flags&0x08) != 0;
 	PostMessage( hUOWindow, WM_PROCREADY, (WPARAM)flags, (LPARAM)hRazorWnd );
 	return SUCCESS;
@@ -681,32 +676,20 @@ void CloseSharedMemory()
 
 	delete ClientCrypt;
 	delete ClientLogin;
-	delete ServerCrypt;
-	delete ServerLogin;
 
 	ClientCrypt = NULL;
 	ClientLogin = NULL;
-	ServerCrypt = NULL;
-	ServerLogin = NULL;
 }
 
 void CreateEncryption()
 {
 	delete ClientCrypt;
 	delete ClientLogin;
-	delete ServerCrypt;
-	delete ServerLogin;
 
 	if ( ClientEncrypted )
 	{
 		ClientCrypt = new OSIEncryption();
 		ClientLogin = new LoginEncryption();
-	}
-
-	if ( ServerEncrypted )
-	{
-		ServerCrypt = new OSIEncryption();
-		ServerLogin = new LoginEncryption();
 	}
 }
 
@@ -766,9 +749,6 @@ int RecvData()
 		}
 		else
 		{
-			if ( ServerEncrypted )
-				ServerCrypt->DecryptFromServer( (BYTE*)buff, (BYTE*)buff, ackLen );
-
 			int blen = Compression::Decompress( (char*)&pShared->InRecv.Buff[pShared->InRecv.Start+pShared->InRecv.Length], buff, ackLen );
 			pShared->InRecv.Length += blen;
 
@@ -903,12 +883,6 @@ int HookSend( SOCKET sock, char *buff, int len, int flags )
 
 				CryptSeed = *((DWORD*)buff);
 
-				if ( ServerEncrypted )
-				{
-					ServerCrypt->Initialize( CryptSeed );
-					ServerLogin->Initialize( (BYTE*)&CryptSeed );
-				}
-
 				if ( ClientEncrypted )
 				{
 					ClientCrypt->Initialize( CryptSeed );
@@ -1042,22 +1016,7 @@ void FlushSendData()
 			} // END while
 		} // END if ( !InGame && !LoginServer
 
-		if ( ServerEncrypted )
-		{
-			if ( tempBuff == NULL )
-				tempBuff = new char[SHARED_BUFF_SIZE];
-
-			if ( LoginServer )
-				ServerLogin->Encrypt( (BYTE*)&pShared->OutSend.Buff[pShared->OutSend.Start], (BYTE*)tempBuff, outLen );
-			else
-				ServerCrypt->EncryptForServer( (BYTE*)&pShared->OutSend.Buff[pShared->OutSend.Start], (BYTE*)tempBuff, outLen );
-
-			ackLen = (*(NetIOFunc)OldSend)(CurrentConnection,tempBuff,outLen,0);
-		}
-		else
-		{
-			ackLen = (*(NetIOFunc)OldSend)(CurrentConnection,(char*)&pShared->OutSend.Buff[pShared->OutSend.Start],outLen,0);
-		}
+		ackLen = (*(NetIOFunc)OldSend)(CurrentConnection,(char*)&pShared->OutSend.Buff[pShared->OutSend.Start],outLen,0);
 
 		if ( ackLen == SOCKET_ERROR )
 		{
@@ -1470,7 +1429,6 @@ void MessageProc( HWND hWnd, UINT nMsg, WPARAM wParam, LPARAM lParam, MSG *pMsg 
 			OnAttach(NULL, 0);
 
 		ClientEncrypted = (wParam & 0x08) != 0;
-		ServerEncrypted = (wParam & 0x10) != 0;
 
 		if ( !pShared )
 			PostMessage( hRazorWnd, WM_UONETEVENT, NOT_READY, NO_SHAREMEM );

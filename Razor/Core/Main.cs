@@ -259,31 +259,6 @@ namespace Assistant
 
             ClientCommunication.ClientEncrypted = false;
 
-            // check if the new ServerEncryption option is in app.config
-            dataDir = Config.GetAppSetting<string>("ServerEnc");
-            if (dataDir == null)
-            {
-                // if not, add it (copied from UseOSIEnc)
-                dataDir = Config.GetAppSetting<string>("UseOSIEnc");
-                if (dataDir == "1")
-                {
-                    ClientCommunication.ServerEncrypted = true;
-                    Config.SetAppSetting("ServerEnc", "1");
-                }
-                else
-                {
-                    Config.SetAppSetting("ServerEnc", "0");
-                    ClientCommunication.ServerEncrypted = false;
-                }
-
-                Config.SetAppSetting("PatchEncy", "1");
-                patch = true;
-            }
-            else
-            {
-                ClientCommunication.ServerEncrypted = Utility.ToInt32(dataDir, 0) != 0;
-            }
-
             dataDir = null;
 
             bool advCmdLine = false;
@@ -300,11 +275,6 @@ namespace Assistant
                     ClientCommunication.ClientEncrypted = true;
                     advCmdLine = true;
                     patch = false;
-                }
-                else if (arg == "--serverenc")
-                {
-                    ClientCommunication.ServerEncrypted = true;
-                    advCmdLine = true;
                 }
                 else if (arg == "--welcome")
                 {
@@ -351,7 +321,6 @@ namespace Assistant
 
             if (attPID > 0 && !advCmdLine)
             {
-                ClientCommunication.ServerEncrypted = false;
                 ClientCommunication.ClientEncrypted = false;
             }
 

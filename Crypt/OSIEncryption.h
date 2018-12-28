@@ -9,10 +9,8 @@ public:
 
 	void Initialize( DWORD dwSeed );
 
-	void DecryptFromServer( const BYTE *in, BYTE *out, int len );
 	void DecryptFromClient( const BYTE *in, BYTE *out, int len );
 
-	void EncryptForServer( const BYTE *in, BYTE *out, int len );
 	void EncryptForClient( const BYTE *in, BYTE *out, int len );
 
 	static void MD5( const BYTE *input, int inLen, BYTE *output );

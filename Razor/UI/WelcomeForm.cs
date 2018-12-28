@@ -36,7 +36,6 @@ namespace Assistant
         private System.Windows.Forms.CheckBox showAtStart;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.ComboBox langSel;
-        private System.Windows.Forms.CheckBox useEnc;
         private System.Windows.Forms.Button dataBrowse;
         private System.Windows.Forms.GroupBox groupBox3;
 
@@ -91,7 +90,6 @@ namespace Assistant
             this.serverList = new System.Windows.Forms.ComboBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.uoClient = new System.Windows.Forms.TextBox();
-            this.useEnc = new System.Windows.Forms.CheckBox();
             this.makeDef = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.serverInfo = new System.Windows.Forms.Label();
@@ -180,7 +178,6 @@ namespace Assistant
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.uoClient);
-            this.groupBox1.Controls.Add(this.useEnc);
             this.groupBox1.Controls.Add(this.makeDef);
             this.groupBox1.Controls.Add(this.browse);
             this.groupBox1.Controls.Add(this.label1);
@@ -199,15 +196,6 @@ namespace Assistant
             this.uoClient.ReadOnly = true;
             this.uoClient.Size = new System.Drawing.Size(202, 23);
             this.uoClient.TabIndex = 6;
-            // 
-            // useEnc
-            // 
-            this.useEnc.Location = new System.Drawing.Point(8, 68);
-            this.useEnc.Name = "useEnc";
-            this.useEnc.Size = new System.Drawing.Size(140, 20);
-            this.useEnc.TabIndex = 5;
-            this.useEnc.Text = "Use OSI Encryption";
-            this.useEnc.CheckedChanged += new System.EventHandler(this.useEnc_CheckedChanged);
             // 
             // makeDef
             // 
@@ -497,7 +485,6 @@ namespace Assistant
             IsValidClientAndDataDir();
 
             patchEncy.Checked = Config.GetAppSetting<int>("PatchEncy") != 0;
-            useEnc.Checked = Config.GetAppSetting<int>("ServerEnc") != 0;
 
             LoginCFG_SE lse = new LoginCFG_SE();
             Custom_SE cse;
@@ -596,7 +583,6 @@ namespace Assistant
         {
 
             Config.SetAppSetting("PatchEncy", patchEncy.Checked ? "1" : "0");
-            Config.SetAppSetting("ServerEnc", useEnc.Checked ? "1" : "0");
 
             MessageBox.Show(this, Language.GetString(LocString.SaveOK), "Done", MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
@@ -625,11 +611,6 @@ namespace Assistant
                     int port = ((Custom_SE)serverList.SelectedItem).Port;
 
                     string addr = ((Custom_SE)serverList.SelectedItem).RealAddress;
-
-                    if (addr == "login.ultimaonline.com")
-                    {
-                        ClientCommunication.ServerEncrypted = true;
-                    }
 
                     if (port == 0)
                         port = 2593; // runuo default
@@ -735,11 +716,6 @@ namespace Assistant
                 if (MessageBox.Show(this, Language.GetString(LocString.NoPatchWarning), Language.GetString(LocString.Confirm), MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
                     patchEncy.Checked = true;
             }
-        }
-
-        private void useEnc_CheckedChanged(object sender, System.EventArgs e)
-        {
-            ClientCommunication.ServerEncrypted = useEnc.Checked;
         }
 
         private void dataBrowse_Click(object sender, System.EventArgs e)

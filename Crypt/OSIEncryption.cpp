@@ -302,22 +302,10 @@ void OSIEncryption::TwoFishCrypt( const BYTE *in, BYTE *out, int len )
 	}
 }
 
-//server -> us
-void OSIEncryption::DecryptFromServer( const BYTE *in, BYTE *out, int len )
-{
-	XORCrypt( in, out, len );
-}
-
 //us -> client
 void OSIEncryption::EncryptForClient( const BYTE *in, BYTE *out, int len )
 {
 	XORCrypt( in, out, len );
-}
-
-//us -> server
-void OSIEncryption::EncryptForServer( const BYTE *in, BYTE *out, int len )
-{
-	TwoFishCrypt( in, out, len );
 }
 
 //client -> us
