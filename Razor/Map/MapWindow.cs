@@ -128,7 +128,7 @@ namespace Assistant.MapUO
 					{
 						Engine.MainWindow.MapWindow.Hide();
 						Engine.MainWindow.BringToFront();
-						ClientCommunication.BringToFront( ClientCommunication.UOWindow );
+						Windows.BringToFront(Windows.UOWindow );
 					}
 					else
 					{
@@ -333,7 +333,7 @@ namespace Assistant.MapUO
 				e.Cancel = true;
 				this.Hide();
 				Engine.MainWindow.BringToFront();
-				ClientCommunication.BringToFront( ClientCommunication.UOWindow );
+				Windows.BringToFront(Windows.UOWindow );
 			}
 		}
 

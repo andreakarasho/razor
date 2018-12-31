@@ -154,6 +154,7 @@
     <Compile Include="Core\DressList.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Core\Windows.cs" />
     <Compile Include="Filters\Death.cs">
       <SubType>Code</SubType>
     </Compile>

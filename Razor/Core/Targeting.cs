@@ -421,7 +421,7 @@ namespace Assistant
 
         public static void RandomTarget(params int[] noto)
         {
-            if (!ClientCommunication.AllowBit(FeatureBit.RandomTargets))
+            if (!Windows.AllowBit(FeatureBit.RandomTargets))
                 return;
 
             List<Mobile> list = new List<Mobile>();
@@ -453,7 +453,7 @@ namespace Assistant
 
         public static void RandomHumanoidTarget(params int[] noto)
         {
-            if (!ClientCommunication.AllowBit(FeatureBit.RandomTargets))
+            if (!Windows.AllowBit(FeatureBit.RandomTargets))
                 return;
 
             List<Mobile> list = new List<Mobile>();
@@ -488,7 +488,7 @@ namespace Assistant
 
         public static void RandomMonsterTarget(params int[] noto)
         {
-            if (!ClientCommunication.AllowBit(FeatureBit.RandomTargets))
+            if (!Windows.AllowBit(FeatureBit.RandomTargets))
                 return;
 
             List<Mobile> list = new List<Mobile>();
@@ -594,7 +594,7 @@ namespace Assistant
 
         public static void ClosestTarget(params int[] noto)
         {
-            if (!ClientCommunication.AllowBit(FeatureBit.ClosestTargets))
+            if (!Windows.AllowBit(FeatureBit.ClosestTargets))
                 return;
 
             List<Mobile> list = new List<Mobile>();
@@ -640,7 +640,7 @@ namespace Assistant
 
         public static void ClosestHumanoidTarget(params int[] noto)
         {
-            if (!ClientCommunication.AllowBit(FeatureBit.ClosestTargets))
+            if (!Windows.AllowBit(FeatureBit.ClosestTargets))
                 return;
 
             List<Mobile> list = new List<Mobile>();
@@ -689,7 +689,7 @@ namespace Assistant
 
         public static void ClosestMonsterTarget(params int[] noto)
         {
-            if (!ClientCommunication.AllowBit(FeatureBit.ClosestTargets))
+            if (!Windows.AllowBit(FeatureBit.ClosestTargets))
                 return;
 
             List<Mobile> list = new List<Mobile>();
@@ -890,7 +890,7 @@ namespace Assistant
         public static bool DoLastTarget()
         {
             TargetInfo targ;
-            if (Config.GetBool("SmartLastTarget") && ClientCommunication.AllowBit(FeatureBit.SmartLT))
+            if (Config.GetBool("SmartLastTarget") && Windows.AllowBit(FeatureBit.SmartLT))
             {
                 if (m_AllowGround && m_LastGroundTarg != null)
                     targ = m_LastGroundTarg;
@@ -962,7 +962,7 @@ namespace Assistant
                 }
             }
 
-            if (Config.GetBool("RangeCheckLT") && ClientCommunication.AllowBit(FeatureBit.RangeCheckLT) && (pos == Point3D.Zero || !Utility.InRange(World.Player.Position, pos, Config.GetInt("LTRange"))))
+            if (Config.GetBool("RangeCheckLT") && Windows.AllowBit(FeatureBit.RangeCheckLT) && (pos == Point3D.Zero || !Utility.InRange(World.Player.Position, pos, Config.GetInt("LTRange"))))
             {
                 if (Config.GetBool("QueueTargets"))
                     m_QueueTarget = LastTargetAction;
@@ -1162,7 +1162,7 @@ namespace Assistant
                 m.OverheadMessage(Config.GetInt("SysColor"), "[Ignored]");
             }
 
-            if (Config.GetBool("SmartLastTarget") && ClientCommunication.AllowBit(FeatureBit.SmartLT))
+            if (Config.GetBool("SmartLastTarget") && Windows.AllowBit(FeatureBit.SmartLT))
             {
                 bool harm = m_LastHarmTarg != null && m_LastHarmTarg.Serial == m.Serial;
                 bool bene = m_LastBeneTarg != null && m_LastBeneTarg.Serial == m.Serial;
@@ -1180,7 +1180,7 @@ namespace Assistant
         {
             if (m != null)
             {
-                if (Config.GetBool("SmartLastTarget") && ClientCommunication.AllowBit(FeatureBit.SmartLT))
+                if (Config.GetBool("SmartLastTarget") && Windows.AllowBit(FeatureBit.SmartLT))
                 {
                     if (m_LastHarmTarg != null && m_LastHarmTarg.Serial == m.Serial)
                         return true;
@@ -1607,7 +1607,7 @@ namespace Assistant
 
             if (m_HasTarget && m != null && m_LastTarget != null && m.Serial == m_LastTarget.Serial && m_QueueTarget == LastTargetAction)
             {
-                if (Config.GetBool("RangeCheckLT") && ClientCommunication.AllowBit(FeatureBit.RangeCheckLT))
+                if (Config.GetBool("RangeCheckLT") && Windows.AllowBit(FeatureBit.RangeCheckLT))
                 {
                     if (Utility.InRange(World.Player.Position, m.Position, Config.GetInt("LTRange")))
                     {
@@ -1623,7 +1623,7 @@ namespace Assistant
             if (World.Player == null)
                 return false;
 
-            if (targID == m_SpellTargID && ser.IsMobile && (World.Player.LastSpell == Spell.ToID(1, 4) || World.Player.LastSpell == Spell.ToID(4, 5)) && Config.GetBool("BlockHealPoison") && ClientCommunication.AllowBit(FeatureBit.BlockHealPoisoned))
+            if (targID == m_SpellTargID && ser.IsMobile && (World.Player.LastSpell == Spell.ToID(1, 4) || World.Player.LastSpell == Spell.ToID(4, 5)) && Config.GetBool("BlockHealPoison") && Windows.AllowBit(FeatureBit.BlockHealPoisoned))
             {
                 Mobile m = World.FindMobile(ser);
 
