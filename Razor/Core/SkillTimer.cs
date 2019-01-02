@@ -32,13 +32,13 @@ namespace Assistant
             }
 
             m_Timer.Start();
-            ClientCommunication.RequestTitlebarUpdate();
+            Windows.RequestTitleBarUpdate();
         }
 
         public static void Stop()
         {
             m_Timer.Stop();
-            ClientCommunication.RequestTitlebarUpdate();
+            Windows.RequestTitleBarUpdate();
         }
 
         private class InternalTimer : Timer
@@ -50,12 +50,12 @@ namespace Assistant
             protected override void OnTick()
             {
                 m_Count++;
-                if (m_Count >= 10)
+                if (m_Count > 10)
                 {
                     Stop();
                 }
 
-                ClientCommunication.RequestTitlebarUpdate();
+                Windows.RequestTitleBarUpdate();
             }
         }
     }

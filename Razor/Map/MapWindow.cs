@@ -52,7 +52,6 @@ namespace Assistant.MapUO
 			//
 
 			this.Map.FullUpdate();
-			ClientCommunication.SetMapWndHandle( this );
 		}
 
 		public class MapMenuItem : MenuItem
@@ -128,14 +127,13 @@ namespace Assistant.MapUO
 					{
 						Engine.MainWindow.MapWindow.Hide();
 						Engine.MainWindow.BringToFront();
-						ClientCommunication.BringToFront( ClientCommunication.FindUOWindow() );
+						Windows.BringToFront(Windows.UOWindow );
 					}
 					else
 					{
 						Engine.MainWindow.MapWindow.Show();
 						Engine.MainWindow.MapWindow.BringToFront();
 						Engine.MainWindow.MapWindow.TopMost = true;
-						ClientCommunication.SetMapWndHandle( Engine.MainWindow.MapWindow );
 					}
 				}
 			}
@@ -268,13 +266,6 @@ namespace Assistant.MapUO
 
 			protected override void OnTick()
 			{
-				// never send this packet to encrypted servers (could lead to OSI detecting razor)
-				if ( ClientCommunication.ServerEncrypted )
-				{
-					Stop();
-					return;
-				}
-
 				if ( Engine.MainWindow == null || Engine.MainWindow.MapWindow == null || !Engine.MainWindow.MapWindow.Visible )
 					return; // don't bother when the map window isnt visible
 
@@ -329,7 +320,6 @@ namespace Assistant.MapUO
 
 		public void UpdateMap()
 		{
-			ClientCommunication.SetMapWndHandle( this );
 			this.Map.UpdateMap();
 		}
 
@@ -340,7 +330,7 @@ namespace Assistant.MapUO
 				e.Cancel = true;
 				this.Hide();
 				Engine.MainWindow.BringToFront();
-				ClientCommunication.BringToFront( ClientCommunication.FindUOWindow() );
+				Windows.BringToFront(Windows.UOWindow );
 			}
 		}
 

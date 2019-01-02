@@ -18,19 +18,7 @@
     <ClCompile Include="Crypt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="gfx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LoginEncryption.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="MemFinder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OldStatusBar.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OSIEncryption.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PacketInfo.cpp">
@@ -39,13 +27,7 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="twofish.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="uo_huffman.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="UOArt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -56,22 +38,10 @@
     <ClInclude Include="debug.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="gfx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LoginEncryption.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="MemFinder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="OSIEncryption.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="PacketInfo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="platform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
@@ -80,22 +50,7 @@
     <ClInclude Include="stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="table.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="twofish.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="uo_huffman.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="UOArt.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Obfuscation.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="resource1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

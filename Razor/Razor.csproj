@@ -99,8 +99,10 @@
     <TargetZone>LocalIntranet</TargetZone>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net40\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net40\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System">
       <Name>System</Name>
@@ -120,15 +122,25 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Boat\BoatWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Boat\BoatWindow.Designer.cs">
+      <DependentUpon>BoatWindow.cs</DependentUpon>
+    </Compile>
     <Compile Include="Core\ActionQueue.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Core\Agents.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Core\AVIRec.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="Core\BuffsTimer.cs" />
+    <Compile Include="Core\BuffsDebuffs.cs" />
+    <Compile Include="Core\BodCapture.cs" />
+    <Compile Include="Core\ContainerLabels.cs" />
+    <Compile Include="Core\OverheadMessages.cs" />
+    <Compile Include="Core\GoldPerHourTimer.cs" />
+    <Compile Include="Core\GateTimer.cs" />
     <Compile Include="Core\SkillTimer.cs" />
     <Compile Include="Core\BandageTimer.cs">
       <SubType>Code</SubType>
@@ -142,6 +154,7 @@
     <Compile Include="Core\DressList.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Core\Windows.cs" />
     <Compile Include="Filters\Death.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -193,7 +206,7 @@
     <Compile Include="Core\ItemID.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Macros\AbsoluteTarget.cs" />
+    <Compile Include="Macros\AbsoluteTargets.cs" />
     <Compile Include="Macros\Actions.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -248,9 +261,6 @@
     <Compile Include="Core\ObjectPropertyList.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Core\PacketRec.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Core\PasswordMemory.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -260,6 +270,7 @@
     <Compile Include="Core\Player.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Network\UOAssist.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -275,9 +286,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Core\StealthSteps.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Core\Stuff.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Core\Targeting.cs">
@@ -316,6 +324,18 @@
     <Compile Include="UI\MessageDialog.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="UI\ContainerLabels.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\ContainerLabels.Designer.cs">
+      <DependentUpon>ContainerLabels.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\OverheadMessages.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\OverheadMessages.Designer.cs">
+      <DependentUpon>OverheadMessages.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\Razor.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -337,6 +357,10 @@
     <Compile Include="Core\ZLib.cs">
       <SubType>Code</SubType>
     </Compile>
+    <EmbeddedResource Include="Boat\BoatWindow.resx">
+      <DependentUpon>BoatWindow.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Macros\Actions.resx">
       <DependentUpon>Actions.cs</DependentUpon>
     </EmbeddedResource>
@@ -372,15 +396,38 @@
     <EmbeddedResource Include="UI\MessageDialog.resx">
       <DependentUpon>MessageDialog.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="UI\ContainerLabels.resx">
+      <DependentUpon>ContainerLabels.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\OverheadMessages.resx">
+      <DependentUpon>OverheadMessages.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\Razor.resx">
       <DependentUpon>Razor.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\SplashScreen.resx">
       <DependentUpon>SplashScreen.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\WelcomeForm.resx">
       <DependentUpon>WelcomeForm.cs</DependentUpon>
     </EmbeddedResource>
+    <Content Include="Boat\Images\anchor-left.png" />
+    <Content Include="Boat\Images\anchor-right.png" />
+    <Content Include="Boat\Images\boateast.png" />
+    <Content Include="Boat\Images\boatnorth.png" />
+    <Content Include="Boat\Images\boatsouth.png" />
+    <Content Include="Boat\Images\boatwest.png" />
+    <Content Include="Boat\Images\east.png" />
+    <Content Include="Boat\Images\north.png" />
+    <Content Include="Boat\Images\northeast.png" />
+    <Content Include="Boat\Images\northwest.png" />
+    <Content Include="Boat\Images\serpentspillar.png" />
+    <Content Include="Boat\Images\south.png" />
+    <Content Include="Boat\Images\southeast.png" />
+    <Content Include="Boat\Images\southwest.png" />
+    <Content Include="Boat\Images\west.png" />
     <Content Include="UI\Lock.ico" />
     <Content Include="UI\UOPS.ico" />
   </ItemGroup>

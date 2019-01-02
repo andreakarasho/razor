@@ -28,7 +28,19 @@ namespace Assistant
 		}
 	}
 
-	public sealed class AcceptParty : Packet
+    public sealed class SendPartyMessage : Packet
+    {
+        public SendPartyMessage( string message ) : base(0xBF)
+        {
+            EnsureCapacity(1 + 2 + 2 + 1 + 4);
+
+            Write( (ushort)0x06); // party command
+            Write( (byte)0x04); // tell party
+            WriteBigUniNull(message);
+        }
+    }
+
+    public sealed class AcceptParty : Packet
 	{
 		public AcceptParty( Serial leader ) : base( 0xBF )
 		{
@@ -52,7 +64,19 @@ namespace Assistant
 		}
 	}
 
-	public sealed class ContainerContent : Packet
+    public sealed class SendMessageParty : Packet
+    {
+        public SendMessageParty(string message) : base(0xBF)
+        {
+            EnsureCapacity(1 + 2 + 2 + 1 + 4);
+
+            Write((ushort)0x06); // party command
+            Write((byte)0x04); // tell party
+            WriteBigUniNull(message);
+        }
+    }
+
+    public sealed class ContainerContent : Packet
 	{
 		public ContainerContent(List<Item> items ) : this( items, Engine.UsePostKRPackets )
 		{
@@ -229,8 +253,26 @@ namespace Assistant
 			Write( (uint)serial );
 		}
 	}
-	
-	public sealed class CancelTarget : Packet
+
+    public sealed class SetWeather : Packet
+    {
+        public SetWeather(int type, int num) : base(0x65, 4)
+        {
+            Write((byte)type); //types: 0x00 - "It starts to rain", 0x01 - "A fierce storm approaches.", 0x02 - "It begins to snow", 0x03 - "A storm is brewing.", 0xFF - None (turns off sound effects), 0xFE (no effect?? Set temperature?) 
+            Write((byte)num); //number of weather effects on screen
+            Write((byte)0xFE);
+        }
+    }
+
+    public sealed class PlayMusic : Packet
+    {
+        public PlayMusic(int num) : base(0x6D, 3)
+        {
+            Write((uint)num);
+        }
+    }
+
+    public sealed class CancelTarget : Packet
 	{
 		public CancelTarget( uint id ) : base( 0x6C, 19 )
 		{
@@ -591,42 +633,6 @@ namespace Assistant
 		}
 	}
 
-	public sealed class MoveRequest : Packet
-	{
-		public MoveRequest( byte seq, byte dir ) : base( 0x02, 7 )
-		{
-			Write( (byte)dir );
-			Write( (byte)seq );
-			//Write( (uint)Utility.Random( 0x7FFFFFFF ) ); // fastwalk key (unused)
-			if ( PlayerData.FastWalkKey < 5 )
-				Write( (uint)0xBAADF00D );
-			else
-				Write( (uint)0 );
-			PlayerData.FastWalkKey++;
-		}
-	}
-
-	public sealed class MoveReject : Packet
-	{
-		public MoveReject( byte seq, Mobile m ) : base( 0x21, 8 )
-		{
-			Write( (byte) seq );
-			Write( (short)m.Position.X );
-			Write( (short)m.Position.Y );
-			Write( (byte) m.Direction );
-			Write( (sbyte)m.Position.Z );
-		}
-	}
-
-	public sealed class MoveAcknowledge : Packet
-	{
-		public MoveAcknowledge( byte seq, byte noto ) : base( 0x22, 3 )
-		{
-			Write( (byte) seq );
-			Write( (byte) noto );
-		}
-	}
-
 	public sealed class GumpTextEntry
 	{
 		public GumpTextEntry( ushort id, string s )
@@ -664,7 +670,32 @@ namespace Assistant
 		}
 	}
 
-	public sealed class UseSkill : Packet
+    public sealed class CompressedGump : Packet
+    {
+        public CompressedGump(uint serial, uint tid, int bid, int[] switches, GumpTextEntry[] entries) : base(0xDD)
+        {
+            EnsureCapacity(3 + 4 + 4 + 4 + 4 + switches.Length * 4 + 4 + entries.Length * 4);
+
+            Write((uint)serial);
+            Write((uint)tid);
+
+            Write((int)bid);
+
+            Write((int)switches.Length);
+            for (int i = 0; i < switches.Length; i++)
+                Write((int)switches[i]);
+            Write((int)entries.Length);
+            for (int i = 0; i < entries.Length; i++)
+            {
+                GumpTextEntry gte = (GumpTextEntry)entries[i];
+                Write((ushort)gte.EntryID);
+                Write((ushort)(gte.Text.Length * 2));
+                WriteBigUniFixed(gte.Text, gte.Text.Length);
+            }
+        }
+    }
+
+    public sealed class UseSkill : Packet
 	{
 		public UseSkill( int sk ) : base( 0x12 )
 		{
@@ -1261,7 +1292,20 @@ namespace Assistant
 		}
 	}
 
-	public sealed class RazorNegotiateResponse : Packet
+    public sealed class PlaySound : Packet
+    {
+        public PlaySound(int sound) : base(0x54, 12)
+        {
+            Write((byte)0x01); //(0x00=quiet, repeating, 0x01=single normally played sound effect)
+            Write((ushort)sound);
+            Write((ushort)0);
+            Write((ushort)World.Player.Position.X);
+            Write((ushort)World.Player.Position.Y);
+            Write((ushort)World.Player.Position.Z);
+        }
+    }
+
+    public sealed class RazorNegotiateResponse : Packet
 	{
 		public RazorNegotiateResponse() : base( 0xF0 )
 		{

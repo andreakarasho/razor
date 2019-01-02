@@ -156,7 +156,7 @@ namespace Assistant
 							m_LastWarning = DateTime.UtcNow;
 						}
 
-						if ( ClientCommunication.NotificationCount > 0 )
+						if ( UOAssist.NotificationCount > 0 )
 						{
 							int wp = 0;
 							if ( Format == "bm" )
@@ -187,7 +187,7 @@ namespace Assistant
 								wp = 104;
 
 							if ( wp != 0 )
-								ClientCommunication.PostCounterUpdate( wp, value );
+								UOAssist.PostCounterUpdate( wp, value );
 						}
 
 						m_Count = value; 
@@ -195,7 +195,7 @@ namespace Assistant
 							m_Count = 0;
 
 						//Engine.MainWindow.RefreshCounters();
-						ClientCommunication.RequestTitlebarUpdate();
+						Windows.RequestTitleBarUpdate();
 					}
 					
 					m_LVI.SubItems[1].Text = m_Count.ToString();

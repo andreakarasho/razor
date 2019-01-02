@@ -17,16 +17,14 @@ namespace Assistant
             Command.Register("Ping", Ping);
             Command.Register("Help", Command.ListCommands);
             Command.Register("Echo", Echo);
-            Command.Register("GetSerial", GetSerial);
-            Command.Register("RPVInfo", GetRPVInfo);
             Command.Register("Macro", MacroCmd);
             Command.Register("Hue", GetItemHue);
             Command.Register("Item", GetItemHue);
             Command.Register("ClearItems", ClearItems);
             Command.Register("Resync", Resync);
             Command.Register("Mobile", GetMobile);
-
-            //Command.Register( "Setup-T", new CommandCallback( TranslateSetup ) );
+            Command.Register("Weather", SetWeather);
+            Command.Register("Season", SetSeason);
         }
 
         private static DateTime m_LastSync;
@@ -39,34 +37,24 @@ namespace Assistant
                 ClientCommunication.SendToClient(new UnicodeMessage(0xFFFFFFFF, -1, MessageType.Regular, 0x3B2, 3,
                     Language.CliLocName, "System", "Updating and resyncing with server"));
 
-                ClientCommunication.SendToClient(new MobileUpdate(World.Player));
                 ClientCommunication.SendToServer(new ResyncReq());
-                World.Player.Resync();
-
-                ClientCommunication.SendToClient(new UnicodeMessage(0xFFFFFFFF, -1, MessageType.Regular, 0x3B2, 3,
-                    Language.CliLocName, "System", "Done.."));
             }
         }
 
-        private static void GetRPVInfo(string[] param)
+        private static void SetWeather(string[] param)
         {
-            if (string.IsNullOrEmpty(PacketPlayer.CurrentOpenedInfo))
-                return;
+            ClientCommunication.SendToClient(new UnicodeMessage(0xFFFFFFFF, -1, MessageType.Regular, 0x3B2, 3,
+                Language.CliLocName, "System", "Setting weather.."));
 
-            ClientCommunication.ForceSendToClient(new UnicodeMessage(0xFFFFFFFF, -1, MessageType.Regular, 0x25, 3,
-                Language.CliLocName, "System", "Current PacketVideo File Information:"));
-            ClientCommunication.ForceSendToClient(new UnicodeMessage(0xFFFFFFFF, -1, MessageType.Regular, 0x25, 3,
-                Language.CliLocName, "System", PacketPlayer.CurrentOpenedInfo));
+            ClientCommunication.SendToClient(new SetWeather(Convert.ToInt32(param[0]), Convert.ToInt32(param[1])));
         }
 
-        private static void GetSerial(string[] param)
+        private static void SetSeason(string[] param)
         {
-            if (PacketPlayer.Playing)
-            {
-                ClientCommunication.ForceSendToClient(new UnicodeMessage(0xFFFFFFFF, -1, MessageType.Regular, 0x25, 3,
-                    Language.CliLocName, "System", "Target a player to get their serial number."));
-                ClientCommunication.ForceSendToClient(new Target(Targeting.LocalTargID, false));
-            }
+            ClientCommunication.SendToClient(new UnicodeMessage(0xFFFFFFFF, -1, MessageType.Regular, 0x3B2, 3,
+                Language.CliLocName, "System", "Setting season.."));
+
+            ClientCommunication.ForceSendToClient(new SeasonChange(Convert.ToInt32(param[0]), true));
         }
 
         private static void GetItemHue(string[] param)
@@ -104,10 +92,10 @@ namespace Assistant
             if (mobile != null)
             {
                 ClientCommunication.SendToClient(new UnicodeMessage(0xFFFFFFFF, -1, MessageType.Regular, 0x3B2, 3,
-                    Language.CliLocName, "System", $"Name: '{mobile.Name}' Hits: '{mobile.Hits}/{mobile.HitsMax}' Mana: '{mobile.Mana}/{mobile.ManaMax}' Stam: '{mobile.Stam}/{mobile.StamMax}'"));
+                    Language.CliLocName, "System", $"Name: '{mobile.Name}'"));
 
                 ClientCommunication.SendToClient(new UnicodeMessage(0xFFFFFFFF, -1, MessageType.Regular, 0x3B2, 3,
-                    Language.CliLocName, "System", $"Serial: '{mobile.Serial}' Hue: '{mobile.Hue}' IsAnimal: '{mobile.IsAnimal}' IsGhost: '{mobile.IsGhost}' IsHuman: '{mobile.IsHuman}' IsMonster: '{mobile.IsMonster}' IsSeaMonster: '{mobile.IsSeaMonster}'"));
+                    Language.CliLocName, "System", $"Serial: '{mobile.Serial}' Hue: '{mobile.Hue}' IsGhost: '{mobile.IsGhost}' IsHuman: '{mobile.IsHuman}' IsMonster: '{mobile.IsMonster}'"));
             }
 
         }
@@ -140,7 +128,7 @@ namespace Assistant
             string use = Language.GetString(LocString.UseOnce);
             for (int i = 0; i < Agent.List.Count; i++)
             {
-                Agent a = (Agent) Agent.List[i];
+                Agent a = (Agent)Agent.List[i];
                 if (a.Name == use)
                 {
                     a.OnButtonPress(1);
@@ -191,6 +179,10 @@ namespace Assistant
             int count = 5;
             if (param.Length > 0)
                 count = Utility.ToInt32(param[0], 5);
+
+            if (count > 10)
+                count = 10;
+
             Assistant.Ping.StartPing(count);
         }
 
@@ -260,7 +252,7 @@ namespace Assistant
 
         public static void OnSpeech(Packet pvSrc, PacketHandlerEventArgs args)
         {
-            MessageType type = (MessageType) pvSrc.ReadByte();
+            MessageType type = (MessageType)pvSrc.ReadByte();
             ushort hue = pvSrc.ReadUInt16();
             ushort font = pvSrc.ReadUInt16();
             string lang = pvSrc.ReadString(4);
@@ -275,7 +267,7 @@ namespace Assistant
                 int value = pvSrc.ReadInt16();
                 int count = (value & 0xFFF0) >> 4;
                 keys = new ArrayList();
-                keys.Add((ushort) value);
+                keys.Add((ushort)value);
 
                 for (int i = 0; i < count; ++i)
                 {
@@ -312,16 +304,25 @@ namespace Assistant
                 {
                     text = text.Substring(1);
                     string[] split = text.Split(' ', '\t');
-                    CommandCallback call = (CommandCallback) m_List[split[0]];
-                    if (call != null)
-                    {
-                        string[] param = new String[split.Length - 1];
-                        for (int i = 0; i < param.Length; i++)
-                            param[i] = split[i + 1];
-                        call(param);
 
-                        args.Block = true;
+                    if (m_List.ContainsKey(split[0]))
+                    {
+                        CommandCallback call = (CommandCallback)m_List[split[0]];
+                        if (call != null)
+                        {
+                            string[] param = new String[split.Length - 1];
+                            for (int i = 0; i < param.Length; i++)
+                                param[i] = split[i + 1];
+                            call(param);
+
+                            args.Block = true;
+                        }
                     }
+                    else
+                    {
+                        World.Player.SendMessage(MsgLevel.Force, "Unknown command");
+                    }
+                    
                 }
             }
         }

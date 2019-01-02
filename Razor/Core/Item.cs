@@ -229,6 +229,14 @@ namespace Assistant
 			}
 		}
 
+        public string DisplayName
+        {
+            get
+            {
+                return Ultima.TileData.ItemTable[m_ItemID.Value].Name;
+            }
+        }
+
 		public Layer Layer
 		{
 			get
@@ -540,7 +548,7 @@ namespace Assistant
 		public override void Remove()
 		{
 			/*if ( IsMulti )
-				ClientCommunication.PostRemoveMulti( this );*/
+				UOAssist.PostRemoveMulti( this );*/
 
 		    List<Item> rem = new List<Item>( m_Items );
 			m_Items.Clear();
@@ -557,16 +565,6 @@ namespace Assistant
 			World.RemoveItem( this );
 			base.Remove();
 		}
-
-		/*public override void OnPositionChanging( Point3D newPos )
-		{
-			if ( IsMulti && this.Position != Point3D.Zero && newPos != Point3D.Zero && this.Position != newPos )
-			{
-				ClientCommunication.PostRemoveMulti( this );
-				ClientCommunication.PostAddMulti( m_ItemID, newPos );
-			}
-			base.OnPositionChanging ( newPos );
-		}*/
 
 		public List<Item> Contains{ get{ return m_Items; } }
 
