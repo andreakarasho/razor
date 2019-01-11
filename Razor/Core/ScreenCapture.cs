@@ -5,6 +5,8 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 
+using Assistant.UI;
+
 namespace Assistant
 {
 	public class ScreenCapManager
@@ -69,7 +71,7 @@ namespace Assistant
 			
 			try
 			{
-				IntPtr hBmp = Windows.CaptureScreen(Windows.UOWindow, Config.GetBool( "CapFullScreen" ), timestamp );
+				IntPtr hBmp = Windows.CaptureScreen(ClientCommunication.ClientWindow, Config.GetBool( "CapFullScreen" ), timestamp );
 				using ( Image img = Image.FromHbitmap( hBmp ) )
 					img.Save( filename, GetFormat( type ) );
 				DeleteObject( hBmp );
@@ -78,7 +80,7 @@ namespace Assistant
 			{
 			}
 
-			Engine.MainWindow.ReloadScreenShotsList();
+			Engine.MainWindow.SafeAction(s => s.ReloadScreenShotsList());
 		} 
 
 		private static ImageFormat GetFormat( string fmt )

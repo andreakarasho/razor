@@ -22,3 +22,5 @@ DLLFUNCTION void HandleNegotiate(uint64_t features);
 DLLFUNCTION void InitTitleBar(const char *datapath);
 DLLFUNCTION void DrawTitleBar(HWND hUOWindow, const char *str);
 DLLFUNCTION void FreeTitleBar();
+DLLFUNCTION void CreateUOAWindow(HWND razorWindow);
+DLLFUNCTION void DestroyUOAWindow();

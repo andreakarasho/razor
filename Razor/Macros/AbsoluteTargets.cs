@@ -90,7 +90,7 @@ namespace Assistant.Macros
                     AbsoluteTargetList.Add(absoluteTarget);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
         }

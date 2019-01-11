@@ -8,6 +8,10 @@ using System.Text.RegularExpressions;
 using Assistant.Core;
 using Assistant.Macros;
 
+using Assistant.UI;
+using ContainerLabels = Assistant.Core.ContainerLabels;
+using OverheadMessages = Assistant.Core.OverheadMessages;
+
 namespace Assistant
 {
     public class PacketHandlers
@@ -341,7 +345,7 @@ namespace Assistant
                                 Spell s = Spell.Get(spellID);
                                 if (s != null)
                                 {
-                                    s.OnCast(p);
+                                    s.OnCast(spellID);
                                     args.Block = true;
                                     if (Macros.MacroManager.AcceptActions)
                                         MacroManager.Action(new BookCastSpellAction(s, serial));
@@ -361,7 +365,7 @@ namespace Assistant
                             Spell s = Spell.Get(spellID);
                             if (s != null)
                             {
-                                s.OnCast(p);
+                                s.OnCast(spellID);
                                 args.Block = true;
                                 if (Macros.MacroManager.AcceptActions)
                                     MacroManager.Action(new MacroCastSpellAction(s));
@@ -385,7 +389,7 @@ namespace Assistant
             PlayCharTime = DateTime.UtcNow;
 
             if (Engine.MainWindow != null)
-                Engine.MainWindow.UpdateControlLocks();
+                Engine.MainWindow.SafeAction(s => s.UpdateControlLocks());
         }
 
         private static void PlayCharacter(PacketReader p, PacketHandlerEventArgs args)
@@ -396,7 +400,7 @@ namespace Assistant
             PlayCharTime = DateTime.UtcNow;
 
             if (Engine.MainWindow != null)
-                Engine.MainWindow.UpdateControlLocks();
+                Engine.MainWindow.SafeAction(s => s.UpdateControlLocks());
 
             //ClientCommunication.TranslateLogin( World.OrigPlayerName, World.ShardName );
         }
@@ -722,7 +726,7 @@ namespace Assistant
                 Skill skill = World.Player.Skills[i];
 
                 skill.Lock = (LockType)p.ReadByte();
-                Engine.MainWindow.UpdateSkill(skill);
+                Engine.MainWindow.SafeAction(s => s.UpdateSkill(skill));
             }
         }
 
@@ -763,7 +767,7 @@ namespace Assistant
                         }
 
                         World.Player.SkillsSent = true;
-                        Engine.MainWindow.RedrawSkills();
+                        Engine.MainWindow.SafeAction(s => s.RedrawSkills());
                         break;
                     }
 
@@ -795,7 +799,7 @@ namespace Assistant
                         }
 
                         World.Player.SkillsSent = true;
-                        Engine.MainWindow.RedrawSkills();
+                        Engine.MainWindow.SafeAction(s => s.RedrawSkills());
                         break;
                     }
 
@@ -815,7 +819,7 @@ namespace Assistant
                             skill.FixedBase = p.ReadUInt16();
                             skill.Lock = (LockType)p.ReadByte();
                             skill.FixedCap = p.ReadUInt16();
-                            Engine.MainWindow.UpdateSkill(skill);
+                            Engine.MainWindow.SafeAction(s => s.UpdateSkill(skill));
 
                             if (Config.GetBool("DisplaySkillChanges") && skill.FixedBase != old)
                                 World.Player.SendMessage(MsgLevel.Force, LocString.SkillChanged, (SkillName)i, skill.Delta > 0 ? "+" : "", skill.Delta, skill.Value, skill.FixedBase - old > 0 ? "+" : "", ((double)(skill.FixedBase - old)) / 10.0);
@@ -841,7 +845,7 @@ namespace Assistant
                             skill.FixedBase = p.ReadUInt16();
                             skill.Lock = (LockType)p.ReadByte();
                             skill.FixedCap = 100;
-                            Engine.MainWindow.UpdateSkill(skill);
+                            Engine.MainWindow.SafeAction(s => s.UpdateSkill(skill));
                             if (Config.GetBool("DisplaySkillChanges") && skill.FixedBase != old)
                                 World.Player.SendMessage(MsgLevel.Force, LocString.SkillChanged, (SkillName)i, skill.Delta > 0 ? "+" : "", skill.Delta, skill.Value, ((double)(skill.FixedBase - old)) / 10.0, skill.FixedBase - old > 0 ? "+" : "");
 
@@ -878,9 +882,7 @@ namespace Assistant
 
             Windows.RequestTitleBarUpdate();
             UOAssist.PostLogin((int)serial.Value);
-            Engine.MainWindow.UpdateTitle(); // update player name & shard name
-
-            ClientCommunication.CalibratePosition((uint)m.Position.X, (uint)m.Position.Y, (uint)m.Position.Z, (byte)m.Direction);
+            Engine.MainWindow.SafeAction(s => s.UpdateTitle()); // update player name & shard name
 
             if (World.Player != null)
                 World.Player.SetSeason();
@@ -919,8 +921,6 @@ namespace Assistant
 
                 if (m == World.Player)
                 {
-                    ClientCommunication.CalibratePosition((uint)m.Position.X, (uint)m.Position.Y, (uint)m.Position.Z, (byte)m.Direction);
-
                     if (wasPoisoned != m.Poisoned || (oldNoto != m.Notoriety && Config.GetBool("ShowNotoHue")))
                         Windows.RequestTitleBarUpdate();
 
@@ -1208,7 +1208,7 @@ namespace Assistant
                 UOAssist.PostStamUpdate();
                 UOAssist.PostManaUpdate();
 
-                Engine.MainWindow.UpdateTitle(); // update player name
+                Engine.MainWindow.SafeAction(s => s.UpdateTitle()); // update player name
             }
         }
 
@@ -1244,8 +1244,6 @@ namespace Assistant
 
             if (m == World.Player)
             {
-                ClientCommunication.CalibratePosition((uint)m.Position.X, (uint)m.Position.Y, (uint)m.Position.Z, (byte)m.Direction);
-
                 if (!wasHidden && !m.Visible)
                 {
                     if (Config.GetBool("AlwaysStealth"))
@@ -2134,7 +2132,7 @@ namespace Assistant
                         }
 
                         if (Engine.MainWindow.MapWindow != null)
-                            Engine.MainWindow.MapWindow.UpdateMap();
+                            Engine.MainWindow.SafeAction(s => s.MapWindow.UpdateMap());
 
                         break;
                     }
@@ -2145,7 +2143,7 @@ namespace Assistant
                         if (Windows.HandleNegotiate(features) != 0)
                         {
                             ClientCommunication.SendToServer(new RazorNegotiateResponse());
-                            Engine.MainWindow.UpdateControlLocks();
+                            Engine.MainWindow.SafeAction(s => s.UpdateControlLocks());
                         }
                         break;
                     }
@@ -2263,7 +2261,7 @@ namespace Assistant
 
 
             if (Engine.MainWindow.MapWindow != null)
-                Engine.MainWindow.MapWindow.UpdateMap();
+                Engine.MainWindow.SafeAction(s => s.MapWindow.UpdateMap());
         }
 
         private static void PartyAutoDecline()

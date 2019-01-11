@@ -97,13 +97,11 @@ namespace Assistant
             AddProperty("RangeCheckLT", true);
             AddProperty("LTRange", (int)12);
 
-            AddProperty("ClientPrio", "Normal");
             AddProperty("FilterSnoopMsg", true);
             AddProperty("OldStatBar", false);
 
             AddProperty("SmartLastTarget", false);
             AddProperty("LastTargTextFlags", true);
-            //AddProperty("SmartCPU", false);
             AddProperty("LTHilight", (int)0);
 
             AddProperty("AutoFriend", false);
@@ -839,7 +837,7 @@ namespace Assistant
 
         public static string GetInstallDirectory(string name)
         {
-            string dir = AppDomain.CurrentDomain.BaseDirectory;
+            string dir = Engine.RootPath;
 
             if (name.Length > 0)
             {

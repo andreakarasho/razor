@@ -6,6 +6,8 @@ using System.Windows.Forms;
 using System.Text;
 using System.Xml;
 
+using Assistant.UI;
+
 namespace Assistant
 {
 	[Flags]
@@ -299,7 +301,7 @@ namespace Assistant
 			}
 
 			if ( m_Status != null )
-				m_Status.Text = msg;
+                m_Status.SafeAction(s => s.Text = msg);
 			return msg;
 		}
 

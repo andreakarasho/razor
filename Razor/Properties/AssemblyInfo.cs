@@ -2,17 +2,15 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-//
-// General Information about an assembly is controlled through the following 
-// set of attributes. Change these attribute values to modify the information
-// associated with an assembly.
-//
+// Le informazioni generali relative a un assembly sono controllate dal seguente 
+// set di attributi. Modificare i valori di questi attributi per modificare le informazioni
+// associate a un assembly.
 [assembly: AssemblyTitle("Razor")]
-[assembly: AssemblyDescription("Ultima Online Assistant Tool")]
+[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Razor")]
-[assembly: AssemblyCopyright("")]
+[assembly: AssemblyCopyright("Copyright ©  2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]	
 

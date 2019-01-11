@@ -83,8 +83,8 @@ namespace Assistant
 				string str = sb.ToString();
 				ushort atom = 0;
 				if (str != null && str.Length > 0)
-					atom = GlobalAddAtom(str);
-				PostMessage(hWnd, Msg, (IntPtr)atom, IntPtr.Zero);
+					atom = Windows.GlobalAddAtom(str);
+                Windows.PostMessage(hWnd, Msg, (IntPtr)atom, IntPtr.Zero);
 			}
 		}
 
@@ -113,8 +113,21 @@ namespace Assistant
 			m_WndReg = new ArrayList();
 		}
 
+        public static void CreateWindow()
+        {
+            Console.WriteLine("Creating UOASSIST window");
+            Windows.CreateUOAWindow(ClientCommunication.ClientWindow);
+        }
+
+        public static void DestroyWindow()
+        {
+            Console.WriteLine("Destroying UOASSIST window");
+            Windows.DestroyUOAWindow();
+        }
+
 		public static int OnUOAMessage(MainForm razor, int Msg, int wParam, int lParam)
 		{
+            Console.WriteLine("ON UOA Message {0}", Msg);
 			switch ((UOAMessage)Msg)
 			{
 				case UOAMessage.REGISTER:
@@ -135,7 +148,7 @@ namespace Assistant
 							foreach (Item item in World.Items.Values)
 							{
 								if (item.ItemID >= 0x4000)
-									PostMessage((IntPtr)wParam, (uint)UOAMessage.ADD_MULTI, (IntPtr)((int)((item.Position.X & 0xFFFF) | ((item.Position.Y & 0xFFFF) << 16))), (IntPtr)item.ItemID.Value);
+                                    Windows.PostMessage((IntPtr)wParam, (uint)UOAMessage.ADD_MULTI, (IntPtr)((int)((item.Position.X & 0xFFFF) | ((item.Position.Y & 0xFFFF) << 16))), (IntPtr)item.ItemID.Value);
 							}
 						}
 
@@ -163,7 +176,7 @@ namespace Assistant
 								{
 									try
 									{
-										return GlobalAddAtom(((SkillName)wParam).ToString());
+										return Windows.GlobalAddAtom(((SkillName)wParam).ToString());
 									}
 									catch
 									{
@@ -218,14 +231,14 @@ namespace Assistant
 
 						int hue = wParam & 0xFFFF;
 						StringBuilder sb = new StringBuilder(256);
-						if (GlobalGetAtomName((ushort)lParam, sb, 256) == 0)
+						if (Windows.GlobalGetAtomName((ushort)lParam, sb, 256) == 0)
 							return 0;
 
 						if ((wParam & 0x00010000) != 0)
 							ClientCommunication.SendToClient(new UnicodeMessage(0xFFFFFFFF, -1, MessageType.Regular, hue, 3, Language.CliLocName, "System", sb.ToString()));
 						else
 							World.Player.OverheadMessage(hue, sb.ToString());
-						GlobalDeleteAtom((ushort)lParam);
+                        Windows.GlobalDeleteAtom((ushort)lParam);
 						return 1;
 					}
 				case UOAMessage.REQUEST_MULTIS:
@@ -235,7 +248,7 @@ namespace Assistant
 				case UOAMessage.ADD_CMD:
 					{
 						StringBuilder sb = new StringBuilder(256);
-						if (GlobalGetAtomName((ushort)lParam, sb, 256) == 0)
+						if (Windows.GlobalGetAtomName((ushort)lParam, sb, 256) == 0)
 							return 0;
 
 						if (wParam == 0)
@@ -256,7 +269,7 @@ namespace Assistant
 				case UOAMessage.GET_SHARDNAME:
 					{
 						if (World.ShardName != null && World.ShardName.Length > 0)
-							return GlobalAddAtom(World.ShardName);
+							return Windows.GlobalAddAtom(World.ShardName);
 						else
 							return 0;
 					}
@@ -266,7 +279,7 @@ namespace Assistant
 					}
 				case UOAMessage.GET_UO_HWND:
 					{
-						return Windows.UOWindow.ToInt32();
+						return ClientCommunication.ClientWindow.ToInt32();
 					}
 				case UOAMessage.GET_POISON:
 					{
@@ -309,7 +322,7 @@ namespace Assistant
 		public static void PostLogout()
 		{
 			for (int i = 0; i < m_WndReg.Count; i++)
-				PostMessage((IntPtr)((WndRegEnt)m_WndReg[i]).Handle, (uint)UOAMessage.LOGOUT, IntPtr.Zero, IntPtr.Zero);
+                Windows.PostMessage((IntPtr)((WndRegEnt)m_WndReg[i]).Handle, (uint)UOAMessage.LOGOUT, IntPtr.Zero, IntPtr.Zero);
 		}
 
 		public static void PostMacroStop()
@@ -343,7 +356,7 @@ namespace Assistant
 			{
 				WndRegEnt wnd = (WndRegEnt)m_WndReg[i];
 				if (wnd.Type == 1)
-					PostMessage((IntPtr)wnd.Handle, (uint)UOAMessage.REM_MULTI, pos, (IntPtr)item.ItemID.Value);
+                    Windows.PostMessage((IntPtr)wnd.Handle, (uint)UOAMessage.REM_MULTI, pos, (IntPtr)item.ItemID.Value);
 			}
 		}
 
@@ -358,7 +371,7 @@ namespace Assistant
 			{
 				WndRegEnt wnd = (WndRegEnt)m_WndReg[i];
 				if (wnd.Type == 1)
-					PostMessage((IntPtr)wnd.Handle, (uint)UOAMessage.ADD_MULTI, pos, (IntPtr)iid.Value);
+                    Windows.PostMessage((IntPtr)wnd.Handle, (uint)UOAMessage.ADD_MULTI, pos, (IntPtr)iid.Value);
 			}
 		}
 
@@ -385,7 +398,7 @@ namespace Assistant
 			ArrayList rem = null;
 			for (int i = 0; i < m_WndReg.Count; i++)
 			{
-				if (PostMessage((IntPtr)((WndRegEnt)m_WndReg[i]).Handle, Msg, wParam, lParam) == 0)
+				if (Windows.PostMessage((IntPtr)((WndRegEnt)m_WndReg[i]).Handle, Msg, wParam, lParam) == 0)
 				{
 					if (rem == null)
 						rem = new ArrayList(1);
@@ -399,15 +412,6 @@ namespace Assistant
 					m_WndReg.Remove(rem[i]);
 			}
 		}
-
-		[DllImport("user32.dll")]
-		internal static extern uint PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
-		[DllImport("kernel32.dll")]
-		private static extern ushort GlobalAddAtom(string str);
-		[DllImport("kernel32.dll")]
-		private static extern ushort GlobalDeleteAtom(ushort atom);
-		[DllImport("kernel32.dll")]
-		private static extern uint GlobalGetAtomName(ushort atom, StringBuilder buff, int bufLen);
 	}
 }
 

@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Assistant.Core;
 using Assistant.Macros;
+using Assistant.UI;
 using Ultima;
 
 namespace Assistant
@@ -660,8 +661,9 @@ namespace Assistant
 
             ilist = null;
 
+            Console.WriteLine("Player position changed");
             if (Engine.MainWindow != null && Engine.MainWindow.MapWindow != null)
-                Engine.MainWindow.MapWindow.PlayerMoved();
+                Engine.MainWindow.SafeAction(f => f.MapWindow.PlayerMoved());
 
             base.OnPositionChanging(oldPos);
         }
@@ -698,7 +700,7 @@ namespace Assistant
             UOAssist.PostMapChange(cur);
 
             if (Engine.MainWindow != null && Engine.MainWindow.MapWindow != null)
-                Engine.MainWindow.MapWindow.PlayerMoved();
+                Engine.MainWindow.SafeAction(s => s.MapWindow.PlayerMoved());
         }
 
         /*public override void OnMapChange( byte old, byte cur )
@@ -890,7 +892,7 @@ namespace Assistant
 
             protected override void OnTick()
             {
-                ClientCommunication.ForceSendToClient(new SeasonChange(World.Player.Season, true));
+                ClientCommunication.SendToClient(new SeasonChange(World.Player.Season, true));
                 m_SeasonTimer.Stop();
             }
         }

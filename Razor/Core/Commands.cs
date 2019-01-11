@@ -54,7 +54,7 @@ namespace Assistant
             ClientCommunication.SendToClient(new UnicodeMessage(0xFFFFFFFF, -1, MessageType.Regular, 0x3B2, 3,
                 Language.CliLocName, "System", "Setting season.."));
 
-            ClientCommunication.ForceSendToClient(new SeasonChange(Convert.ToInt32(param[0]), true));
+            ClientCommunication.SendToClient(new SeasonChange(Convert.ToInt32(param[0]), true));
         }
 
         private static void GetItemHue(string[] param)

@@ -4,6 +4,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 
+using Assistant.UI;
+
 namespace Assistant
 {
 	public class FeatureBit
@@ -31,30 +33,21 @@ namespace Assistant
 
 	public static unsafe class Windows
 	{
-		[DllImport("user32.dll", SetLastError = true)]
-		static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
-		[DllImport("user32.dll", CharSet = CharSet.Unicode)]
-		static extern IntPtr FindWindowEx(IntPtr parentHandle, IntPtr childAfter, string lclassName, string windowTitle);
-		[DllImport("user32.dll", SetLastError = true)]
-		static extern int GetWindowThreadProcessId(IntPtr hWnd, out int lpdwProcessId);
-		[DllImport("user32.dll")]
-		internal static extern uint PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
 		[DllImport("user32.dll")]
 		internal static extern bool SetForegroundWindow(IntPtr hWnd);
+        [DllImport("user32.dll")]
+        internal static extern IntPtr GetForegroundWindow();
 
-		[DllImport("kernel32.dll", SetLastError = true)]
-		public static extern IntPtr OpenProcess(int dwDesiredAccess, bool bInheritHandle, int processId);
-		[DllImport("kernel32.dll", SetLastError = true)]
-		static extern bool CloseHandle(IntPtr hHandle);
-		[DllImport("kernel32.dll", SetLastError = true)]
-		public static extern bool GetExitCodeProcess(IntPtr hProcess, out uint ExitCode);
-		[DllImport("kernel32.dll")]
-		private static extern uint GlobalGetAtomName(ushort atom, StringBuilder buff, int bufLen);
+        [DllImport("user32.dll")]
+        internal static extern uint PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+        [DllImport("kernel32.dll")]
+        internal static extern ushort GlobalAddAtom(string str);
+        [DllImport("kernel32.dll")]
+        internal static extern ushort GlobalDeleteAtom(ushort atom);
+        [DllImport("kernel32.dll")]
+        internal static extern uint GlobalGetAtomName(ushort atom, StringBuilder buff, int bufLen);
 
-		[DllImport("msvcrt.dll")]
-		internal static unsafe extern void memcpy(void* to, void* from, int len);
-
-		[DllImport("Advapi32.dll")]
+        [DllImport("Advapi32.dll")]
 		private static extern int GetUserNameA(StringBuilder buff, int* len);
 
 		[DllImport("WinUtil.dll")]
@@ -71,61 +64,10 @@ namespace Assistant
 		internal static unsafe extern void DrawTitleBar(IntPtr handle, string path);
 		[DllImport("WinUtil.dll")]
 		internal static unsafe extern void FreeTitleBar();
-
-		public static IntPtr UOWindow { get; private set; } = IntPtr.Zero;
-
-		public static void FindUOWindow(int uoProcId)
-		{
-			IntPtr process;
-			uint exitCode;
-
-			process = OpenProcess(0x400, false, uoProcId);
-
-			do
-			{
-				int tid;
-				int pid = 0;
-
-				IntPtr wnd = FindWindow("Ultima Online", null);
-				while (wnd != IntPtr.Zero)
-				{
-					tid = GetWindowThreadProcessId(wnd, out pid);
-					if (uoProcId == pid)
-					{
-						break;
-					}
-					wnd = FindWindowEx(IntPtr.Zero, wnd, "Ultima Online", null);
-				}
-
-				if (uoProcId == pid)
-				{
-					UOWindow = wnd;
-					break;
-				}
-
-				wnd = FindWindow("Ultima Online Third Dawn", null);
-				while (wnd != IntPtr.Zero)
-				{
-					tid = GetWindowThreadProcessId(wnd, out pid);
-					if (uoProcId == pid)
-					{
-						break;
-					}
-					wnd = FindWindowEx(IntPtr.Zero, wnd, "Ultima Online Third Dawn", null);
-				}
-
-				if (uoProcId == pid)
-				{
-					UOWindow = wnd;
-					break;
-				}
-
-				Thread.Sleep(500);
-				GetExitCodeProcess(process, out exitCode);
-			} while (exitCode == 0x00000103); // Still active
-
-			CloseHandle(process);
-		}
+        [DllImport("WinUtil.dll")]
+        internal static unsafe extern void CreateUOAWindow(IntPtr razorWindow);
+        [DllImport("WinUtil.dll")]
+        internal static unsafe extern void DestroyUOAWindow();
 
 		public static string GetWindowsUserName()
 		{
@@ -178,7 +120,7 @@ namespace Assistant
 
 		private static void UpdateTitleBar()
 		{
-			if (UOWindow == IntPtr.Zero)
+			if (ClientCommunication.ClientWindow == IntPtr.Zero)
 				return;
 
 			if (World.Player != null && Config.GetBool("TitleBarDisplay"))
@@ -195,7 +137,7 @@ namespace Assistant
 				{
 					m_LastPlayerName = p.Name;
 
-					Engine.MainWindow.UpdateTitle();
+					Engine.MainWindow.SafeAction(s => s.UpdateTitle());
 				}
 
 				sb.Replace(@"{char}",
@@ -322,7 +264,7 @@ namespace Assistant
 
 			m_LastStr = str;
 
-			DrawTitleBar(UOWindow, str);
+			DrawTitleBar(ClientCommunication.ClientWindow, str);
 		}
 	}
 }

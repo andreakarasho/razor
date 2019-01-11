@@ -1,347 +1,352 @@
 using System;
-using System.IO;
-using System.Collections;
-using System.Threading;
+using System.Collections.Generic;
 
 namespace Assistant
 {
-	public class MinHeap
-	{
-		private ArrayList m_List;
-		private int m_Size;
+    public class MinHeap
+    {
+        private List<IComparable> m_List;
+        private int m_Size;
 
-		public MinHeap() : this( 1 )
-		{
-		}
+        public MinHeap()
+            : this(1)
+        {
+        }
 
-		public MinHeap( int capacity ) 
-		{
-			m_List = new ArrayList( capacity + 1 );
-			m_Size = 0;
-			m_List.Add( null ); // 0th index is never used, always null
-		}
+        public MinHeap(int capacity)
+        {
+            m_List = new List<IComparable>(capacity + 1);
+            m_Size = 0;
+            m_List.Add(null); // 0th index is never used, always null
+        }
 
-		public MinHeap( ICollection c ) : this( c.Count )
-		{
-			foreach ( IComparable o in c )
-				m_List.Add( o );
-			m_Size = c.Count;
-			Heapify();
-		}
+        public MinHeap(ICollection<IComparable> c)
+            : this(c.Count)
+        {
+            foreach (IComparable o in c)
+                m_List.Add(o);
+            m_Size = c.Count;
+            Heapify();
+        }
 
-		public void Heapify()
-		{
-			for (int i = m_Size / 2; i > 0; i--)
-				PercolateDown( i );
-		}
+        public void Heapify()
+        {
+            for (int i = m_Size / 2; i > 0; i--)
+                PercolateDown(i);
+        }
 
-		private void PercolateDown( int hole )
-		{
-			IComparable tmp = (IComparable)m_List[hole];
-			int child;
+        private void PercolateDown(int hole)
+        {
+            IComparable tmp = m_List[hole];
+            int child;
 
-			for ( ; hole * 2 <= m_Size; hole = child )
-			{
-				child = hole * 2;
-				if ( child != m_Size && ((IComparable)m_List[child+1]).CompareTo( m_List[child] ) < 0 )
-					child++;
+            for (; hole * 2 <= m_Size; hole = child)
+            {
+                child = hole * 2;
+                if (child != m_Size && (m_List[child + 1]).CompareTo(m_List[child]) < 0)
+                    child++;
 
-				if ( tmp.CompareTo( m_List[child] ) >= 0 )
-					m_List[hole] = m_List[child];
-				else
-					break;
-			}
+                if (tmp.CompareTo(m_List[child]) >= 0)
+                    m_List[hole] = m_List[child];
+                else
+                    break;
+            }
 
-			m_List[hole] = tmp;
-		}
+            m_List[hole] = tmp;
+        }
 
-		public IComparable Peek()
-		{
-			return m_List[1] as IComparable;
-		}
+        public IComparable Peek()
+        {
+            return m_List[1] as IComparable;
+        }
 
-		public IComparable Pop()
-		{
-			IComparable top = Peek();
+        public IComparable Pop()
+        {
+            IComparable top = Peek();
 
-			m_List[1] = m_List[m_Size--];
-			PercolateDown( 1 );
+            m_List[1] = m_List[m_Size--];
+            PercolateDown(1);
 
-			return top;
-		}
+            return top;
+        }
 
-		public void Remove( IComparable o )
-		{
-			for ( int i = 1 ; i <= m_Size; i++ )
-			{
-				if ( m_List[i] == o )
-				{
-					m_List[i] = m_List[m_Size--];
-					PercolateDown( i );
-					// TODO: Do we ever need to shrink?
-					return;
-				}
-			}
-		}
-		
-		public void Clear()
-		{
-			int capacity = m_List.Count / 2;
-			if ( capacity < 2 )
-				capacity = 2;
-			m_Size = 0;
-			m_List = new ArrayList( capacity );
-			m_List.Add( null );
-		}
+        public void Remove(IComparable o)
+        {
+            for (int i = 1; i <= m_Size; i++)
+            {
+                if (m_List[i] == o)
+                {
+                    m_List[i] = m_List[m_Size--];
+                    PercolateDown(i);
+                    // TODO: Do we ever need to shrink?
+                    return;
+                }
+            }
+        }
 
-		public void Add( IComparable o )
-		{
-			// PercolateUp
-			int hole = ++m_Size;
+        public void Clear()
+        {
+            int capacity = m_List.Count / 2;
+            if (capacity < 2)
+                capacity = 2;
+            m_Size = 0;
+            m_List = new List<IComparable>(capacity) { null };
+        }
 
-			// Grow the list if needed
-			while ( m_List.Count <= m_Size )
-				m_List.Add( null );
+        public void Add(IComparable o)
+        {
+            // PercolateUp
+            int hole = ++m_Size;
 
-			for( ; hole > 1 && o.CompareTo( m_List[ hole / 2 ] ) < 0; hole /= 2 )
-				m_List[ hole ] = m_List[ hole / 2 ];
-			m_List[ hole ] = o;
-		}
+            // Grow the list if needed
+            while (m_List.Count <= m_Size)
+                m_List.Add(null);
 
-		public void AddMultiple( ICollection col )
-		{
-			if ( col != null && col.Count > 0 )
-			{
-				foreach ( object o in col )
-				{
-					int hole = ++m_Size;
+            for (; hole > 1 && o.CompareTo(m_List[hole / 2]) < 0; hole /= 2)
+                m_List[hole] = m_List[hole / 2];
+            m_List[hole] = o;
+        }
 
-					// Grow the list as needed
-					while ( m_List.Count <= m_Size )
-						m_List.Add( null );
+        public void AddMultiple(ICollection<IComparable> col)
+        {
+            if (col == null || col.Count <= 0)
+                return;
 
-					m_List[hole] = o;
-				}
+            foreach (IComparable o in col)
+            {
+                int hole = ++m_Size;
 
-				Heapify();
-			}
-		}
-				
-		public int Count { get { return m_Size; } }
+                // Grow the list as needed
+                while (m_List.Count <= m_Size)
+                    m_List.Add(null);
 
-		public bool IsEmpty { get { return Count <= 0; } }
+                m_List[hole] = o;
+            }
 
-		public ArrayList GetRawList()
-		{
-			ArrayList copy = new ArrayList( m_Size );
-			for (int i = 1; i <= m_Size; i++)
-				copy.Add( m_List[i] );
-			return copy;
-		}
-	}
+            Heapify();
+        }
 
-	public delegate void TimerCallback();
-	public delegate void TimerCallbackState( object state );
+        public int Count { get { return m_Size; } }
 
-	public abstract class Timer : IComparable
-	{
-		private DateTime m_Next;
-		private TimeSpan m_Delay;
-		private TimeSpan m_Interval;
-		private bool m_Running;
-		private int m_Index, m_Count;
+        public bool IsEmpty { get { return Count <= 0; } }
 
-		protected abstract void OnTick();
+        public List<IComparable> GetRawList()
+        {
+            List<IComparable> copy = new List<IComparable>(m_Size);
+            for (int i = 1; i <= m_Size; i++)
+                copy.Add(m_List[i]);
+            return copy;
+        }
+    }
 
-		public Timer( TimeSpan delay ) : this( delay, TimeSpan.Zero, 1 )
-		{
-		}
+    public delegate void TimerCallback();
 
-		public Timer( TimeSpan interval, int count ) : this( interval, interval, count )
-		{
-		}
+    public delegate void TimerCallbackState(object state);
 
-		public Timer( TimeSpan delay, TimeSpan interval ) : this( delay, interval, 0 )
-		{
-		}
+    public abstract class Timer : IComparable
+    {
+        private DateTime m_Next;
+        private TimeSpan m_Delay;
+        private TimeSpan m_Interval;
+        private bool m_Running;
+        private int m_Index, m_Count;
 
-		public Timer( TimeSpan delay, TimeSpan interval, int count )
-		{
-			m_Delay = delay;
-			m_Interval = interval;
-			m_Count = count;
-		}
+        protected abstract void OnTick();
 
-		public void Start()
-		{
-			if ( !m_Running )
-			{
-				m_Index = 0;
-				m_Next = DateTime.UtcNow + m_Delay;
-				m_Running = true;
-				m_Heap.Add( this );
-				ChangedNextTick( true );
-			}
-		}
+        public Timer(TimeSpan delay)
+            : this(delay, TimeSpan.Zero, 1)
+        {
+        }
 
-		public void Stop()
-		{
-			if ( m_Running )
-			{
-				m_Running = false;
-				m_Heap.Remove( this );
-				//ChangedNextTick();
-			}
-		}
+        public Timer(TimeSpan interval, int count)
+            : this(interval, interval, count)
+        {
+        }
 
-		public int CompareTo(object obj)
-		{
-			if ( obj is Timer )
-				return this.TimeUntilTick.CompareTo( ((Timer)obj).TimeUntilTick );
-			else
-				return -1;
-		}
+        public Timer(TimeSpan delay, TimeSpan interval)
+            : this(delay, interval, 0)
+        {
+        }
 
-		public TimeSpan TimeUntilTick
-		{
-			get { return m_Running ? m_Next - DateTime.UtcNow : TimeSpan.MaxValue; }
-		}
-		
-		public bool Running { get { return m_Running; } }
+        public Timer(TimeSpan delay, TimeSpan interval, int count)
+        {
+            m_Delay = delay;
+            m_Interval = interval;
+            m_Count = count;
+        }
 
-		public TimeSpan Delay
-		{
-			get { return m_Delay; }
-			set	{ m_Delay = value; }
-		}
+        public void Start()
+        {
+            if (!m_Running)
+            {
+                m_Index = 0;
+                m_Next = DateTime.Now + m_Delay;
+                m_Running = true;
+                m_Heap.Add(this);
+                ChangedNextTick(true);
+            }
+        }
 
-		public TimeSpan Interval
-		{
-			get { return m_Interval; }
-			set { m_Interval = value; }
-		}
+        public void Stop()
+        {
+            if (!m_Running)
+                return;
 
-		private static MinHeap m_Heap = new MinHeap();
-		private static System.Windows.Forms.Timer m_Ctrl;
-		
-		public static System.Windows.Forms.Timer Control
-		{
-			get { return m_Ctrl; }
-			set 
-			{
-				if ( m_Ctrl != value )
-				{
-					if ( m_Ctrl != null )
-						m_Ctrl.Stop();
-					m_Ctrl = value;
-					ChangedNextTick();
-				}
-			}
-		}
+            m_Running = false;
+            m_Heap.Remove(this);
+            //ChangedNextTick();
+        }
 
-		private static void ChangedNextTick()
-		{
-			ChangedNextTick( false );
-		}
+        public int CompareTo(object obj)
+        {
+            if (obj is Timer)
+                return this.TimeUntilTick.CompareTo(((Timer)obj).TimeUntilTick);
+            else
+                return -1;
+        }
 
-		private static void ChangedNextTick( bool allowImmediate )
-		{
-			if ( m_Ctrl == null )
-				return;
+        public TimeSpan TimeUntilTick
+        {
+            get { return m_Running ? m_Next - DateTime.Now : TimeSpan.MaxValue; }
+        }
 
-			m_Ctrl.Stop();
+        public bool Running { get { return m_Running; } }
 
-			if ( !m_Heap.IsEmpty )
-			{
-				int interval = (int)Math.Round( ((Timer)m_Heap.Peek()).TimeUntilTick.TotalMilliseconds );
-				if ( allowImmediate && interval <= 0 )
-				{
-					Slice();
-				}
-				else
-				{
-					if ( interval <= 0 )
-						interval = 1;
-				
-					m_Ctrl.Interval = interval;
-					m_Ctrl.Start();
-				}
-			}
-		}
+        public TimeSpan Delay
+        {
+            get { return m_Delay; }
+            set { m_Delay = value; }
+        }
 
-		public static void Slice()
-		{
-			int breakCount = 100;
-			ArrayList readd = new ArrayList();
+        public TimeSpan Interval
+        {
+            get { return m_Interval; }
+            set { m_Interval = value; }
+        }
 
-			while ( !m_Heap.IsEmpty && ((Timer)m_Heap.Peek()).TimeUntilTick < TimeSpan.Zero )
-			{
-				if ( breakCount-- <= 0 )
-					break;
+        private static MinHeap m_Heap = new MinHeap();
+        private static System.Timers.Timer m_SystemTimer;
 
-				Timer t = (Timer)m_Heap.Pop();
+        public static System.Timers.Timer SystemTimer
+        {
+            get { return m_SystemTimer; }
+            set
+            {
+                if (m_SystemTimer != value)
+                {
+                    if (m_SystemTimer != null)
+                        m_SystemTimer.Stop();
+                    m_SystemTimer = value;
+                    ChangedNextTick();
+                }
+            }
+        }
 
-				if ( t != null && t.Running )
-				{
-					t.OnTick();
+        private static void ChangedNextTick()
+        {
+            ChangedNextTick(false);
+        }
 
-					if ( t.Running && ( t.m_Count == 0 || (++t.m_Index) < t.m_Count ) )
-					{
-						t.m_Next = DateTime.UtcNow + t.m_Interval;
-						readd.Add( t );
-					}
-					else
-					{
-						t.Stop();
-					}
-				}
-			}
+        private static void ChangedNextTick(bool allowImmediate)
+        {
+            if (m_SystemTimer == null)
+                return;
 
-			m_Heap.AddMultiple( readd );
+            m_SystemTimer.Stop();
 
-			ChangedNextTick();
-		}
+            if (!m_Heap.IsEmpty)
+            {
+                int interval = (int)Math.Round(((Timer)m_Heap.Peek()).TimeUntilTick.TotalMilliseconds);
+                if (allowImmediate && interval <= 0)
+                {
+                    Slice();
+                }
+                else
+                {
+                    if (interval <= 0)
+                        interval = 1;
 
-		private class OneTimeTimer : Timer
-		{
-			private TimerCallback m_Call;
+                    m_SystemTimer.Interval = interval;
+                    m_SystemTimer.Start();
+                }
+            }
+        }
 
-			public OneTimeTimer( TimeSpan d, TimerCallback call ) : base( d )
-			{
-				m_Call = call;
-			}
+        public static void Slice()
+        {
+            int breakCount = 100;
+            List<IComparable> readd = new List<IComparable>();
 
-			protected override void OnTick()
-			{
-				m_Call();
-			}
-		}
+            while (!m_Heap.IsEmpty && ((Timer)m_Heap.Peek()).TimeUntilTick < TimeSpan.Zero)
+            {
+                if (breakCount-- <= 0)
+                    break;
 
-		public static Timer DelayedCallback( TimeSpan delay, TimerCallback call )
-		{
-			return new OneTimeTimer( delay, call );
-		}
+                Timer t = (Timer)m_Heap.Pop();
 
-		private class OneTimeTimerState : Timer
-		{
-			private TimerCallbackState m_Call;
-			private object m_State;
+                if (t != null && t.Running)
+                {
+                    t.OnTick();
 
-			public OneTimeTimerState( TimeSpan d, TimerCallbackState call, object state ) : base( d )
-			{
-				m_Call = call;
-				m_State = state;
-			}
+                    if (t.Running && (t.m_Count == 0 || (++t.m_Index) < t.m_Count))
+                    {
+                        t.m_Next = DateTime.Now + t.m_Interval;
+                        readd.Add(t);
+                    }
+                    else
+                    {
+                        t.Stop();
+                    }
+                }
+            }
 
-			protected override void OnTick()
-			{
-				m_Call( m_State );
-			}
-		}
+            m_Heap.AddMultiple(readd);
 
-		public static Timer DelayedCallbackState( TimeSpan delay, TimerCallbackState call, object state )
-		{
-			return new OneTimeTimerState( delay, call, state );
-		}
-	}
+            ChangedNextTick();
+        }
+
+        private class OneTimeTimer : Timer
+        {
+            private TimerCallback m_Call;
+
+            public OneTimeTimer(TimeSpan d, TimerCallback call)
+                : base(d)
+            {
+                m_Call = call;
+            }
+
+            protected override void OnTick()
+            {
+                m_Call();
+            }
+        }
+
+        public static Timer DelayedCallback(TimeSpan delay, TimerCallback call)
+        {
+            return new OneTimeTimer(delay, call);
+        }
+
+        private class OneTimeTimerState : Timer
+        {
+            private TimerCallbackState m_Call;
+            private object m_State;
+
+            public OneTimeTimerState(TimeSpan d, TimerCallbackState call, object state)
+                : base(d)
+            {
+                m_Call = call;
+                m_State = state;
+            }
+
+            protected override void OnTick()
+            {
+                m_Call(m_State);
+            }
+        }
+
+        public static Timer DelayedCallbackState(TimeSpan delay, TimerCallbackState call, object state)
+        {
+            return new OneTimeTimerState(delay, call, state);
+        }
+    }
 }

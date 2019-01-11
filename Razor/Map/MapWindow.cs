@@ -6,6 +6,8 @@ using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.Threading;
 
+using Assistant.UI;
+
 namespace Assistant.MapUO
 {
 	/// <summary>
@@ -52,7 +54,6 @@ namespace Assistant.MapUO
 			//
 
 			this.Map.FullUpdate();
-			ClientCommunication.SetMapWndHandle( this );
 		}
 
 		public class MapMenuItem : MenuItem
@@ -118,24 +119,29 @@ namespace Assistant.MapUO
 			{
 				if ( Engine.MainWindow.MapWindow == null )
 				{
-					Engine.MainWindow.MapWindow = new Assistant.MapUO.MapWindow();
-					Engine.MainWindow.MapWindow.Show();
-					Engine.MainWindow.MapWindow.BringToFront();
+                    Engine.MainWindow.SafeAction(s =>
+                    {
+                        s.MapWindow = new Assistant.MapUO.MapWindow();
+                        s.MapWindow.Show();
+                        s.MapWindow.BringToFront();
+                    });
 				}
 				else
 				{
-					if ( Engine.MainWindow.MapWindow.Visible )
-					{
-						Engine.MainWindow.MapWindow.Hide();
-						Engine.MainWindow.BringToFront();
-						Windows.BringToFront(Windows.UOWindow );
+                    if (Engine.MainWindow.MapWindow.Visible)
+                    {
+                        Engine.MainWindow.SafeAction(s =>
+                        {
+                            s.MapWindow.Hide();
+                            s.BringToFront();
+                        });
+						Windows.BringToFront(ClientCommunication.ClientWindow);
 					}
 					else
 					{
 						Engine.MainWindow.MapWindow.Show();
 						Engine.MainWindow.MapWindow.BringToFront();
 						Engine.MainWindow.MapWindow.TopMost = true;
-						ClientCommunication.SetMapWndHandle( Engine.MainWindow.MapWindow );
 					}
 				}
 			}
@@ -321,8 +327,7 @@ namespace Assistant.MapUO
 		}
 
 		public void UpdateMap()
-		{
-			ClientCommunication.SetMapWndHandle( this );
+        {
 			this.Map.UpdateMap();
 		}
 
@@ -333,12 +338,13 @@ namespace Assistant.MapUO
 				e.Cancel = true;
 				this.Hide();
 				Engine.MainWindow.BringToFront();
-				Windows.BringToFront(Windows.UOWindow );
+				Windows.BringToFront(ClientCommunication.ClientWindow);
 			}
 		}
 
 		public void PlayerMoved()
 		{
+            Console.WriteLine("Map window player update");
 			if ( this.Visible && this.Map != null )
 				this.Map.FullUpdate();
 		}

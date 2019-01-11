@@ -8,3 +8,5 @@ EXPORTS
 	InitTitleBar
 	DrawTitleBar
 	FreeTitleBar
+	CreateUOAWindow
+	DestroyUOAWindow

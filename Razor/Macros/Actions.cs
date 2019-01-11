@@ -4,6 +4,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 
+using Assistant.UI;
+
 namespace Assistant.Macros
 {
     public delegate void MacroMenuCallback(object[] Args);
@@ -229,7 +231,7 @@ namespace Assistant.Macros
                 m_Gfx = gfx;
             }
 
-            Engine.MainWindow.ShowMe();
+            Engine.MainWindow.SafeAction(s => s.ShowMe());
 
             if (m_Parent != null)
                 m_Parent.Update();
@@ -383,7 +385,7 @@ namespace Assistant.Macros
             m_Gfx = gfx;
             m_Item = serial.IsItem;
 
-            Engine.MainWindow.ShowMe();
+            Engine.MainWindow.SafeAction(s => s.ShowMe());
             if (m_Parent != null)
                 m_Parent.Update();
         }
@@ -907,7 +909,7 @@ namespace Assistant.Macros
             m_Info.Y = pt.Y;
             m_Info.Z = pt.Z;
 
-            Engine.MainWindow.ShowMe();
+            Engine.MainWindow.SafeAction(s => s.ShowMe());
             if (m_Parent != null)
                 m_Parent.Update();
         }
@@ -1014,7 +1016,7 @@ namespace Assistant.Macros
             _target.Y = pt.Y;
             _target.Z = pt.Z;
 
-            Engine.MainWindow.ShowMe();
+            Engine.MainWindow.SafeAction(s => s.ShowMe());
 
             m_Parent?.Update();
         }*/
@@ -1154,7 +1156,7 @@ namespace Assistant.Macros
                 m_Mobile = serial.IsMobile;
                 m_Gfx = gfx;
             }
-            Engine.MainWindow.ShowMe();
+            Engine.MainWindow.SafeAction(s => s.ShowMe());
             if (m_Parent != null)
                 m_Parent.Update();
         }
@@ -1225,7 +1227,7 @@ namespace Assistant.Macros
 
         private void ReTarget(object[] args)
         {
-            Engine.MainWindow.ShowMe();
+            Engine.MainWindow.SafeAction(s => s.ShowMe());
 
             Targeting.OneTimeTarget(true, new Targeting.TargetResponseCallback(ReTargetResponse));
             World.Player.SendMessage(LocString.SelTargAct);
@@ -1826,7 +1828,7 @@ namespace Assistant.Macros
                         break;
                 }
               
-                SendMessage(Windows.UOWindow, WM_KEYDOWN, (IntPtr)direction, (IntPtr)1);
+                SendMessage(ClientCommunication.ClientWindow, WM_KEYDOWN, (IntPtr)direction, (IntPtr)1);
 
                 return false;
             }

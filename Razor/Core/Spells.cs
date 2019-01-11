@@ -87,16 +87,16 @@ namespace Assistant
             }
         }
 
-        public void OnCast(PacketReader p)
+        public void OnCast(Packet p)
         {
             Cast();
             ClientCommunication.SendToServer(p);
         }
 
-        public void OnCast(Packet p)
+        public void OnCast(int idx)
         {
             Cast();
-            ClientCommunication.SendToServer(p);
+            ClientCommunication.CastSpell(idx);
         }
 
         private void Cast()
