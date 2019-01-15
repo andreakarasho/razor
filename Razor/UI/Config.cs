@@ -91,7 +91,6 @@ namespace Assistant
 
             AddProperty("AutoStack", false);
             AddProperty("ActionStatusMsg", true);
-            AddProperty("RememberPwds", false);
 
             AddProperty("SpellUnequip", false);
             AddProperty("RangeCheckLT", true);
@@ -112,10 +111,6 @@ namespace Assistant
 
             AddProperty("ForceIP", "");
             AddProperty("ForcePort", 0);
-
-            AddProperty("ForceSizeEnabled", false);
-            AddProperty("ForceSizeX", 800);
-            AddProperty("ForceSizeY", 600);
 
             AddProperty("PotionEquip", false);
             AddProperty("BlockHealPoison", false);
@@ -203,7 +198,6 @@ namespace Assistant
             DressList.ClearAll();
             HotKey.ClearAll();
             Agent.ClearAll();
-            PasswordMemory.ClearAll();
             OverheadMessages.ClearAll();
             ContainerLabels.ClearAll();
         }
@@ -288,7 +282,7 @@ namespace Assistant
                         if (type == null)
                             type = exe.GetType(typeStr);
 
-                        if (m_Props.ContainsKey(name) || name == "ForceSize")
+                        if (m_Props.ContainsKey(name))
                         {
                             if (type == null)
                                 m_Props.Remove(name);
@@ -308,48 +302,11 @@ namespace Assistant
             Agent.LoadProfile(root["agents"]);
             DressList.Load(root["dresslists"]);
             HotKey.Load(root["hotkeys"]);
-            PasswordMemory.Load(root["passwords"]);
             OverheadMessages.Load(root["overheadmessages"]);
             ContainerLabels.Load(root["containerlabels"]);
             AbsoluteTargets.Load(root["absolutetargets"]);
 
             GoldPerHourTimer.Stop();
-
-            if (m_Props.ContainsKey("ForceSize"))
-            {
-                try
-                {
-                    int x, y;
-                    switch ((int)m_Props["ForceSize"])
-                    {
-                        case 1: x = 960; y = 600; break;
-                        case 2: x = 1024; y = 768; break;
-                        case 3: x = 1152; y = 864; break;
-                        case 4: x = 1280; y = 720; break;
-                        case 5: x = 1280; y = 768; break;
-                        case 6: x = 1280; y = 800; break;
-                        case 7: x = 1280; y = 960; break;
-                        case 8: x = 1280; y = 1024; break;
-
-                        case 0:
-                        default: x = 800; y = 600; break;
-                    }
-
-                    SetProperty("ForceSizeX", x);
-                    SetProperty("ForceSizeY", y);
-
-                    if (x != 800 || y != 600)
-                        SetProperty("ForceSizeEnabled", true);
-
-                    m_Props.Remove("ForceSize");
-                }
-                catch
-                {
-                }
-            }
-
-            //if ( !Language.Load( GetString( "Language" ) ) )
-            //	MessageBox.Show( Engine.ActiveWindow, "Warning: Could not load language from profile, using current language instead.", "Language Error", MessageBoxButtons.OK, MessageBoxIcon.Warning );
 
             return true;
         }
@@ -443,10 +400,6 @@ namespace Assistant
 
             xml.WriteStartElement("hotkeys");
             HotKey.Save(xml);
-            xml.WriteEndElement();
-
-            xml.WriteStartElement("passwords");
-            PasswordMemory.Save(xml);
             xml.WriteEndElement();
 
             xml.WriteStartElement("overheadmessages");

@@ -36,7 +36,6 @@ namespace Assistant
             PacketHandler.RegisterClientToServerViewer(0x3A, new PacketViewerCallback(SetSkillLock));
             PacketHandler.RegisterClientToServerViewer(0x5D, new PacketViewerCallback(PlayCharacter));
             PacketHandler.RegisterClientToServerViewer(0x7D, new PacketViewerCallback(MenuResponse));
-            PacketHandler.RegisterClientToServerFilter(0x80, new PacketFilterCallback(ServerListLogin));
             PacketHandler.RegisterClientToServerFilter(0x91, new PacketFilterCallback(GameLogin));
             PacketHandler.RegisterClientToServerViewer(0x95, new PacketViewerCallback(HueResponse));
             PacketHandler.RegisterClientToServerViewer(0xA0, new PacketViewerCallback(PlayServer));
@@ -2294,46 +2293,13 @@ namespace Assistant
             }
         }
 
-        private static string m_LastPW = "";
-
-        private static void ServerListLogin(Packet p, PacketHandlerEventArgs args)
-        {
-            m_LastPW = "";
-            if (!Config.GetBool("RememberPwds"))
-                return;
-
-            World.AccountName = p.ReadStringSafe(30);
-            string pass = p.ReadStringSafe(30);
-
-            if (pass == "")
-            {
-                pass = PasswordMemory.Find(World.AccountName, ClientCommunication.LastConnection);
-                if (pass != null && pass != "")
-                {
-                    p.Seek(31, SeekOrigin.Begin);
-                    p.WriteAsciiFixed(pass, 30);
-                    m_LastPW = pass;
-                }
-            }
-            else
-            {
-                PasswordMemory.Add(World.AccountName, pass, ClientCommunication.LastConnection);
-            }
-        }
-
         private static void GameLogin(Packet p, PacketHandlerEventArgs args)
         {
             int authID = p.ReadInt32();
 
             World.AccountName = p.ReadString(30);
-            string password = p.ReadString(30);
-
-            if (password == "" && m_LastPW != "" && Config.GetBool("RememberPwds"))
-            {
-                p.Seek(35, SeekOrigin.Begin);
-                p.WriteAsciiFixed(m_LastPW, 30);
-                m_LastPW = "";
-            }
+            
+            // TODO: Do we need to store account name?
         }
 
         private static void MenuResponse(PacketReader pvSrc, PacketHandlerEventArgs args)
