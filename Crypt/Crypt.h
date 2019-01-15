@@ -86,7 +86,6 @@ struct SharedMemory
 	bool ForceDisconn;
 	unsigned int TotalSend;
 	unsigned int TotalRecv;
-	unsigned short PacketTable[256];
 	unsigned int ServerIP;
 	unsigned short ServerPort;
 	char UOVersion[16];
@@ -106,8 +105,6 @@ extern HANDLE CommMutex;
 DLLFUNCTION int InstallLibrary(HWND RazorWindow, HWND UOWindow, int flags);
 DLLFUNCTION void Shutdown();
 DLLFUNCTION void *GetSharedAddress();
-DLLFUNCTION int GetPacketLength( unsigned char *data, int len );
-DLLFUNCTION bool IsDynLength( unsigned char packet );
 DLLFUNCTION HANDLE GetCommMutex();
 DLLFUNCTION unsigned int TotalIn();
 DLLFUNCTION unsigned int TotalOut();
@@ -122,9 +119,3 @@ void Log( const char *format, ... );
 void MemoryPatch( unsigned long, unsigned long );
 void MemoryPatch( unsigned long, int, int );
 void MemoryPatch( unsigned long, const void *, int );
-
-//#define PACKET_TBL_STR "Got Logout OK packet!\0\0\0"
-//#define PACKET_TS_LEN 24
-#define PACKET_TBL_STR "\x07\0\0\0\x03\0\0\0"
-#define PACKET_TS_LEN 8
-#define PACKET_TBL_OFFSET (0-(8+12+12))

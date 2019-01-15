@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "Crypt.h"
 #include "uo_huffman.h"
-#include "PacketInfo.h"
 #include "MemFinder.h"
 
 //*************************************************************************************
@@ -317,11 +316,8 @@ DLLFUNCTION void OnAttach( void *params, int paramsLen )
 		mf.AddEntry("\x80\x02\x00\x00\xE0\x01\x00\x00", 8, 0x00500000); // current screen size
 		mf.AddEntry("\x8B\x44\x24\x04\xBA\x80\x02\x00\x00\x3B\xC2\xB9\xE0\x01\x00\x00", 16); // resize screen function
 		mf.AddEntry("\x57\x56\x6A\x00\x6A\x00\xE8", 7); // redraw screen/edge function
-		mf.AddEntry(PACKET_TBL_STR, PACKET_TS_LEN, 10, 0x00500000);
 		mf.AddEntry("UO Version %s", 12);
 		mf.AddEntry("Multiple Instances Running", 26, 0x00500000);
-
-		memcpy( pShared->PacketTable, StaticPacketTable, 256*sizeof(short) );
 
 		mf.Execute();
 
@@ -360,49 +356,6 @@ DLLFUNCTION void OnAttach( void *params, int paramsLen )
 				VirtualProtect((void*)origAddr, 128, oldProt, &oldProt);
 			}
 		}
-
-		int i = 0;
-		while ((addr = mf.GetAddress(PACKET_TBL_STR, PACKET_TS_LEN, i++)) != 0)
-		{
-			memset(pShared->PacketTable, 0xFF, 512);
-
-			addr += PACKET_TBL_OFFSET;
-			if (IsBadReadPtr((void*)addr, sizeof(ClientPacketInfo) * 128))
-				continue;
-			ClientPacketInfo *tbl = (ClientPacketInfo*)addr;
-
-			if (tbl[0].Id == 1 || tbl[0].Id == 2 || tbl[0].Id >= 256)
-				continue;
-
-			// this one isnt in order because OSI are idiots (0xF8)
-			pShared->PacketTable[tbl[0].Id] = tbl[0].Length;
-
-			int idx = 1;
-			bool got1 = false, got2 = false;
-			for (int prev = 0; prev < 255 && idx < 256; idx++)
-			{
-				if (IsBadReadPtr((void*)(tbl + idx), sizeof(ClientPacketInfo)) ||
-					tbl[idx].Id <= prev || tbl[idx].Id >= 256)
-				{
-					break;
-				}
-
-				got1 |= tbl[idx].Id == 1 && tbl[idx].Length == StaticPacketTable[1];
-				got2 |= tbl[idx].Id == 2 && tbl[idx].Length == StaticPacketTable[2];
-
-				prev = tbl[idx].Id;
-				if (pShared->PacketTable[prev] == 0xFFFF)
-					pShared->PacketTable[prev] = tbl[idx].Length;
-			}
-
-			if (idx < 128 || !got1 || !got2)
-				continue;
-			else
-				break;
-		}
-
-		if (!addr)
-			CopyFailed = true;
 
 		// Multi UO
 		addr = mf.GetAddress("UoClientApp", 12);

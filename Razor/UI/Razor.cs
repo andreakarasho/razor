@@ -3165,6 +3165,8 @@ namespace Assistant
                 return;
             }
 
+            PacketsTable.AdjustPacketSizeByVersion(Engine.ClientVersion);
+
             SplashScreen.Message = LocString.Welcome;
             InitConfig();
 

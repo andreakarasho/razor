@@ -127,7 +127,6 @@
       <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </DebugInformationFormat>
     </ClCompile>
-    <ClCompile Include="PacketInfo.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="uo_huffman.cpp" />
   </ItemGroup>
@@ -135,7 +134,6 @@
     <ClInclude Include="Crypt.h" />
     <ClInclude Include="debug.h" />
     <ClInclude Include="MemFinder.h" />
-    <ClInclude Include="PacketInfo.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="uo_huffman.h" />

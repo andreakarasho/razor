@@ -81,10 +81,6 @@ namespace Assistant
 		[DllImport( "Crypt.dll" )]
 		private static unsafe extern IntPtr GetSharedAddress();
 		[DllImport( "Crypt.dll" )]
-		internal static unsafe extern int GetPacketLength( byte *data, int bufLen );//GetPacketLength( [MarshalAs(UnmanagedType.LPArray, SizeParamIndex=1)] byte[] data, int bufLen );
-		[DllImport( "Crypt.dll" )]
-		internal static unsafe extern bool IsDynLength(byte packetId);
-		[DllImport( "Crypt.dll" )]
 		private static unsafe extern IntPtr GetCommMutex();
 		[DllImport( "Crypt.dll" )]
 		internal static unsafe extern uint TotalIn();
@@ -584,7 +580,7 @@ namespace Assistant
 			{
 				byte *buff = (&inBuff->Buff0) + inBuff->Start;
 
-				int len = GetPacketLength( buff, inBuff->Length );
+				int len = PacketsTable.GetPacketLength( buff[0] );
 				if ( len > inBuff->Length || len <= 0 )
 					break;
 
@@ -610,7 +606,7 @@ namespace Assistant
 				PacketReader pr = null;
 				if ( viewer )
 				{
-					pr = new PacketReader( buff, len, IsDynLength( buff[0] ) );
+					pr = new PacketReader( buff, len, PacketsTable.GetPacketLength(buff[0]) == -1 );
 					if ( filter )
 						p = MakePacketFrom( pr );
 				}
@@ -619,7 +615,7 @@ namespace Assistant
 					byte[] temp = new byte[len];
 					fixed ( byte *ptr = temp )
 						Windows.memcpy( ptr, buff, len );
-					p = new Packet( temp, len, IsDynLength( buff[0] ) );
+					p = new Packet( temp, len, PacketsTable.GetPacketLength(buff[0]) == -1);
 				}
 
 				bool blocked = false;

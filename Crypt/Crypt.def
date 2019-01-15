@@ -4,8 +4,6 @@ EXPORTS
 	InstallLibrary
 	Shutdown
 	GetSharedAddress
-	GetPacketLength
-	IsDynLength
 	GetCommMutex
 	TotalIn
 	TotalOut
