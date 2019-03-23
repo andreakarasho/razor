@@ -956,7 +956,7 @@ namespace Assistant
                         try
                         {
                             m.OverheadMessageFrom(HealthHues[((percent + 5) / 10) % HealthHues.Length],
-                                 Language.Format(LocString.sStatsA1, m.Name),
+                                 m.Name ?? string.Empty,
                                  Config.GetString("HealthFmt"), percent);
                         }
                         catch
