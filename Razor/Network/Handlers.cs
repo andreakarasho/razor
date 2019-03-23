@@ -995,7 +995,7 @@ namespace Assistant
                         try
                         {
                             m.OverheadMessageFrom(0x63,
-                                 Language.Format(LocString.sStatsA1, m.Name),
+                                m.Name ?? string.Empty,
                                  Config.GetString("PartyStatFmt"), manaPercent, stamPercent);
                         }
                         catch
