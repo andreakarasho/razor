@@ -460,6 +460,9 @@
     <PostBuildEvent>xcopy /S /Q /Y $(SolutionDir)etc\* $(SolutionDir)bin\$(Configuration)\</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup>
     <DllExportIdent>F1CC4E50-3308-429C-967D-F44F678C9471</DllExportIdent>
     <DllExportMetaLibName>DllExport.dll</DllExportMetaLibName>
     <DllExportNamespace>Assistant</DllExportNamespace>

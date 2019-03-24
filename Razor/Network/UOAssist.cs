@@ -115,14 +115,14 @@ namespace Assistant
 
         public static void CreateWindow()
         {
-            Console.WriteLine("Creating UOASSIST window");
-            Windows.CreateUOAWindow(ClientCommunication.ClientWindow);
+            //Console.WriteLine("Creating UOASSIST window");
+            //Windows.CreateUOAWindow(ClientCommunication.ClientWindow);
         }
 
         public static void DestroyWindow()
         {
-            Console.WriteLine("Destroying UOASSIST window");
-            Windows.DestroyUOAWindow();
+            //Console.WriteLine("Destroying UOASSIST window");
+            //Windows.DestroyUOAWindow();
         }
 
 		public static int OnUOAMessage(MainForm razor, int Msg, int wParam, int lParam)

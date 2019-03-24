@@ -2953,13 +2953,13 @@ namespace Assistant
 
         #endregion
 
-        protected override void WndProc(ref Message msg)
-        {
-            if (msg.Msg >= (int)UOAssist.UOAMessage.First && msg.Msg <= (int)UOAssist.UOAMessage.Last)
-                msg.Result = (IntPtr)UOAssist.OnUOAMessage(this, msg.Msg, msg.WParam.ToInt32(), msg.LParam.ToInt32());
-            else
-                base.WndProc(ref msg);
-        }
+        //protected override void WndProc(ref Message msg)
+        //{
+        //    if (msg.Msg >= (int)UOAssist.UOAMessage.First && msg.Msg <= (int)UOAssist.UOAMessage.Last)
+        //        msg.Result = (IntPtr)UOAssist.OnUOAMessage(this, msg.Msg, msg.WParam.ToInt32(), msg.LParam.ToInt32());
+        //    else
+        //        base.WndProc(ref msg);
+        //}
 
         private void DisableCloseButton()
         {
