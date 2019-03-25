@@ -2990,22 +2990,22 @@ namespace Assistant
             //this.Text = String.Format( this.Text, Engine.Version );
             UpdateTitle();
 
-            try
-            {
-                string path = Ultima.Files.GetFilePath("art.mul");
-                if (path != null && path != string.Empty)
-                {
-                    Windows.InitTitleBar(Path.GetDirectoryName(path));
-                }
-                else
-                {
-                    Windows.InitTitleBar(Ultima.Files.Directory);
-                }
-            }
-            catch
-            {
-                Windows.InitTitleBar("");
-            }
+            //try
+            //{
+            //    string path = Ultima.Files.GetFilePath("art.mul");
+            //    if (path != null && path != string.Empty)
+            //    {
+            //        Windows.InitTitleBar(Path.GetDirectoryName(path));
+            //    }
+            //    else
+            //    {
+            //        Windows.InitTitleBar(Ultima.Files.Directory);
+            //    }
+            //}
+            //catch
+            //{
+            //    Windows.InitTitleBar("");
+            //}
 
             PacketsTable.AdjustPacketSizeByVersion(Engine.ClientVersion);
 
