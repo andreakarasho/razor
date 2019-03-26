@@ -1,13 +1,10 @@
-﻿using Assistant.Macros;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
+
+using Assistant.Macros;
+
 using Ultima;
 
 namespace Assistant.UI
@@ -15,7 +12,7 @@ namespace Assistant.UI
     public partial class ContainerLabels : Form
     {
         // Used to track new entries in the form's life
-        private List<Core.ContainerLabels.ContainerLabel> NewContainerEntries = new List<Core.ContainerLabels.ContainerLabel>();
+        private readonly List<Core.ContainerLabels.ContainerLabel> NewContainerEntries = new List<Core.ContainerLabels.ContainerLabel>();
 
         public ContainerLabels()
         {
@@ -34,11 +31,11 @@ namespace Assistant.UI
                 int hueIdx = list.Hue;
 
                 if (hueIdx > 0 && hueIdx < 3000)
-                    item.SubItems[2].BackColor = Ultima.Hues.GetHue(hueIdx - 1).GetColor(HueEntry.TextHueIDX);
+                    item.SubItems[2].BackColor = Hues.GetHue(hueIdx - 1).GetColor(HueEntry.TextHueIDX);
                 else
                     item.SubItems[2].BackColor = SystemColors.Control;
 
-                item.SubItems[2].ForeColor = (item.SubItems[2].BackColor.GetBrightness() < 0.35 ? Color.White : Color.Black);
+                item.SubItems[2].ForeColor = item.SubItems[2].BackColor.GetBrightness() < 0.35 ? Color.White : Color.Black;
 
                 item.UseItemStyleForSubItems = false;
 
@@ -49,13 +46,9 @@ namespace Assistant.UI
             InitPreviewHue(lblContainerHue, "ContainerLabelColor");
 
             if (Config.GetInt("ContainerLabelStyle") == 0)
-            {
                 asciiStyle.Checked = true;
-            }
             else
-            {
                 unicodeStyle.Checked = true;
-            }
         }
 
         private void InitPreviewHue(Control ctrl, string cfg)
@@ -63,11 +56,11 @@ namespace Assistant.UI
             int hueIdx = Config.GetInt(cfg);
 
             if (hueIdx > 0 && hueIdx < 3000)
-                ctrl.BackColor = Ultima.Hues.GetHue(hueIdx - 1).GetColor(HueEntry.TextHueIDX);
+                ctrl.BackColor = Hues.GetHue(hueIdx - 1).GetColor(HueEntry.TextHueIDX);
             else
                 ctrl.BackColor = SystemColors.Control;
 
-            ctrl.ForeColor = (ctrl.BackColor.GetBrightness() < 0.35 ? Color.White : Color.Black);
+            ctrl.ForeColor = ctrl.BackColor.GetBrightness() < 0.35 ? Color.White : Color.Black;
         }
 
         private void saveContainerLabels_Click(object sender, EventArgs e)
@@ -75,20 +68,14 @@ namespace Assistant.UI
             List<Core.ContainerLabels.ContainerLabel> newContainerLabelList = new List<Core.ContainerLabels.ContainerLabel>();
 
             // Keep it simple, reset to default if it isn't what we like
-            if (string.IsNullOrEmpty(containerLabelFormat.Text) || !containerLabelFormat.Text.Contains("{label}"))
-            {
-                containerLabelFormat.Text = @"[{label}] ({type})";
-            }
+            if (string.IsNullOrEmpty(containerLabelFormat.Text) || !containerLabelFormat.Text.Contains("{label}")) containerLabelFormat.Text = @"[{label}] ({type})";
 
             Config.SetProperty("ContainerLabelFormat", containerLabelFormat.Text);
 
             if (asciiStyle.Checked)
-            {
                 Config.SetProperty("ContainerLabelStyle", 0);
-            } else
-            {
+            else
                 Config.SetProperty("ContainerLabelStyle", 1);
-            }
 
             foreach (ListViewItem item in containerView.Items)
             {
@@ -113,10 +100,7 @@ namespace Assistant.UI
 
         private void removeContainerLabel_Click(object sender, EventArgs e)
         {
-            if (containerView.SelectedItems.Count > 0)
-            {
-                containerView.Items.Remove(containerView.SelectedItems[0]);
-            }
+            if (containerView.SelectedItems.Count > 0) containerView.Items.Remove(containerView.SelectedItems[0]);
         }
 
         private void cancelOverheadMessages_Click(object sender, EventArgs e)
@@ -139,7 +123,7 @@ namespace Assistant.UI
             {
                 Gfx = gfx,
                 Serial = serial,
-                Type = (byte)(ground ? 1 : 0),
+                Type = (byte) (ground ? 1 : 0),
                 X = pt.X,
                 Y = pt.Y,
                 Z = pt.Z
@@ -171,11 +155,11 @@ namespace Assistant.UI
                         int hueIdx = Config.GetInt("ContainerLabelColor");
 
                         if (hueIdx > 0 && hueIdx < 3000)
-                            lvItem.SubItems[2].BackColor = Ultima.Hues.GetHue(hueIdx - 1).GetColor(HueEntry.TextHueIDX);
+                            lvItem.SubItems[2].BackColor = Hues.GetHue(hueIdx - 1).GetColor(HueEntry.TextHueIDX);
                         else
                             lvItem.SubItems[2].BackColor = SystemColors.Control;
 
-                        lvItem.SubItems[2].ForeColor = (lvItem.SubItems[2].BackColor.GetBrightness() < 0.35 ? Color.White : Color.Black);
+                        lvItem.SubItems[2].ForeColor = lvItem.SubItems[2].BackColor.GetBrightness() < 0.35 ? Color.White : Color.Black;
 
                         lvItem.UseItemStyleForSubItems = false;
 
@@ -195,10 +179,7 @@ namespace Assistant.UI
                     }
                 }
             }
-            else if (t != null && t.Serial.IsMobile)
-            {
-                World.Player.SendMessage(MsgLevel.Force, "You shouldn't label other people");
-            }
+            else if (t != null && t.Serial.IsMobile) World.Player.SendMessage(MsgLevel.Force, "You shouldn't label other people");
         }
 
         private void setExHue_Click(object sender, EventArgs e)
@@ -214,26 +195,22 @@ namespace Assistant.UI
             {
                 int hueIdx = h.Hue;
                 Config.SetProperty(cfg, hueIdx);
+
                 if (hueIdx > 0 && hueIdx < 3000)
-                    ctrl.BackColor = Ultima.Hues.GetHue(hueIdx - 1).GetColor(HueEntry.TextHueIDX);
+                    ctrl.BackColor = Hues.GetHue(hueIdx - 1).GetColor(HueEntry.TextHueIDX);
                 else
                     ctrl.BackColor = Color.White;
-                ctrl.ForeColor = (ctrl.BackColor.GetBrightness() < 0.35 ? Color.White : Color.Black);
+                ctrl.ForeColor = ctrl.BackColor.GetBrightness() < 0.35 ? Color.White : Color.Black;
 
                 return true;
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
 
         private void setColorHue_Click(object sender, EventArgs e)
         {
-            if (containerView.SelectedItems.Count > 0)
-            {
-                SetContainerLabelHue();
-            }
+            if (containerView.SelectedItems.Count > 0) SetContainerLabelHue();
         }
 
         private bool SetContainerLabelHue()
@@ -252,13 +229,14 @@ namespace Assistant.UI
                 else
                     selectedItem.SubItems[2].BackColor = Color.White;
 
-                selectedItem.SubItems[2].ForeColor = (selectedItem.SubItems[2].BackColor.GetBrightness() < 0.35 ? Color.White : Color.Black);
+                selectedItem.SubItems[2].ForeColor = selectedItem.SubItems[2].BackColor.GetBrightness() < 0.35 ? Color.White : Color.Black;
 
                 foreach (Core.ContainerLabels.ContainerLabel list in Core.ContainerLabels.ContainerLabelList)
                 {
                     if (list.Id.Equals(selectedItem.Text))
                     {
                         list.Hue = hueIdx;
+
                         break;
                     }
                 }
@@ -268,16 +246,15 @@ namespace Assistant.UI
                     if (list.Id.Equals(selectedItem.Text))
                     {
                         list.Hue = hueIdx;
+
                         break;
                     }
                 }
 
                 return true;
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
 
         public int GetHueFromListView(string id)
@@ -285,20 +262,12 @@ namespace Assistant.UI
             int hue = 0;
 
             foreach (Core.ContainerLabels.ContainerLabel list in Core.ContainerLabels.ContainerLabelList)
-            {
                 if (list.Id.Equals(id))
-                {
                     return list.Hue;
-                }
-            }
 
             foreach (Core.ContainerLabels.ContainerLabel list in NewContainerEntries)
-            {
                 if (list.Id.Equals(id))
-                {
                     return list.Hue;
-                }
-            }
 
             return hue;
         }
@@ -310,15 +279,14 @@ namespace Assistant.UI
 
             if (e.Button == MouseButtons.Right && e.Clicks == 1)
             {
-                ContextMenu menu = new ContextMenu();                                
-                menu.MenuItems.Add("Open Container (if in range)", new EventHandler(OnContainerDoubleClick));
+                ContextMenu menu = new ContextMenu();
+                menu.MenuItems.Add("Open Container (if in range)", OnContainerDoubleClick);
 
                 menu.Show(containerView, new Point(e.X, e.Y));
             }
-
         }
 
-        private void OnContainerDoubleClick(object sender, System.EventArgs e)
+        private void OnContainerDoubleClick(object sender, EventArgs e)
         {
             ListViewItem selectedItem = containerView.Items[containerView.SelectedIndices[0]];
 
@@ -339,7 +307,7 @@ namespace Assistant.UI
                 ListViewItem selectedItem = containerView.Items[containerView.SelectedIndices[0]];
 
                 if (InputBox.Show(this, Language.GetString(LocString.SetContainerLabel),
-                    Language.GetString(LocString.EnterAName)))
+                                  Language.GetString(LocString.EnterAName)))
                 {
                     string name = InputBox.GetString();
 
@@ -350,6 +318,7 @@ namespace Assistant.UI
                         if (list.Id.Equals(selectedItem.Text))
                         {
                             list.Alias = name;
+
                             break;
                         }
                     }
@@ -359,6 +328,7 @@ namespace Assistant.UI
                         if (list.Id.Equals(selectedItem.Text))
                         {
                             list.Alias = name;
+
                             break;
                         }
                     }

@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // Le informazioni generali relative a un assembly sono controllate dal seguente 
@@ -12,7 +11,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyProduct("Razor")]
 [assembly: AssemblyCopyright("Copyright ©  2018")]
 [assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]	
+[assembly: AssemblyCulture("")]
 
 //
 // Version information for an assembly consists of the following four values:
@@ -55,4 +54,4 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDelaySign(false)]
 //[assembly: AssemblyKeyFile("")]
 //[assembly: AssemblyKeyName("")]
-[assembly: ComVisibleAttribute(false)]
+[assembly: ComVisible(false)]

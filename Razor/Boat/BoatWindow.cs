@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace Assistant.Boat
@@ -14,32 +10,26 @@ namespace Assistant.Boat
     {
         public const int WM_NCLBUTTONDOWN = 0xA1;
         public const int HT_CAPTION = 0x2;
+        private bool _ancherUp;
 
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
+        private readonly List<BoatCommandKeywords> _boatCommandKw = new List<BoatCommandKeywords>();
 
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        public static extern bool ReleaseCapture();
-
-        private bool _inT2A = false;
-        private bool _ancherUp = false;
-
-        private List<BoatCommandKeywords> _boatCommandKw = new List<BoatCommandKeywords>();
-
-        private class BoatCommandKeywords
-        {
-            public string command { get; set; }
-            public ArrayList keywords { get; set; }
-        }
+        private bool _inT2A;
 
         public BoatWindow()
         {
             InitializeComponent();
-            this.MouseDown += BoatWindow_MouseDown;
-            this.boatBorder.MouseDown += BoatWindow_MouseDown;
+            MouseDown += BoatWindow_MouseDown;
+            boatBorder.MouseDown += BoatWindow_MouseDown;
 
             LoadKeywords();
         }
+
+        [DllImport("user32.dll")]
+        public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
+
+        [DllImport("user32.dll")]
+        public static extern bool ReleaseCapture();
 
         private void LoadKeywords()
         {
@@ -52,175 +42,175 @@ namespace Assistant.Boat
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "forward left",
-                keywords = new ArrayList(2) { (ushort)16, (byte)75 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 75}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "forward",
-                keywords = new ArrayList(2) { (ushort)16, (byte)69 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 69}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "forward right",
-                keywords = new ArrayList(2) { (ushort)16, (byte)76 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 76}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "right",
-                keywords = new ArrayList(2) { (ushort)16, (byte)72 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 72}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "back right",
-                keywords = new ArrayList(2) { (ushort)16, (byte)78 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 78}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "back",
-                keywords = new ArrayList(2) { (ushort)16, (byte)70 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 70}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "back left",
-                keywords = new ArrayList(2) { (ushort)16, (byte)77 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 77}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "left",
-                keywords = new ArrayList(2) { (ushort)16, (byte)71 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 71}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "slow left",
-                keywords = new ArrayList(2) { (ushort)16, (byte)80 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 80}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "slow forward left",
-                keywords = new ArrayList(2) { (ushort)16, (byte)84 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 84}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "slow forward",
-                keywords = new ArrayList(2) { (ushort)16, (byte)82 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 82}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "slow forward right",
-                keywords = new ArrayList(2) { (ushort)16, (byte)85 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 85}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "slow right",
-                keywords = new ArrayList(2) { (ushort)16, (byte)81 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 81}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "slow back right",
-                keywords = new ArrayList(2) { (ushort)16, (byte)86 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 86}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "slow back",
-                keywords = new ArrayList(2) { (ushort)16, (byte)83 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 83}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "slow back left",
-                keywords = new ArrayList(2) { (ushort)16, (byte)87 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 87}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "forward left one",
-                keywords = new ArrayList(2) { (ushort)16, (byte)92 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 92}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "forward one",
-                keywords = new ArrayList(2) { (ushort)16, (byte)90 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 90}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "forward right one",
-                keywords = new ArrayList(2) { (ushort)16, (byte)93 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 93}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "right one",
-                keywords = new ArrayList(2) { (ushort)16, (byte)89 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 89}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "back right one",
-                keywords = new ArrayList(2) { (ushort)16, (byte)94 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 94}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "back one",
-                keywords = new ArrayList(2) { (ushort)16, (byte)91 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 91}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "back left one",
-                keywords = new ArrayList(2) { (ushort)16, (byte)95 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 95}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "left one",
-                keywords = new ArrayList(2) { (ushort)16, (byte)88 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 88}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "turn right",
-                keywords = new ArrayList(2) { (ushort)16, (byte)101 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 101}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "turn left",
-                keywords = new ArrayList(2) { (ushort)16, (byte)102 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 102}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "raise anchor",
-                keywords = new ArrayList(4) { (ushort)32, (byte)44, (byte)6, (byte)176 }
+                keywords = new ArrayList(4) {(ushort) 32, (byte) 44, (byte) 6, (byte) 176}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "drop anchor",
-                keywords = new ArrayList(4) { (ushort)32, (byte)44, (byte)6, (byte)160 }
+                keywords = new ArrayList(4) {(ushort) 32, (byte) 44, (byte) 6, (byte) 160}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "turn around",
-                keywords = new ArrayList(2) { (ushort)16, (byte)103 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 103}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
@@ -238,73 +228,73 @@ namespace Assistant.Boat
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "goto 1",
-                keywords = new ArrayList(2) { (ushort)16, (byte)99 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 99}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "goto 2",
-                keywords = new ArrayList(2) { (ushort)16, (byte)99 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 99}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "goto 3",
-                keywords = new ArrayList(2) { (ushort)16, (byte)99 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 99}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "goto 4",
-                keywords = new ArrayList(2) { (ushort)16, (byte)99 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 99}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "goto 5",
-                keywords = new ArrayList(2) { (ushort)16, (byte)99 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 99}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "goto 6",
-                keywords = new ArrayList(2) { (ushort)16, (byte)99 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 99}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "goto 7",
-                keywords = new ArrayList(2) { (ushort)16, (byte)99 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 99}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "goto 8",
-                keywords = new ArrayList(2) { (ushort)16, (byte)99 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 99}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "goto 9",
-                keywords = new ArrayList(2) { (ushort)16, (byte)99 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 99}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "start",
-                keywords = new ArrayList(2) { (ushort)16, (byte)97 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 97}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "continue",
-                keywords = new ArrayList(2) { (ushort)16, (byte)98 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 98}
             });
 
             _boatCommandKw.Add(new BoatCommandKeywords
             {
                 command = "nav",
-                keywords = new ArrayList(2) { (ushort)16, (byte)96 }
+                keywords = new ArrayList(2) {(ushort) 16, (byte) 96}
             });
         }
 
@@ -313,7 +303,7 @@ namespace Assistant.Boat
             alwaysOnTop.Checked = true;
         }
 
-        private void BoatWindow_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
+        private void BoatWindow_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
@@ -327,13 +317,8 @@ namespace Assistant.Boat
             string boatCommand = command;
 
             if (boatSpeedOne.Checked && directionCommand)
-            {
                 boatCommand = $"{command} One";
-            }
-            else if (boatSpeedSlow.Checked && directionCommand)
-            {
-                boatCommand = $"Slow {command}";
-            }
+            else if (boatSpeedSlow.Checked && directionCommand) boatCommand = $"Slow {command}";
 
             ArrayList kw = new ArrayList();
 
@@ -342,11 +327,12 @@ namespace Assistant.Boat
                 if (boatCommandKw.command.Equals(boatCommand.ToLower()))
                 {
                     kw = boatCommandKw.keywords;
+
                     break;
                 }
             }
 
-            ClientCommunication.SendToServer(new ClientUniMessage(MessageType.Regular, World.Player.SpeechHue, Config.GetInt("SysColor"), "ENU",kw, boatCommand));
+            ClientCommunication.SendToServer(new ClientUniMessage(MessageType.Regular, World.Player.SpeechHue, Config.GetInt("SysColor"), "ENU", kw, boatCommand));
         }
 
         private void boatNorth_Click(object sender, EventArgs e)
@@ -510,6 +496,12 @@ namespace Assistant.Boat
         private void boatClose_Click(object sender, EventArgs e)
         {
             Close();
+        }
+
+        private class BoatCommandKeywords
+        {
+            public string command { get; set; }
+            public ArrayList keywords { get; set; }
         }
     }
 }

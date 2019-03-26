@@ -1,72 +1,70 @@
 using System;
-using System.Drawing;
-using System.Collections;
 using System.ComponentModel;
+using System.Drawing;
 using System.Windows.Forms;
+
+using Ultima;
 
 namespace Assistant
 {
-	/// <summary>
-	/// Summary description for HueEntry.
-	/// </summary>
-	public class HueEntry : System.Windows.Forms.Form
-	{
-		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.TextBox hueNum;
-		private System.Windows.Forms.Button inGame;
-		private System.Windows.Forms.Label preview;
-		private System.Windows.Forms.Button okay;
-		private System.Windows.Forms.Button cancel;
-		/// <summary>
-		/// Required designer variable.
-		/// </summary>
-		private System.ComponentModel.Container components = null;
-		private int m_Hue;
+    /// <summary>
+    ///     Summary description for HueEntry.
+    /// </summary>
+    public class HueEntry : Form
+    {
+        public delegate void HueEntryCallback(int hue);
 
-		public delegate void HueEntryCallback( int hue );
-		public static HueEntryCallback Callback = null;
+        public const int TextHueIDX = 30;
+        public static HueEntryCallback Callback;
+        private Button cancel;
+        /// <summary>
+        ///     Required designer variable.
+        /// </summary>
+        private readonly Container components = null;
+        private TextBox hueNum;
+        private Button inGame;
+        private Label label1;
+        private Button okay;
+        private Label preview;
 
-		public int Hue { get{ return m_Hue; } }
+        public HueEntry() : this(0)
+        {
+        }
 
-		public HueEntry() : this( 0 )
-		{
-		}
+        public HueEntry(int hue)
+        {
+            Hue = hue;
+            //
+            // Required for Windows Form Designer support
+            //
+            InitializeComponent();
 
-		public HueEntry( int hue )
-		{
-			m_Hue = hue;
-			//
-			// Required for Windows Form Designer support
-			//
-			InitializeComponent();
+            //
+            // TODO: Add any constructor code after InitializeComponent call
+            //
+        }
 
-			//
-			// TODO: Add any constructor code after InitializeComponent call
-			//
-		}
+        public int Hue { get; private set; }
 
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
-		protected override void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
-				if(components != null)
-				{
-					components.Dispose();
-				}
-			}
-			base.Dispose( disposing );
-		}
+        /// <summary>
+        ///     Clean up any resources being used.
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+                if (components != null)
+                    components.Dispose();
+            base.Dispose(disposing);
+        }
 
-		#region Windows Form Designer generated code
-		/// <summary>
-		/// Required method for Designer support - do not modify
-		/// the contents of this method with the code editor.
-		/// </summary>
-		private void InitializeComponent()
-		{
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        ///     Required method for Designer support - do not modify
+        ///     the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
             this.label1 = new System.Windows.Forms.Label();
             this.hueNum = new System.Windows.Forms.TextBox();
             this.inGame = new System.Windows.Forms.Button();
@@ -142,7 +140,7 @@ namespace Assistant
             this.Controls.Add(this.preview);
             this.Controls.Add(this.inGame);
             this.Controls.Add(this.label1);
-            this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -153,71 +151,70 @@ namespace Assistant
             this.Load += new System.EventHandler(this.HueEntry_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
+        }
 
-		}
-		#endregion
+        #endregion
 
-		private void hueNum_TextChanged(object sender, System.EventArgs e)
-		{
-			SetPreview( Utility.ToInt32( hueNum.Text, 0 ) & 0x3FFF );
-		}
+        private void hueNum_TextChanged(object sender, EventArgs e)
+        {
+            SetPreview(Utility.ToInt32(hueNum.Text, 0) & 0x3FFF);
+        }
 
-		public const int TextHueIDX = 30;
-		private void SetPreview( int hue )
-		{
-			if ( hue > 0 && hue < 3000 )
-				preview.BackColor = Ultima.Hues.GetHue( hue - 1 ).GetColor( TextHueIDX );
-			else
-				preview.BackColor = Color.Black;
-			preview.ForeColor = ( preview.BackColor.GetBrightness() < 0.35 ? Color.White : Color.Black );
-		}
+        private void SetPreview(int hue)
+        {
+            if (hue > 0 && hue < 3000)
+                preview.BackColor = Hues.GetHue(hue - 1).GetColor(TextHueIDX);
+            else
+                preview.BackColor = Color.Black;
+            preview.ForeColor = preview.BackColor.GetBrightness() < 0.35 ? Color.White : Color.Black;
+        }
 
-		private void HueResp( int hue )
-		{
-			hue &= 0x3FFF;
-			SetPreview( hue );
-			hueNum.Text = hue.ToString();
-			Callback = null;
+        private void HueResp(int hue)
+        {
+            hue &= 0x3FFF;
+            SetPreview(hue);
+            hueNum.Text = hue.ToString();
+            Callback = null;
 
-			//Engine.MainWindow.SafeAction(s => s.ShowMe());
-			this.Hide();
-			this.SendToBack();
-			this.WindowState = FormWindowState.Normal;
-			this.BringToFront();
-			this.Show();
-		}
+            //Engine.MainWindow.SafeAction(s => s.ShowMe());
+            Hide();
+            SendToBack();
+            WindowState = FormWindowState.Normal;
+            BringToFront();
+            Show();
+        }
 
-		private void inGame_Click(object sender, System.EventArgs e)
-		{
-			if ( World.Player == null )
-				return;
+        private void inGame_Click(object sender, EventArgs e)
+        {
+            if (World.Player == null)
+                return;
 
-			Callback = new HueEntryCallback( HueResp );
-			ClientCommunication.SendToClient( new HuePicker() );
-			World.Player.SendMessage( MsgLevel.Force, LocString.SelHue );
-		}
-		
-		private void okay_Click(object sender, System.EventArgs e)
-		{
-			m_Hue = Utility.ToInt32( hueNum.Text, 0 );
-			this.DialogResult = DialogResult.OK;
-			this.Close();
-			Callback = null;
-		}
+            Callback = HueResp;
+            ClientCommunication.SendToClient(new HuePicker());
+            World.Player.SendMessage(MsgLevel.Force, LocString.SelHue);
+        }
 
-		private void cancel_Click(object sender, System.EventArgs e)
-		{
-			this.DialogResult = DialogResult.Cancel;
-			this.Close();
-			Callback = null;
-		}
+        private void okay_Click(object sender, EventArgs e)
+        {
+            Hue = Utility.ToInt32(hueNum.Text, 0);
+            DialogResult = DialogResult.OK;
+            Close();
+            Callback = null;
+        }
 
-		private void HueEntry_Load(object sender, System.EventArgs e)
-		{
-			Language.LoadControlNames( this );
+        private void cancel_Click(object sender, EventArgs e)
+        {
+            DialogResult = DialogResult.Cancel;
+            Close();
+            Callback = null;
+        }
 
-			SetPreview( m_Hue );
-			hueNum.Text = m_Hue.ToString();
-		}
-	}
+        private void HueEntry_Load(object sender, EventArgs e)
+        {
+            Language.LoadControlNames(this);
+
+            SetPreview(Hue);
+            hueNum.Text = Hue.ToString();
+        }
+    }
 }

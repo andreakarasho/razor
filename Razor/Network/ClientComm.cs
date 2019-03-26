@@ -1,20 +1,16 @@
-using CUO_API;
 using System;
-using System.Diagnostics;
 using System.Net;
 using System.Runtime.InteropServices;
 
+using Assistant.Macros;
 using Assistant.UI;
+
+using CUO_API;
 
 namespace Assistant
 {
-    public unsafe sealed class ClientCommunication
-	{
-        public static DateTime ConnectionStart { get; private set; }
-        public static IPAddress LastConnection { get; }
-
-        public static IntPtr ClientWindow { get; private set; } = IntPtr.Zero;
-
+    public sealed unsafe class ClientCommunication
+    {
         private static OnPacketSendRecv _sendToClient, _sendToServer, _recv, _send;
         private static OnGetPacketLength _getPacketLength;
         private static OnGetPlayerPosition _getPlayerPosition;
@@ -30,9 +26,13 @@ namespace Assistant
         private static OnDisconnected _onDisconnected;
         private static OnFocusGained _onFocusGained;
         private static OnFocusLost _onFocusLost;
+        public static DateTime ConnectionStart { get; private set; }
+        public static IPAddress LastConnection { get; }
 
-		internal static bool InstallHooks( ref PluginHeader *header )
-		{
+        public static IntPtr ClientWindow { get; private set; } = IntPtr.Zero;
+
+        internal static bool InstallHooks(ref PluginHeader* header)
+        {
             _sendToClient = Marshal.GetDelegateForFunctionPointer<OnPacketSendRecv>(header->Recv);
             _sendToServer = Marshal.GetDelegateForFunctionPointer<OnPacketSendRecv>(header->Send);
             _getPacketLength = Marshal.GetDelegateForFunctionPointer<OnGetPacketLength>(header->GetPacketLength);
@@ -66,8 +66,8 @@ namespace Assistant
             header->OnFocusGained = Marshal.GetFunctionPointerForDelegate(_onFocusGained);
             header->OnFocusLost = Marshal.GetFunctionPointerForDelegate(_onFocusLost);
 
-			return true;
-		}
+            return true;
+        }
 
         private static void OnClientClosing()
         {
@@ -97,6 +97,7 @@ namespace Assistant
         private static void OnConnected()
         {
             ConnectionStart = DateTime.Now;
+
             try
             {
                 //m_LastConnection = new IPAddress((uint)lParam);
@@ -117,7 +118,7 @@ namespace Assistant
             World.Player = null;
             World.Items.Clear();
             World.Mobiles.Clear();
-            Macros.MacroManager.Stop();
+            MacroManager.Stop();
             ActionQueue.Stop();
             Counter.Reset();
             GoldPerHourTimer.Stop();
@@ -126,6 +127,7 @@ namespace Assistant
             BuffsTimer.Stop();
             StealthSteps.Unhide();
             Engine.MainWindow.OnLogout();
+
             if (Engine.MainWindow.MapWindow != null)
                 Engine.MainWindow.MapWindow.Close();
             PacketHandlers.Party.Clear();
@@ -136,8 +138,10 @@ namespace Assistant
         private static void OnFocusGained()
         {
             var razor = Engine.MainWindow;
+
             if (razor == null)
                 return;
+
             if (Config.GetBool("AlwaysOnTop"))
             {
                 if (!razor.TopMost)
@@ -167,13 +171,15 @@ namespace Assistant
         private static void OnFocusLost()
         {
             var razor = Engine.MainWindow;
+
             if (razor == null)
                 return;
+
             if (Config.GetBool("AlwaysOnTop"))
             {
                 IntPtr ptr = Windows.GetForegroundWindow();
 
-                if (ptr != ClientWindow && ptr != (IntPtr)Engine.MainWindow.Invoke(new Func<IntPtr>(() => Engine.MainWindow.Handle)))
+                if (ptr != ClientWindow && ptr != (IntPtr) Engine.MainWindow.Invoke(new Func<IntPtr>(() => Engine.MainWindow.Handle)))
                 {
                     if (razor.TopMost)
                     {
@@ -182,7 +188,6 @@ namespace Assistant
                             s.TopMost = false;
                             s.SendToBack();
                         });
-
                     }
                 }
             }
@@ -205,7 +210,7 @@ namespace Assistant
         {
             if (ispressed)
             {
-                bool code = HotKey.OnKeyDown((int)(key | mod));
+                bool code = HotKey.OnKeyDown(key | mod);
 
                 return code;
             }
@@ -255,23 +260,26 @@ namespace Assistant
             }
         }
 
-        public static void CastSpell(int idx) => _castSpell(idx);
+        public static void CastSpell(int idx)
+        {
+            _castSpell(idx);
+        }
 
         public static bool GetPlayerPosition(out int x, out int y, out int z)
-            => _getPlayerPosition(out x, out y, out z);
-
-        internal static void SendToServer( Packet p )
-		{
-            var len = p.Length;
-            _sendToServer(p.Compile(), (int)len);
+        {
+            return _getPlayerPosition(out x, out y, out z);
         }
 
-		internal static void SendToClient( Packet p )
-		{
+        internal static void SendToServer(Packet p)
+        {
             var len = p.Length;
-            _sendToClient(p.Compile(), (int)len);
+            _sendToServer(p.Compile(), (int) len);
         }
-	}
 
+        internal static void SendToClient(Packet p)
+        {
+            var len = p.Length;
+            _sendToClient(p.Compile(), (int) len);
+        }
+    }
 }
-

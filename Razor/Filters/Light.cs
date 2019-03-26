@@ -1,63 +1,60 @@
-using System;
-using Assistant;
-
 namespace Assistant.Filters
 {
-	public class LightFilter : Filter
-	{
-		public static void Initialize()
-		{
-			Filter.Register( new LightFilter() );
-		}
+    public class LightFilter : Filter
+    {
+        private LightFilter()
+        {
+        }
 
-		private LightFilter()
-		{
-		}
+        public override byte[] PacketIDs => new byte[] {0x4E, 0x4F};
 
-		public override byte[] PacketIDs{ get{ return new byte[]{ 0x4E, 0x4F }; } }
+        public override LocString Name => LocString.LightFilter;
 
-		public override LocString Name{ get{ return LocString.LightFilter; } }
+        public static void Initialize()
+        {
+            Register(new LightFilter());
+        }
 
-		public override void OnFilter( PacketReader p, PacketHandlerEventArgs args )
-		{
-			if ( Windows.AllowBit( FeatureBit.LightFilter ) )
-			{
-				args.Block = true;
-				if ( World.Player != null )
-				{
-					World.Player.LocalLightLevel = 0;
-					World.Player.GlobalLightLevel = 0;
-				}
-			}
-		}
+        public override void OnFilter(PacketReader p, PacketHandlerEventArgs args)
+        {
+            if (Windows.AllowBit(FeatureBit.LightFilter))
+            {
+                args.Block = true;
 
-		public override void OnEnable()
-		{
-			base.OnEnable ();
+                if (World.Player != null)
+                {
+                    World.Player.LocalLightLevel = 0;
+                    World.Player.GlobalLightLevel = 0;
+                }
+            }
+        }
 
-			if ( Windows.AllowBit( FeatureBit.LightFilter ) && World.Player != null )
-			{
-				World.Player.LocalLightLevel = 0;
-				World.Player.GlobalLightLevel = 0;
+        public override void OnEnable()
+        {
+            base.OnEnable();
 
-				ClientCommunication.SendToClient( new GlobalLightLevel( 0 ) );
-				ClientCommunication.SendToClient( new PersonalLightLevel( World.Player ) );
-			}
-		}
+            if (Windows.AllowBit(FeatureBit.LightFilter) && World.Player != null)
+            {
+                World.Player.LocalLightLevel = 0;
+                World.Player.GlobalLightLevel = 0;
 
-	    public override void OnDisable()
-	    {
-	        base.OnDisable();
+                ClientCommunication.SendToClient(new GlobalLightLevel(0));
+                ClientCommunication.SendToClient(new PersonalLightLevel(World.Player));
+            }
+        }
 
-	        if (Windows.AllowBit(FeatureBit.LightFilter) && World.Player != null)
-	        {
-	            World.Player.LocalLightLevel = 6;
-	            World.Player.GlobalLightLevel = 2;
+        public override void OnDisable()
+        {
+            base.OnDisable();
 
-	            ClientCommunication.SendToClient(new GlobalLightLevel(26));
-	            ClientCommunication.SendToClient(new PersonalLightLevel(World.Player));
-	        }
-	    }
+            if (Windows.AllowBit(FeatureBit.LightFilter) && World.Player != null)
+            {
+                World.Player.LocalLightLevel = 6;
+                World.Player.GlobalLightLevel = 2;
 
+                ClientCommunication.SendToClient(new GlobalLightLevel(26));
+                ClientCommunication.SendToClient(new PersonalLightLevel(World.Player));
+            }
+        }
     }
 }

@@ -1,15 +1,14 @@
 using System;
-using System.Xml;
-using System.IO;
-using System.Reflection;
-using System.Text;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Configuration;
+using System.IO;
+using System.Reflection;
+using System.Text;
+using System.Threading;
 using System.Windows.Forms;
-using Assistant.Core;
-using Microsoft.Win32;
+using System.Xml;
+
 using Assistant.Filters;
 using Assistant.Macros;
 using Assistant.UI;
@@ -21,9 +20,12 @@ namespace Assistant
 {
     public class Profile
     {
+        private static readonly bool m_Warned = false;
+
+        private static readonly Type[] ctorTypes = {typeof(string)};
+        private Mutex m_Mutex;
         private string m_Name;
-        private Dictionary<string, object> m_Props;
-        private System.Threading.Mutex m_Mutex;
+        private readonly Dictionary<string, object> m_Props;
 
         public Profile(string name)
         {
@@ -33,6 +35,30 @@ namespace Assistant
             MakeDefault();
         }
 
+        public string Name
+        {
+            get => m_Name;
+            set
+            {
+                if (value != null && value.Trim() != "")
+                {
+                    StringBuilder sb = new StringBuilder(value);
+                    sb.Replace('\\', '_');
+                    sb.Replace('/', '_');
+                    sb.Replace('\"', '\'');
+                    sb.Replace(':', '_');
+                    sb.Replace('?', '_');
+                    sb.Replace('*', '_');
+                    sb.Replace('<', '(');
+                    sb.Replace('>', ')');
+                    sb.Replace('|', '_');
+                    m_Name = sb.ToString();
+                }
+                else
+                    m_Name = "[No Name]";
+            }
+        }
+
         public void MakeDefault()
         {
             m_Props.Clear();
@@ -40,47 +66,49 @@ namespace Assistant
             AddProperty("ShowMobNames", false);
             AddProperty("ShowCorpseNames", false);
             AddProperty("DisplaySkillChanges", false);
+
             AddProperty("TitleBarText",
-                @"UO - {char} {crimtime}- {mediumstatbar} {bp} {bm} {gl} {gs} {mr} {ns} {ss} {sa} {aids}");
+                        @"UO - {char} {crimtime}- {mediumstatbar} {bp} {bm} {gl} {gs} {mr} {ns} {ss} {sa} {aids}");
             AddProperty("TitleBarDisplay", true);
             AddProperty("AutoSearch", true);
             AddProperty("NoSearchPouches", true);
-            AddProperty("CounterWarnAmount", (int)5);
+            AddProperty("CounterWarnAmount", 5);
             AddProperty("CounterWarn", true);
-            AddProperty("ObjectDelay", (int)600);
+            AddProperty("ObjectDelay", 600);
             AddProperty("ObjectDelayEnabled", true);
             AddProperty("AlwaysOnTop", false);
             AddProperty("SortCounters", true);
             AddProperty("QueueActions", true);
             AddProperty("QueueTargets", true);
-            AddProperty("WindowX", (int)400);
-            AddProperty("WindowY", (int)400);
+            AddProperty("WindowX", 400);
+            AddProperty("WindowY", 400);
             AddProperty("CountStealthSteps", true);
             AddProperty("AlwaysStealth", false);
 
-            AddProperty("SysColor", (int)0x03B1);
-            AddProperty("WarningColor", (int)0x0025);
-            AddProperty("ExemptColor", (int)0x0480);            
-            AddProperty("SpeechHue", (int)0x03B1);
-            AddProperty("BeneficialSpellHue", (int)0x0005);
-            AddProperty("HarmfulSpellHue", (int)0x0025);
-            AddProperty("NeutralSpellHue", (int)0x03B1);
+            AddProperty("SysColor", 0x03B1);
+            AddProperty("WarningColor", 0x0025);
+            AddProperty("ExemptColor", 0x0480);
+            AddProperty("SpeechHue", 0x03B1);
+            AddProperty("BeneficialSpellHue", 0x0005);
+            AddProperty("HarmfulSpellHue", 0x0025);
+            AddProperty("NeutralSpellHue", 0x03B1);
             AddProperty("ForceSpeechHue", false);
             AddProperty("ForceSpellHue", false);
             AddProperty("SpellFormat", @"{power} [{spell}]");
 
             AddProperty("ShowNotoHue", true);
-            AddProperty("Opacity", (int)100);
+            AddProperty("Opacity", 100);
 
             AddProperty("AutoOpenCorpses", false);
-            AddProperty("CorpseRange", (int)2);
-            
+            AddProperty("CorpseRange", 2);
+
             AddProperty("BlockDismount", false);
 
             AddProperty("AutoCap", false);
             AddProperty("CapFullScreen", false);
+
             AddProperty("CapPath",
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "RazorScreenShots"));
+                        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "RazorScreenShots"));
             AddProperty("CapTimeStamp", true);
             AddProperty("ImageFormat", "jpg");
 
@@ -89,8 +117,8 @@ namespace Assistant
             AddProperty("Systray", false);
             AddProperty("TitlebarImages", true);
 
-            AddProperty("SellAgentMax", (int)99);
-            AddProperty("SkillListCol", (int)-1);
+            AddProperty("SellAgentMax", 99);
+            AddProperty("SkillListCol", -1);
             AddProperty("SkillListAsc", false);
 
             AddProperty("AutoStack", false);
@@ -98,14 +126,14 @@ namespace Assistant
 
             AddProperty("SpellUnequip", false);
             AddProperty("RangeCheckLT", true);
-            AddProperty("LTRange", (int)12);
+            AddProperty("LTRange", 12);
 
             AddProperty("FilterSnoopMsg", true);
             AddProperty("OldStatBar", false);
 
             AddProperty("SmartLastTarget", false);
             AddProperty("LastTargTextFlags", true);
-            AddProperty("LTHilight", (int)0);
+            AddProperty("LTHilight", 0);
 
             AddProperty("AutoFriend", false);
 
@@ -188,7 +216,7 @@ namespace Assistant
 
             AddProperty("RealSeason", false);
             AddProperty("Season", 5);
-            
+
             AddProperty("BlockTradeRequests", false);
             AddProperty("BlockPartyInvites", false);
             AddProperty("AutoAcceptParty", false);
@@ -206,48 +234,19 @@ namespace Assistant
             ContainerLabels.ClearAll();
         }
 
-        public string Name
-        {
-            get
-            {
-                return m_Name;
-            }
-            set
-            {
-                if (value != null && value.Trim() != "")
-                {
-                    StringBuilder sb = new StringBuilder(value);
-                    sb.Replace('\\', '_');
-                    sb.Replace('/', '_');
-                    sb.Replace('\"', '\'');
-                    sb.Replace(':', '_');
-                    sb.Replace('?', '_');
-                    sb.Replace('*', '_');
-                    sb.Replace('<', '(');
-                    sb.Replace('>', ')');
-                    sb.Replace('|', '_');
-                    m_Name = sb.ToString();
-                }
-                else
-                {
-                    m_Name = "[No Name]";
-                }
-            }
-        }
-
-        private static bool m_Warned = false;
-
         public bool Load()
         {
             if (m_Name == null || m_Name.Trim() == "")
                 return false;
 
             string path = Config.GetUserDirectory("Profiles");
-            string file = Path.Combine(path, String.Format("{0}.xml", m_Name));
+            string file = Path.Combine(path, string.Format("{0}.xml", m_Name));
+
             if (!File.Exists(file))
                 return false;
 
             XmlDocument doc = new XmlDocument();
+
             try
             {
                 doc.Load(file);
@@ -255,14 +254,17 @@ namespace Assistant
             catch
             {
                 MessageBox.Show(Engine.ActiveWindow, Language.Format(LocString.ProfileCorrupt, file), "Profile Load Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+
                 return false;
             }
 
             XmlElement root = doc["profile"];
+
             if (root == null)
                 return false;
 
             Assembly exe = Assembly.GetCallingAssembly();
+
             if (exe == null)
                 return false;
 
@@ -283,6 +285,7 @@ namespace Assistant
                     else
                     {
                         Type type = Type.GetType(typeStr);
+
                         if (type == null)
                             type = exe.GetType(typeStr);
 
@@ -334,13 +337,13 @@ namespace Assistant
         public void Save()
         {
             string profileDir = Config.GetUserDirectory("Profiles");
-            string file = Path.Combine(profileDir, String.Format("{0}.xml", m_Name));
+            string file = Path.Combine(profileDir, string.Format("{0}.xml", m_Name));
 
             if (m_Name != "default" && !m_Warned)
             {
                 try
                 {
-                    m_Mutex = new System.Threading.Mutex(true, String.Format("Razor_Profile_{0}", m_Name));
+                    m_Mutex = new Mutex(true, string.Format("Razor_Profile_{0}", m_Name));
 
                     if (!m_Mutex.WaitOne(10, false))
                         throw new Exception("Can't grab profile mutex, must be in use!");
@@ -354,6 +357,7 @@ namespace Assistant
             }
 
             XmlTextWriter xml;
+
             try
             {
                 xml = new XmlTextWriter(file, Encoding.Default);
@@ -374,15 +378,15 @@ namespace Assistant
             {
                 xml.WriteStartElement("property");
                 xml.WriteAttributeString("name", de.Key);
+
                 if (de.Value == null)
-                {
                     xml.WriteAttributeString("type", "-null-");
-                }
                 else
                 {
                     xml.WriteAttributeString("type", de.Value.GetType().FullName);
                     xml.WriteString(de.Value.ToString());
                 }
+
                 xml.WriteEndElement();
             }
 
@@ -423,33 +427,30 @@ namespace Assistant
             xml.Close();
         }
 
-        private static Type[] ctorTypes = new Type[] { typeof(string) };
         private object GetObjectFromString(string val, Type type)
         {
             if (type == typeof(string))
-            {
                 return val;
-            }
-            else
-            {
-                try
-                {
-                    ConstructorInfo ctor = type.GetConstructor(ctorTypes);
-                    if (ctor != null)
-                        return ctor.Invoke(new object[] { val });
-                }
-                catch
-                {
-                }
 
-                return Convert.ChangeType(val, type);
+            try
+            {
+                ConstructorInfo ctor = type.GetConstructor(ctorTypes);
+
+                if (ctor != null)
+                    return ctor.Invoke(new object[] {val});
             }
+            catch
+            {
+            }
+
+            return Convert.ChangeType(val, type);
         }
 
         public object GetProperty(string name)
         {
             if (!m_Props.ContainsKey(name))
                 throw new Exception(Language.Format(LocString.NoProp, name));
+
             return m_Props[name];
         }
 
@@ -457,6 +458,7 @@ namespace Assistant
         {
             if (!m_Props.ContainsKey(name))
                 throw new Exception(Language.Format(LocString.NoProp, name));
+
             m_Props[name] = val;
         }
 
@@ -477,8 +479,15 @@ namespace Assistant
             {
                 if (m_Current == null)
                     LoadLastProfile();
+
                 return m_Current;
             }
+        }
+
+        public static string LastProfileName
+        {
+            get => GetAppSetting<string>("LastProfile");
+            set => SetAppSetting("LastProfile", value);
         }
 
         public static void Save()
@@ -491,18 +500,19 @@ namespace Assistant
         public static bool LoadProfile(string name)
         {
             Profile p = new Profile(name);
+
             if (p.Load())
             {
                 LastProfileName = p.Name;
+
                 if (m_Current != null)
                     m_Current.Unload();
                 m_Current = p;
+
                 return true;
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
 
         public static void NewProfile(string name)
@@ -519,18 +529,22 @@ namespace Assistant
             else
                 m_Chars.Clear();
 
-            string file = Path.Combine(Config.GetUserDirectory("Profiles"), "chars.lst");
+            string file = Path.Combine(GetUserDirectory("Profiles"), "chars.lst");
+
             if (!File.Exists(file))
                 return;
 
             using (StreamReader reader = new StreamReader(file))
             {
                 string line;
+
                 while ((line = reader.ReadLine()) != null)
                 {
                     if (line.Length <= 0 || line[0] == ';' || line[0] == '#')
                         continue;
+
                     string[] split = line.Split('=');
+
                     try
                     {
                         m_Chars.Add(Serial.Parse(split[0]), split[1]);
@@ -549,13 +563,9 @@ namespace Assistant
 
             try
             {
-                using (StreamWriter writer = new StreamWriter(Path.Combine(Config.GetUserDirectory("Profiles"), "chars.lst")))
-                {
+                using (StreamWriter writer = new StreamWriter(Path.Combine(GetUserDirectory("Profiles"), "chars.lst")))
                     foreach (KeyValuePair<Serial, string> de in m_Chars)
-                    {
                         writer.WriteLine("{0}={1}", de.Key, de.Value);
-                    }
-                }
             }
             catch
             {
@@ -584,17 +594,13 @@ namespace Assistant
                             m_Current.MakeDefault();
                     }
                     else
-                    {
                         m_Current.MakeDefault();
-                    }
                 }
 
                 Engine.MainWindow.InitConfig();
             }
             else
-            {
-                m_Chars[player.Serial] = (m_Current != null ? m_Current.Name : "default");
-            }
+                m_Chars[player.Serial] = m_Current != null ? m_Current.Name : "default";
 
             Engine.MainWindow.SafeAction(s => s.SelectProfile(m_Current != null ? m_Current.Name : "default"));
         }
@@ -629,6 +635,7 @@ namespace Assistant
                     p.MakeDefault();
                     p.Save();
                 }
+
                 LastProfileName = "default";
             }
 
@@ -638,6 +645,7 @@ namespace Assistant
                     m_Current.Unload();
                 m_Current = p;
             }
+
             return !failed;
         }
 
@@ -646,20 +654,24 @@ namespace Assistant
             if (list == null || list.Items == null)
                 return;
 
-            string[] files = Directory.GetFiles(Config.GetUserDirectory("Profiles"), "*.xml");
-            string compare = String.Empty;
+            string[] files = Directory.GetFiles(GetUserDirectory("Profiles"), "*.xml");
+            string compare = string.Empty;
+
             if (selectName != null)
                 compare = selectName.ToLower();
 
             for (int i = 0; i < files.Length; i++)
             {
                 string name = Path.GetFileNameWithoutExtension(files[i]);
+
                 if (name == null || name.Length <= 0)
                     name = files[i];
+
                 if (name == null)
                     continue;
 
                 list.Items.Add(name);
+
                 if (name.ToLower() == compare)
                     list.SelectedIndex = i;
             }
@@ -674,7 +686,8 @@ namespace Assistant
                 if (!string.IsNullOrWhiteSpace(appSetting))
                 {
                     var converter = TypeDescriptor.GetConverter(typeof(T));
-                    return (T)(converter.ConvertFromInvariantString(appSetting));
+
+                    return (T) converter.ConvertFromInvariantString(appSetting);
                 }
 
                 return default(T);
@@ -702,24 +715,23 @@ namespace Assistant
 
         public static bool GetBool(string name)
         {
-            return (bool)CurrentProfile.GetProperty(name);
+            return (bool) CurrentProfile.GetProperty(name);
         }
 
         public static string GetString(string name)
         {
-            return (string)CurrentProfile.GetProperty(name);
+            return (string) CurrentProfile.GetProperty(name);
         }
 
         public static int GetInt(string name)
         {
-            return (int)CurrentProfile.GetProperty(name);
+            return (int) CurrentProfile.GetProperty(name);
         }
 
         public static bool SetAppSetting(string key, string value)
         {
             try
             {
-
                 Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
                 config.AppSettings.Settings.Remove(key);
                 config.AppSettings.Settings.Add(key, value);
@@ -744,10 +756,12 @@ namespace Assistant
                 return;
 
             string[] files = Directory.GetFiles(oldDir);
+
             foreach (string f in files)
                 File.Copy(Path.Combine(oldDir, Path.GetFileName(f)), Path.Combine(newDir, Path.GetFileName(f)), overWrite);
 
             string[] dirs = Directory.GetDirectories(oldDir);
+
             foreach (string d in dirs)
                 RecursiveCopy(Path.Combine(oldDir, Path.GetDirectoryName(d)), Path.Combine(newDir, Path.GetDirectoryName(d)), overWrite);
         }
@@ -770,15 +784,9 @@ namespace Assistant
         {
             string appDir = GetInstallDirectory();
 
-            if (!Directory.Exists($"{appDir}\\Macros"))
-            {
-                Directory.CreateDirectory($"{appDir}\\Macros");
-            }
+            if (!Directory.Exists($"{appDir}\\Macros")) Directory.CreateDirectory($"{appDir}\\Macros");
 
-            if (!Directory.Exists($"{appDir}\\Profiles"))
-            {
-                Directory.CreateDirectory($"{appDir}\\Profiles");
-            }
+            if (!Directory.Exists($"{appDir}\\Profiles")) Directory.CreateDirectory($"{appDir}\\Profiles");
 
             name = name.Length > 0 ? Path.Combine(appDir, name) : appDir;
 
@@ -796,10 +804,7 @@ namespace Assistant
         {
             string dir = Engine.RootPath;
 
-            if (name.Length > 0)
-            {
-                dir = Path.Combine(dir, name);
-            }
+            if (name.Length > 0) dir = Path.Combine(dir, name);
 
             Engine.EnsureDirectory(dir);
 
@@ -809,12 +814,6 @@ namespace Assistant
         public static string GetInstallDirectory()
         {
             return GetInstallDirectory("");
-        }
-
-        public static string LastProfileName
-        {
-            get => GetAppSetting<string>("LastProfile");
-            set => SetAppSetting("LastProfile", value);
         }
     }
 }

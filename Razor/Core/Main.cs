@@ -1,16 +1,18 @@
 using System;
-using System.Reflection;
-using System.Threading;
-using System.Collections;
-using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
+using System.Threading;
+using System.Windows.Forms;
 
+using Assistant.Macros;
 
 using CUO_API;
+
+using Ultima;
 
 namespace Assistant
 {
@@ -48,33 +50,13 @@ namespace Assistant
 
     public class Engine
     {
-        private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-        {
-            if (e.IsTerminating)
-            {
-                m_Running = false;
+        //private static Thread m_TimerThread;
+        private static string m_Version;
 
-                new MessageDialog("Unhandled Exception", !e.IsTerminating, e.ExceptionObject.ToString()).ShowDialog(
-                    Engine.ActiveWindow);
-            }
+        private static int _previousHour = -1;
+        private static int _Differential;
 
-            LogCrash(e.ExceptionObject as Exception);
-        }
-
-        public static void LogCrash(object exception)
-        {
-            if (exception == null || (exception is ThreadAbortException))
-                return;
-
-            using (StreamWriter txt = new StreamWriter("Crash.log", true))
-            {
-                txt.AutoFlush = true;
-                txt.WriteLine("Exception @ {0}", Engine.MistedDateTime.ToString("MM-dd-yy HH:mm:ss.ffff"));
-                txt.WriteLine(exception.ToString());
-                txt.WriteLine("");
-                txt.WriteLine("");
-            }
-        }
+        private static string _rootPath;
 
         public static ClientVersions ClientVersion { get; private set; }
 
@@ -86,21 +68,11 @@ namespace Assistant
 
         public static bool UsePostKRPackets => ClientVersion >= ClientVersions.CV_6017;
 
-        public static MainForm MainWindow
-        {
-            get { return m_MainWnd; }
-        }
+        public static MainForm MainWindow { get; private set; }
 
-        public static bool Running
-        {
-            get { return m_Running; }
-        }
+        public static bool Running { get; private set; }
 
-        public static Form ActiveWindow
-        {
-            get { return m_ActiveWnd; }
-            set { m_ActiveWnd = value; }
-        }
+        public static Form ActiveWindow { get; set; }
 
         public static string Version
         {
@@ -118,17 +90,6 @@ namespace Assistant
 
         public static string ShardList { get; private set; }
 
-        private static MainForm m_MainWnd;
-
-        private static Form m_ActiveWnd;
-
-        //private static Thread m_TimerThread;
-        private static bool m_Running;
-        private static string m_Version;
-
-        private static int _previousHour = -1;
-        private static int _Differential;
-
         public static int Differential //to use in all cases where you rectify normal clocks obtained with utctimer!
         {
             get
@@ -136,23 +97,49 @@ namespace Assistant
                 if (_previousHour != DateTime.UtcNow.Hour)
                 {
                     _previousHour = DateTime.UtcNow.Hour;
-                    _Differential = Engine.MistedDateTime.Subtract(DateTime.UtcNow).Hours;
+                    _Differential = MistedDateTime.Subtract(DateTime.UtcNow).Hours;
                 }
 
                 return _Differential;
             }
         }
 
-        public static DateTime MistedDateTime
-        {
-            get { return DateTime.UtcNow.AddHours(Differential); }
-        }
+        public static DateTime MistedDateTime => DateTime.UtcNow.AddHours(Differential);
 
-        private static string _rootPath = null;
         public static string RootPath => _rootPath ?? (_rootPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
 
+        public static bool IsElevated => new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
+
+        private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            if (e.IsTerminating)
+            {
+                Running = false;
+
+                new MessageDialog("Unhandled Exception", !e.IsTerminating, e.ExceptionObject.ToString()).ShowDialog(
+                                                                                                                    ActiveWindow);
+            }
+
+            LogCrash(e.ExceptionObject as Exception);
+        }
+
+        public static void LogCrash(object exception)
+        {
+            if (exception == null || exception is ThreadAbortException)
+                return;
+
+            using (StreamWriter txt = new StreamWriter("Crash.log", true))
+            {
+                txt.AutoFlush = true;
+                txt.WriteLine("Exception @ {0}", MistedDateTime.ToString("MM-dd-yy HH:mm:ss.ffff"));
+                txt.WriteLine(exception.ToString());
+                txt.WriteLine("");
+                txt.WriteLine("");
+            }
+        }
+
         [DllExport(CallingConvention.Cdecl)]
-        public static unsafe void Install(ref PluginHeader *plugin)
+        public static unsafe void Install(ref PluginHeader* plugin)
         {
             AppDomain.CurrentDomain.AssemblyResolve += (sender, e) =>
             {
@@ -160,23 +147,21 @@ namespace Assistant
                 string name = fields[0];
                 string culture = fields[2];
 
-                if (name.EndsWith(".resources") && !culture.EndsWith("neutral"))
-                {
-                    return null;
-                }
+                if (name.EndsWith(".resources") && !culture.EndsWith("neutral")) return null;
+
                 AssemblyName askedassembly = new AssemblyName(e.Name);
 
                 bool isdll = File.Exists(Path.Combine(RootPath, askedassembly.Name + ".dll"));
 
                 return Assembly.LoadFile(Path.Combine(RootPath, askedassembly.Name + (isdll ? ".dll" : ".exe")));
-
             };
 
-            ClientVersion = (ClientVersions)plugin->ClientVersion;
+            ClientVersion = (ClientVersions) plugin->ClientVersion;
 
             if (!ClientCommunication.InstallHooks(ref plugin))
             {
-                System.Diagnostics.Process.GetCurrentProcess().Kill();
+                Process.GetCurrentProcess().Kill();
+
                 return;
             }
 
@@ -186,52 +171,59 @@ namespace Assistant
 
             Thread t = new Thread(() =>
             {
-                m_Running = true;
+                Running = true;
                 Thread.CurrentThread.Name = "Razor Main Thread";
 
 #if !DEBUG
-			    AppDomain.CurrentDomain.UnhandledException +=
-                    new UnhandledExceptionEventHandler( CurrentDomain_UnhandledException );
+                AppDomain.CurrentDomain.UnhandledException +=
+                    CurrentDomain_UnhandledException;
 #endif
 
-                Ultima.Files.SetMulPath(clientPath);
-                Ultima.Multis.PostHSFormat = UsePostHSChanges;
+                Files.SetMulPath(clientPath);
+                Multis.PostHSFormat = UsePostHSChanges;
 
                 if (!Language.Load("ENU"))
                 {
                     MessageBox.Show(
-                        "Fatal Error: Unable to load required file Language/Razor_lang.enu\nRazor cannot continue.",
-                        "No Language Pack", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                                    "Fatal Error: Unable to load required file Language/Razor_lang.enu\nRazor cannot continue.",
+                                    "No Language Pack", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+
                     return;
                 }
 
                 string defLang = Config.GetAppSetting<string>("DefaultLanguage");
+
                 if (defLang != null && !Language.Load(defLang))
+                {
                     MessageBox.Show(
-                        String.Format(
-                            "WARNING: Razor was unable to load the file Language/Razor_lang.{0}\nENU will be used instead.",
-                            defLang), "Language Load Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                    string.Format(
+                                                  "WARNING: Razor was unable to load the file Language/Razor_lang.{0}\nENU will be used instead.",
+                                                  defLang), "Language Load Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
 
 
                 Language.LoadCliLoc();
 
-                Initialize(typeof(Assistant.Engine).Assembly); //Assembly.GetExecutingAssembly()
+                Initialize(typeof(Engine).Assembly); //Assembly.GetExecutingAssembly()
 
                 Config.LoadCharList();
+
                 if (!Config.LoadLastProfile())
+                {
                     MessageBox.Show(
-                        "The selected profile could not be loaded, using default instead.", "Profile Load Error",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                    "The selected profile could not be loaded, using default instead.", "Profile Load Error",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
 
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
 
-                m_MainWnd = new MainForm();
-                Application.Run(m_MainWnd);
-                m_Running = false;
+                MainWindow = new MainForm();
+                Application.Run(MainWindow);
+                Running = false;
 
                 Counter.Save();
-                Macros.MacroManager.Save();
+                MacroManager.Save();
                 Config.Save();
             });
             t.SetApartmentState(ApartmentState.STA);
@@ -284,14 +276,6 @@ namespace Assistant
             }
 
             return ipAddr;
-        }
-
-        public static bool IsElevated
-        {
-            get
-            {
-                return new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
-            }
         }
     }
 }

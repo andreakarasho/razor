@@ -1,26 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 
 namespace Assistant.Core
 {
     public class BodCapture
     {
-        private class Bod
-        {
-            public bool IsLarge { get; set; }
-            public string ItemName { get; set; }
-            public bool Exceptional { get; set; }
-            public string Material { get; set; }
-            public string TotalAmount { get; set; }
-            public string CurrentAmount { get; set; }
-        }
-
         private static readonly uint _largeBodGumpId = 2703603018;
         private static readonly uint _smallBodGumpId = 1526454082;
-        
+
         private static readonly string _bodFile = $"{Config.GetInstallDirectory()}\\BODs.csv";
 
         public static bool IsBodGump(uint gumpId)
@@ -37,10 +25,7 @@ namespace Assistant.Core
 
             using (StreamWriter sw = File.AppendText(_bodFile))
             {
-                foreach (Bod bod in bods)
-                {
-                    sw.WriteLine($"{bod.ItemName},{(bod.IsLarge ? "large": "small")},{bod.Exceptional},{bod.Material},{bod.CurrentAmount},{bod.TotalAmount}");
-                }
+                foreach (Bod bod in bods) sw.WriteLine($"{bod.ItemName},{(bod.IsLarge ? "large" : "small")},{bod.Exceptional},{bod.Material},{bod.CurrentAmount},{bod.TotalAmount}");
             }
         }
 
@@ -49,10 +34,7 @@ namespace Assistant.Core
             if (File.Exists(_bodFile))
                 return;
 
-            using (StreamWriter sw = File.AppendText(_bodFile))
-            {
-                sw.WriteLine("itemname,type,exceptional,material,currentamount,totalamount");
-            }
+            using (StreamWriter sw = File.AppendText(_bodFile)) sw.WriteLine("itemname,type,exceptional,material,currentamount,totalamount");
         }
 
         /*Count = 11               //// SMALL BOD
@@ -109,18 +91,13 @@ namespace Assistant.Core
             foreach (string data in gumpData)
             {
                 if (data.Contains("exceptional"))
-                {
                     isExceptional = true;
-                }
-                else if (data.Contains("All items must be made with"))
-                {
-                    material = data.Substring(data.IndexOf("with", StringComparison.Ordinal) + 5).Replace(".", "");
-                }
+                else if (data.Contains("All items must be made with")) material = data.Substring(data.IndexOf("with", StringComparison.Ordinal) + 5).Replace(".", "");
             }
 
             // Based on the data above, the total amount is always after EXIT in both small and large
             string totalAmount = gumpData[exitIndex + 1];
-           
+
             // BOD requirement data appears at index 4 for both small and large
             int beginningIndex = 4;
 
@@ -146,9 +123,7 @@ namespace Assistant.Core
                         currentAmountIndex++;
                     }
                     else
-                    {
                         break;
-                    }
                 }
             }
             else // small!
@@ -167,5 +142,14 @@ namespace Assistant.Core
             return bods;
         }
 
+        private class Bod
+        {
+            public bool IsLarge { get; set; }
+            public string ItemName { get; set; }
+            public bool Exceptional { get; set; }
+            public string Material { get; set; }
+            public string TotalAmount { get; set; }
+            public string CurrentAmount { get; set; }
+        }
     }
 }

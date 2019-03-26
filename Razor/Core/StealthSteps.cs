@@ -1,68 +1,47 @@
-using System;
-
 namespace Assistant
 {
     public class StealthSteps
     {
-        private static int m_Count;
-        private static bool m_Hidden = false;
+        public static int Count { get; private set; }
 
-        public static int Count
-        {
-            get { return m_Count; }
-        }
+        public static bool Counting { get; private set; }
 
-        public static bool Counting
-        {
-            get { return m_Hidden; }
-        }
-
-        public static bool Hidden
-        {
-            get { return m_Hidden; }
-        }
+        public static bool Hidden => Counting;
 
         public static void OnMove()
         {
-            if (m_Hidden && Config.GetBool("CountStealthSteps") && World.Player != null)
+            if (Counting && Config.GetBool("CountStealthSteps") && World.Player != null)
             {
-                m_Count++;
+                Count++;
 
                 if (Config.GetBool("StealthOverhead"))
-                {
-                    World.Player.OverheadMessage(LocString.StealthSteps, m_Count);
-                }
+                    World.Player.OverheadMessage(LocString.StealthSteps, Count);
                 else
-                {
-                    World.Player.SendMessage(MsgLevel.Error, LocString.StealthSteps, m_Count);
-                }   
+                    World.Player.SendMessage(MsgLevel.Error, LocString.StealthSteps, Count);
 
-                if (m_Count > 30)
+                if (Count > 30)
                     Unhide();
             }
         }
 
         public static void Hide()
         {
-            m_Hidden = true;
-            m_Count = 0;
+            Counting = true;
+            Count = 0;
+
             if (Config.GetBool("CountStealthSteps") && World.Player != null)
             {
                 if (Config.GetBool("StealthOverhead"))
-                {
                     World.Player.OverheadMessage(LocString.StealthStart);
-                }
                 else
-                {
                     World.Player.SendMessage(MsgLevel.Error, LocString.StealthStart);
-                }
-            }   
+            }
         }
 
         public static void Unhide()
         {
-            m_Hidden = false;
-            m_Count = 0;
+            Counting = false;
+            Count = 0;
         }
     }
 }

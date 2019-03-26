@@ -2,64 +2,58 @@ using System;
 
 namespace Assistant
 {
-	public class BuffsTimer
-	{
-		//private static int m_Count;
-		private static Timer m_Timer;
+    public class BuffsTimer
+    {
+        //private static int m_Count;
+        private static readonly Timer m_Timer;
 
-		
-		static BuffsTimer()
-		{
-			m_Timer = new InternalTimer();
-		}
 
-		/*public static int Count
-		{
-			get
-			{
-				return m_Count;
-			}
-		}*/
+        static BuffsTimer()
+        {
+            m_Timer = new InternalTimer();
+        }
 
-		public static bool Running
-		{
-			get
-			{
-				return m_Timer.Running;
-			}
-		}
+        /*public static int Count
+        {
+            get
+            {
+                return m_Count;
+            }
+        }*/
 
-		public static void Start()
-		{
-			//m_Count = 0;
+        public static bool Running => m_Timer.Running;
 
-			if ( m_Timer.Running )
-				m_Timer.Stop();
-			m_Timer.Start();
+        public static void Start()
+        {
+            //m_Count = 0;
 
-			Windows.RequestTitleBarUpdate();
-		}
+            if (m_Timer.Running)
+                m_Timer.Stop();
+            m_Timer.Start();
 
-		public static void Stop()
-		{
-			m_Timer.Stop();
-			Windows.RequestTitleBarUpdate();
-		}
+            Windows.RequestTitleBarUpdate();
+        }
 
-		private class InternalTimer : Timer
-		{
-			public InternalTimer() : base( TimeSpan.FromSeconds( 1 ), TimeSpan.FromSeconds( 1 ) )
-			{
-			}
+        public static void Stop()
+        {
+            m_Timer.Stop();
+            Windows.RequestTitleBarUpdate();
+        }
 
-			protected override void OnTick()
-			{
-				/*m_Count++;
-				if ( m_Count > 30 )
-					Stop();*/
+        private class InternalTimer : Timer
+        {
+            public InternalTimer() : base(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1))
+            {
+            }
 
-				Windows.RequestTitleBarUpdate();
-			}
-		}
-	}
+            protected override void OnTick()
+            {
+                /*m_Count++;
+                if ( m_Count > 30 )
+                    Stop();*/
+
+                Windows.RequestTitleBarUpdate();
+            }
+        }
+    }
 }

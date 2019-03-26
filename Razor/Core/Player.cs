@@ -1,15 +1,11 @@
 using System;
-using System.IO;
-using System.Reflection;
-using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 using Assistant.Core;
 using Assistant.Macros;
 using Assistant.UI;
-using Ultima;
 
 namespace Assistant
 {
@@ -32,71 +28,54 @@ namespace Assistant
     public class Skill
     {
         public static int Count = 55;
-
-        private LockType m_Lock;
-        private ushort m_Value;
         private ushort m_Base;
-        private ushort m_Cap;
         private short m_Delta;
-        private int m_Idx;
 
         public Skill(int idx)
         {
-            m_Idx = idx;
+            Index = idx;
         }
 
-        public int Index { get { return m_Idx; } }
+        public int Index { get; }
 
-        public LockType Lock
-        {
-            get { return m_Lock; }
-            set { m_Lock = value; }
-        }
+        public LockType Lock { get; set; }
 
-        public ushort FixedValue
-        {
-            get { return m_Value; }
-            set { m_Value = value; }
-        }
+        public ushort FixedValue { get; set; }
 
         public ushort FixedBase
         {
-            get { return m_Base; }
+            get => m_Base;
             set
             {
-                m_Delta += (short)(value - m_Base);
+                m_Delta += (short) (value - m_Base);
                 m_Base = value;
             }
         }
 
-        public ushort FixedCap
-        {
-            get { return m_Cap; }
-            set { m_Cap = value; }
-        }
+        public ushort FixedCap { get; set; }
 
         public double Value
         {
-            get { return m_Value / 10.0; }
-            set { m_Value = (ushort)(value * 10.0); }
+            get => FixedValue / 10.0;
+            set => FixedValue = (ushort) (value * 10.0);
         }
 
         public double Base
         {
-            get { return m_Base / 10.0; }
-            set { m_Base = (ushort)(value * 10.0); }
+            get => m_Base / 10.0;
+            set => m_Base = (ushort) (value * 10.0);
         }
 
         public double Cap
         {
-            get { return m_Cap / 10.0; }
-            set { m_Cap = (ushort)(value * 10.0); }
+            get => FixedCap / 10.0;
+            set => FixedCap = (ushort) (value * 10.0);
         }
 
         public double Delta
         {
-            get { return m_Delta / 10.0; }
-            set { m_Delta = (short)(value * 10); }
+            get => m_Delta / 10.0;
+            set => m_Delta = (short) (value * 10);
         }
     }
 
@@ -205,7 +184,7 @@ namespace Assistant
         Whistle = 0x448,
         Yawn = 0x449,
         Yea = 0x44A,
-        Yell = 0x44B,
+        Yell = 0x44B
     }
 
     public enum FemaleSounds
@@ -238,7 +217,7 @@ namespace Assistant
         Oomph4 = 0x328,
         Oomph5 = 0x329,
         Oomph6 = 0x32A,
-        Oomph7 = 0x32B,        
+        Oomph7 = 0x32B,
         Oooh = 0x32C,
         Oops = 0x32D,
         Puke = 0x32E,
@@ -252,115 +231,64 @@ namespace Assistant
         Whistle = 0x336,
         Yawn = 0x337,
         Yea = 0x338,
-        Yell = 0x339,
+        Yell = 0x339
     }
 
     public class PlayerData : Mobile
     {
-        public int VisRange = 18;
-        public int MultiVisRange { get { return VisRange + 5; } }
+        public enum SeasonFlag
+        {
+            Spring,
+            Summer,
+            Fall,
+            Winter,
+            Desolation
+        }
+
+        public static Timer m_SeasonTimer = new SeasonTimer();
+        public string CurrentGumpRawData;
+
+        public uint CurrentGumpS, CurrentGumpI;
+        public List<string> CurrentGumpStrings = new List<string>();
+        public ushort CurrentMenuI;
+        public uint CurrentMenuS;
+        public bool HasGump;
+        public bool HasMenu;
+        public GumpResponseAction LastGumpResponseAction;
+
+        internal List<BuffsDebuffs> m_BuffsDebuffs = new List<BuffsDebuffs>();
+        private DateTime m_CriminalStart = DateTime.MinValue;
+        private Timer m_CriminalTime;
 
         private int m_MaxWeight = -1;
 
-        private short m_FireResist, m_ColdResist, m_PoisonResist, m_EnergyResist, m_Luck;
-        private ushort m_DamageMin, m_DamageMax;
 
-        private ushort m_Str, m_Dex, m_Int;
-        private LockType m_StrLock, m_DexLock, m_IntLock;
-        private uint m_Gold;
-        private ushort m_Weight;
-        private Skill[] m_Skills;
-        private ushort m_AR;
-        private ushort m_StatCap;
-        private byte m_Followers;
-        private byte m_FollowersMax;
-        private int m_Tithe;
-        private sbyte m_LocalLight;
-        private byte m_GlobalLight;
-        private ushort m_Features;
-        private byte m_Season;
-        private byte m_DefaultSeason;
-        private int[] m_MapPatches = new int[10];
-
-
-        private bool m_SkillsSent;
-        private Timer m_CriminalTime;
-        private DateTime m_CriminalStart = DateTime.MinValue;
-
-        internal List<BuffsDebuffs> m_BuffsDebuffs = new List<BuffsDebuffs>();
-        internal List<BuffsDebuffs> BuffsDebuffs { get { return m_BuffsDebuffs; } }
-
-        private List<uint> m_OpenedCorpses = new List<uint>();
-        public List<uint> OpenedCorpses { get { return m_OpenedCorpses; } }
-
-
-        public override void SaveState(BinaryWriter writer)
-        {
-            base.SaveState(writer);
-
-            writer.Write(m_Str);
-            writer.Write(m_Dex);
-            writer.Write(m_Int);
-            writer.Write(m_StamMax);
-            writer.Write(m_Stam);
-            writer.Write(m_ManaMax);
-            writer.Write(m_Mana);
-            writer.Write((byte)m_StrLock);
-            writer.Write((byte)m_DexLock);
-            writer.Write((byte)m_IntLock);
-            writer.Write(m_Gold);
-            writer.Write(m_Weight);
-
-            writer.Write((byte)Skill.Count);
-            for (int i = 0; i < Skill.Count; i++)
-            {
-                writer.Write(m_Skills[i].FixedBase);
-                writer.Write(m_Skills[i].FixedCap);
-                writer.Write(m_Skills[i].FixedValue);
-                writer.Write((byte)m_Skills[i].Lock);
-            }
-
-            writer.Write(m_AR);
-            writer.Write(m_StatCap);
-            writer.Write(m_Followers);
-            writer.Write(m_FollowersMax);
-            writer.Write(m_Tithe);
-
-            writer.Write(m_LocalLight);
-            writer.Write(m_GlobalLight);
-            writer.Write(m_Features);
-            writer.Write(m_Season);
-
-            writer.Write((byte)m_MapPatches.Length);
-            for (int i = 0; i < m_MapPatches.Length; i++)
-                writer.Write((int)m_MapPatches[i]);
-        }
+        public int VisRange = 18;
 
         public PlayerData(BinaryReader reader, int version) : base(reader, version)
         {
             int c;
-            m_Str = reader.ReadUInt16();
-            m_Dex = reader.ReadUInt16();
-            m_Int = reader.ReadUInt16();
+            Str = reader.ReadUInt16();
+            Dex = reader.ReadUInt16();
+            Int = reader.ReadUInt16();
             m_StamMax = reader.ReadUInt16();
             m_Stam = reader.ReadUInt16();
             m_ManaMax = reader.ReadUInt16();
             m_Mana = reader.ReadUInt16();
-            m_StrLock = (LockType)reader.ReadByte();
-            m_DexLock = (LockType)reader.ReadByte();
-            m_IntLock = (LockType)reader.ReadByte();
-            m_Gold = reader.ReadUInt32();
-            m_Weight = reader.ReadUInt16();
+            StrLock = (LockType) reader.ReadByte();
+            DexLock = (LockType) reader.ReadByte();
+            IntLock = (LockType) reader.ReadByte();
+            Gold = reader.ReadUInt32();
+            Weight = reader.ReadUInt16();
 
             if (version >= 4)
-            {
                 Skill.Count = c = reader.ReadByte();
-            }
             else if (version == 3)
             {
                 long skillStart = reader.BaseStream.Position;
                 c = 0;
                 reader.BaseStream.Seek(7 * 49, SeekOrigin.Current);
+
                 for (int i = 48; i < 60; i++)
                 {
                     ushort Base, Cap, Val;
@@ -374,6 +302,7 @@ namespace Assistant
                     if (Base > 2000 || Cap > 2000 || Val > 2000 || Lock > 2)
                     {
                         c = i;
+
                         break;
                     }
                 }
@@ -388,189 +317,107 @@ namespace Assistant
                 reader.BaseStream.Seek(skillStart, SeekOrigin.Begin);
             }
             else
-            {
                 Skill.Count = c = 52;
-            }
 
-            m_Skills = new Skill[c];
+            Skills = new Skill[c];
+
             for (int i = 0; i < c; i++)
             {
-                m_Skills[i] = new Skill(i);
-                m_Skills[i].FixedBase = reader.ReadUInt16();
-                m_Skills[i].FixedCap = reader.ReadUInt16();
-                m_Skills[i].FixedValue = reader.ReadUInt16();
-                m_Skills[i].Lock = (LockType)reader.ReadByte();
+                Skills[i] = new Skill(i);
+                Skills[i].FixedBase = reader.ReadUInt16();
+                Skills[i].FixedCap = reader.ReadUInt16();
+                Skills[i].FixedValue = reader.ReadUInt16();
+                Skills[i].Lock = (LockType) reader.ReadByte();
             }
 
-            m_AR = reader.ReadUInt16();
-            m_StatCap = reader.ReadUInt16();
-            m_Followers = reader.ReadByte();
-            m_FollowersMax = reader.ReadByte();
-            m_Tithe = reader.ReadInt32();
+            AR = reader.ReadUInt16();
+            StatCap = reader.ReadUInt16();
+            Followers = reader.ReadByte();
+            FollowersMax = reader.ReadByte();
+            Tithe = reader.ReadInt32();
 
-            m_LocalLight = reader.ReadSByte();
-            m_GlobalLight = reader.ReadByte();
-            m_Features = reader.ReadUInt16();
-            m_Season = reader.ReadByte();
+            LocalLightLevel = reader.ReadSByte();
+            GlobalLightLevel = reader.ReadByte();
+            Features = reader.ReadUInt16();
+            Season = reader.ReadByte();
 
             if (version >= 4)
                 c = reader.ReadByte();
             else
                 c = 8;
-            m_MapPatches = new int[c];
+            MapPatches = new int[c];
+
             for (int i = 0; i < c; i++)
-                m_MapPatches[i] = reader.ReadInt32();
+                MapPatches[i] = reader.ReadInt32();
         }
 
         public PlayerData(Serial serial) : base(serial)
         {
-            m_Skills = new Skill[Skill.Count];
-            for (int i = 0; i < m_Skills.Length; i++)
-                m_Skills[i] = new Skill(i);
+            Skills = new Skill[Skill.Count];
+
+            for (int i = 0; i < Skills.Length; i++)
+                Skills[i] = new Skill(i);
         }
 
-        public ushort Str
-        {
-            get { return m_Str; }
-            set { m_Str = value; }
-        }
+        public int MultiVisRange => VisRange + 5;
+        internal List<BuffsDebuffs> BuffsDebuffs => m_BuffsDebuffs;
+        public List<uint> OpenedCorpses { get; } = new List<uint>();
 
-        public ushort Dex
-        {
-            get { return m_Dex; }
-            set { m_Dex = value; }
-        }
+        public ushort Str { get; set; }
 
-        public ushort Int
-        {
-            get { return m_Int; }
-            set { m_Int = value; }
-        }
+        public ushort Dex { get; set; }
 
-        public uint Gold
-        {
-            get { return m_Gold; }
-            set { m_Gold = value; }
-        }
+        public ushort Int { get; set; }
 
-        public ushort Weight
-        {
-            get { return m_Weight; }
-            set { m_Weight = value; }
-        }
+        public uint Gold { get; set; }
+
+        public ushort Weight { get; set; }
 
         public ushort MaxWeight
         {
             get
             {
                 if (m_MaxWeight == -1)
-                    return (ushort)((m_Str * 3.5) + 40);
-                else
-                    return (ushort)m_MaxWeight;
+                    return (ushort) (Str * 3.5 + 40);
+
+                return (ushort) m_MaxWeight;
             }
-            set
-            {
-                m_MaxWeight = value;
-            }
+            set => m_MaxWeight = value;
         }
 
-        public short FireResistance
-        {
-            get { return m_FireResist; }
-            set { m_FireResist = value; }
-        }
+        public short FireResistance { get; set; }
 
-        public short ColdResistance
-        {
-            get { return m_ColdResist; }
-            set { m_ColdResist = value; }
-        }
+        public short ColdResistance { get; set; }
 
-        public short PoisonResistance
-        {
-            get { return m_PoisonResist; }
-            set { m_PoisonResist = value; }
-        }
+        public short PoisonResistance { get; set; }
 
-        public short EnergyResistance
-        {
-            get { return m_EnergyResist; }
-            set { m_EnergyResist = value; }
-        }
+        public short EnergyResistance { get; set; }
 
-        public short Luck
-        {
-            get { return m_Luck; }
-            set { m_Luck = value; }
-        }
+        public short Luck { get; set; }
 
-        public ushort DamageMin
-        {
-            get { return m_DamageMin; }
-            set { m_DamageMin = value; }
-        }
+        public ushort DamageMin { get; set; }
 
-        public ushort DamageMax
-        {
-            get { return m_DamageMax; }
-            set { m_DamageMax = value; }
-        }
+        public ushort DamageMax { get; set; }
 
-        public LockType StrLock
-        {
-            get { return m_StrLock; }
-            set { m_StrLock = value; }
-        }
+        public LockType StrLock { get; set; }
 
-        public LockType DexLock
-        {
-            get { return m_DexLock; }
-            set { m_DexLock = value; }
-        }
+        public LockType DexLock { get; set; }
 
-        public LockType IntLock
-        {
-            get { return m_IntLock; }
-            set { m_IntLock = value; }
-        }
+        public LockType IntLock { get; set; }
 
-        public ushort StatCap
-        {
-            get { return m_StatCap; }
-            set { m_StatCap = value; }
-        }
+        public ushort StatCap { get; set; }
 
-        public ushort AR
-        {
-            get { return m_AR; }
-            set { m_AR = value; }
-        }
+        public ushort AR { get; set; }
 
-        public byte Followers
-        {
-            get { return m_Followers; }
-            set { m_Followers = value; }
-        }
+        public byte Followers { get; set; }
 
-        public byte FollowersMax
-        {
-            get { return m_FollowersMax; }
-            set { m_FollowersMax = value; }
-        }
+        public byte FollowersMax { get; set; }
 
-        public int Tithe
-        {
-            get { return m_Tithe; }
-            set { m_Tithe = value; }
-        }
+        public int Tithe { get; set; }
 
-        public Skill[] Skills { get { return m_Skills; } }
+        public Skill[] Skills { get; }
 
-        public bool SkillsSent
-        {
-            get { return m_SkillsSent; }
-            set { m_SkillsSent = value; }
-        }
+        public bool SkillsSent { get; set; }
 
         public int CriminalTime
         {
@@ -578,31 +425,91 @@ namespace Assistant
             {
                 if (m_CriminalStart != DateTime.MinValue)
                 {
-                    int sec = (int)(DateTime.UtcNow - m_CriminalStart).TotalSeconds;
+                    int sec = (int) (DateTime.UtcNow - m_CriminalStart).TotalSeconds;
+
                     if (sec > 300)
                     {
                         if (m_CriminalTime != null)
                             m_CriminalTime.Stop();
                         m_CriminalStart = DateTime.MinValue;
+
                         return 0;
                     }
-                    else
-                    {
-                        return sec;
-                    }
+
+                    return sec;
                 }
-                else
-                {
-                    return 0;
-                }
+
+                return 0;
             }
+        }
+
+        public ushort SpeechHue { get; set; }
+
+        public sbyte LocalLightLevel { get; set; }
+
+        public byte GlobalLightLevel { get; set; }
+
+        public byte Season { get; set; }
+
+        public byte DefaultSeason { get; set; }
+
+        public ushort Features { get; set; }
+
+        public int[] MapPatches { get; set; } = new int[10];
+        public int LastSkill { get; set; } = -1;
+        public Serial LastObject { get; private set; } = Serial.Zero;
+        public int LastSpell { get; set; } = -1;
+
+
+        public override void SaveState(BinaryWriter writer)
+        {
+            base.SaveState(writer);
+
+            writer.Write(Str);
+            writer.Write(Dex);
+            writer.Write(Int);
+            writer.Write(m_StamMax);
+            writer.Write(m_Stam);
+            writer.Write(m_ManaMax);
+            writer.Write(m_Mana);
+            writer.Write((byte) StrLock);
+            writer.Write((byte) DexLock);
+            writer.Write((byte) IntLock);
+            writer.Write(Gold);
+            writer.Write(Weight);
+
+            writer.Write((byte) Skill.Count);
+
+            for (int i = 0; i < Skill.Count; i++)
+            {
+                writer.Write(Skills[i].FixedBase);
+                writer.Write(Skills[i].FixedCap);
+                writer.Write(Skills[i].FixedValue);
+                writer.Write((byte) Skills[i].Lock);
+            }
+
+            writer.Write(AR);
+            writer.Write(StatCap);
+            writer.Write(Followers);
+            writer.Write(FollowersMax);
+            writer.Write(Tithe);
+
+            writer.Write(LocalLightLevel);
+            writer.Write(GlobalLightLevel);
+            writer.Write(Features);
+            writer.Write(Season);
+
+            writer.Write((byte) MapPatches.Length);
+
+            for (int i = 0; i < MapPatches.Length; i++)
+                writer.Write(MapPatches[i]);
         }
 
         private void AutoOpenDoors()
         {
             if (Body != 0x03DB &&
                 !IsGhost &&
-                ((int)(Direction & Direction.Mask)) % 2 == 0 &&
+                (int) (Direction & Direction.Mask) % 2 == 0 &&
                 Config.GetBool("AutoOpenDoors") &&
                 Windows.AllowBit(FeatureBit.AutoOpenDoors))
             {
@@ -611,10 +518,7 @@ namespace Assistant
                 /* Check if one more tile in the direction we just moved is a door */
                 Utility.Offset(Direction, ref x, ref y);
 
-                if (World.Items.Values.Any(s => s.IsDoor && s.Position.X == x && s.Position.Y == y && s.Position.Z - 15 <= z && s.Position.Z + 15 >= z))
-                {
-                    ClientCommunication.SendToServer(new OpenDoorMacro());
-                }
+                if (World.Items.Values.Any(s => s.IsDoor && s.Position.X == x && s.Position.Y == y && s.Position.Z - 15 <= z && s.Position.Z + 15 >= z)) ClientCommunication.SendToServer(new OpenDoorMacro());
             }
         }
 
@@ -627,9 +531,11 @@ namespace Assistant
             AutoOpenDoors();
 
             List<Mobile> mlist = new List<Mobile>(World.Mobiles.Values);
+
             for (int i = 0; i < mlist.Count; i++)
             {
                 Mobile m = mlist[i];
+
                 if (m != this)
                 {
                     if (!Utility.InRange(m.Position, Position, VisRange))
@@ -644,14 +550,17 @@ namespace Assistant
 
             List<Item> ilist = new List<Item>(World.Items.Values);
             ScavengerAgent s = ScavengerAgent.Instance;
+
             for (int i = 0; i < ilist.Count; i++)
             {
                 Item item = ilist[i];
+
                 if (item.Deleted || item.Container != null)
                     continue;
 
                 int dist = Utility.Distance(item.GetWorldPosition(), Position);
-                if (item != DragDropManager.Holding && (dist > MultiVisRange || (!item.IsMulti && dist > VisRange)))
+
+                if (item != DragDropManager.Holding && (dist > MultiVisRange || !item.IsMulti && dist > VisRange))
                     item.Remove();
                 else if (!IsGhost && Visible && dist <= 2 && s.Enabled && item.Movable)
                     s.Scavenge(item);
@@ -660,6 +569,7 @@ namespace Assistant
             ilist = null;
 
             Console.WriteLine("Player position changed");
+
             if (Engine.MainWindow != null && Engine.MainWindow.MapWindow != null)
                 Engine.MainWindow.SafeAction(f => f.MapWindow.PlayerMoved());
 
@@ -674,9 +584,11 @@ namespace Assistant
         public override void OnMapChange(byte old, byte cur)
         {
             List<Mobile> list = new List<Mobile>(World.Mobiles.Values);
+
             for (int i = 0; i < list.Count; i++)
             {
                 Mobile m = list[i];
+
                 if (m != this && m.Map != cur)
                     m.Remove();
             }
@@ -685,15 +597,16 @@ namespace Assistant
 
             World.Items.Clear();
             Counter.Reset();
+
             for (int i = 0; i < Contains.Count; i++)
             {
-                Item item = (Item)Contains[i];
+                Item item = Contains[i];
                 World.AddItem(item);
                 item.Contains.Clear();
             }
 
             if (Config.GetBool("AutoSearch") && Backpack != null)
-                PlayerData.DoubleClick(Backpack);
+                DoubleClick(Backpack);
 
             UOAssist.PostMapChange(cur);
 
@@ -716,7 +629,7 @@ namespace Assistant
 
         protected override void OnNotoChange(byte old, byte cur)
         {
-            if ((old == 3 || old == 4) && (cur != 3 && cur != 4))
+            if ((old == 3 || old == 4) && cur != 3 && cur != 4)
             {
                 // grey is turning off
                 // SendMessage( "You are no longer a criminal." );
@@ -725,7 +638,7 @@ namespace Assistant
                 m_CriminalStart = DateTime.MinValue;
                 Windows.RequestTitleBarUpdate();
             }
-            else if ((cur == 3 || cur == 4) && (old != 3 && old != 4 && old != 0))
+            else if ((cur == 3 || cur == 4) && old != 3 && old != 4 && old != 0)
             {
                 // grey is turning on
                 ResetCriminalTimer();
@@ -737,23 +650,10 @@ namespace Assistant
             if (m_CriminalStart == DateTime.MinValue || DateTime.UtcNow - m_CriminalStart >= TimeSpan.FromSeconds(1))
             {
                 m_CriminalStart = DateTime.UtcNow;
+
                 if (m_CriminalTime == null)
                     m_CriminalTime = new CriminalTimer(this);
                 m_CriminalTime.Start();
-                Windows.RequestTitleBarUpdate();
-            }
-        }
-
-        private class CriminalTimer : Timer
-        {
-            private PlayerData m_Player;
-            public CriminalTimer(PlayerData player) : base(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1))
-            {
-                m_Player = player;
-            }
-
-            protected override void OnTick()
-            {
                 Windows.RequestTitleBarUpdate();
             }
         }
@@ -785,12 +685,12 @@ namespace Assistant
 
         internal void SendMessage(MsgLevel lvl, string format, params object[] args)
         {
-            SendMessage(lvl, String.Format(format, args));
+            SendMessage(lvl, string.Format(format, args));
         }
 
         internal void SendMessage(string format, params object[] args)
         {
-            SendMessage(MsgLevel.Info, String.Format(format, args));
+            SendMessage(MsgLevel.Info, string.Format(format, args));
         }
 
         internal void SendMessage(string text)
@@ -800,18 +700,21 @@ namespace Assistant
 
         internal void SendMessage(MsgLevel lvl, string text)
         {
-            if (lvl >= (MsgLevel)Config.GetInt("MessageLevel") && text.Length > 0)
+            if (lvl >= (MsgLevel) Config.GetInt("MessageLevel") && text.Length > 0)
             {
                 int hue;
+
                 switch (lvl)
                 {
                     case MsgLevel.Error:
                     case MsgLevel.Warning:
                         hue = Config.GetInt("WarningColor");
+
                         break;
 
                     default:
                         hue = Config.GetInt("SysColor");
+
                         break;
                 }
 
@@ -824,48 +727,17 @@ namespace Assistant
             }
         }
 
-        public uint CurrentGumpS, CurrentGumpI;
-        public GumpResponseAction LastGumpResponseAction;
-        public bool HasGump;
-        public List<string> CurrentGumpStrings = new List<string>();
-        public string CurrentGumpRawData;
-        public uint CurrentMenuS;
-        public ushort CurrentMenuI;
-        public bool HasMenu;
-
-        private ushort m_SpeechHue;
-        public ushort SpeechHue { get { return m_SpeechHue; } set { m_SpeechHue = value; } }
-
-        public sbyte LocalLightLevel { get { return m_LocalLight; } set { m_LocalLight = value; } }
-        public byte GlobalLightLevel { get { return m_GlobalLight; } set { m_GlobalLight = value; } }
-
-        public enum SeasonFlag
-        {
-            Spring,
-            Summer,
-            Fall,
-            Winter,
-            Desolation
-        }
-
-        public byte Season { get { return m_Season; } set { m_Season = value; } }
-
-        public byte DefaultSeason { get { return m_DefaultSeason; } set { m_DefaultSeason = value; } }
-
         /// <summary>
-        /// Sets the player's season, set a default to revert back if required
+        ///     Sets the player's season, set a default to revert back if required
         /// </summary>
         /// <param name="defaultSeason"></param>
         public void SetSeason(byte defaultSeason = 0)
         {
             if (Config.GetInt("Season") < 5)
             {
-                byte season = (byte)Config.GetInt("Season");
+                byte season = (byte) Config.GetInt("Season");
 
-                if (Config.GetBool("RealSeason"))
-                {
-                    season = World.Player.WhichSeason();
-                }
+                if (Config.GetBool("RealSeason")) season = World.Player.WhichSeason();
 
                 World.Player.Season = season;
                 World.Player.DefaultSeason = defaultSeason;
@@ -880,21 +752,6 @@ namespace Assistant
             }
         }
 
-        public static Timer m_SeasonTimer = new SeasonTimer();
-
-        private class SeasonTimer : Timer
-        {
-            public SeasonTimer() : base(TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(3))
-            {
-            }
-
-            protected override void OnTick()
-            {
-                ClientCommunication.SendToClient(new SeasonChange(World.Player.Season, true));
-                m_SeasonTimer.Stop();
-            }
-        }
-
         public byte WhichSeason()
         {
             DateTime now = DateTime.UtcNow;
@@ -903,28 +760,16 @@ namespace Assistant
                * Summer begins on the 172nd day, Autumn, the 266th and Winter the 355th.
                * Of course, on a leap year add one day to each, 81, 173, 267 and 356. */
 
-            int doy = now.DayOfYear - Convert.ToInt32((DateTime.IsLeapYear(now.Year)) && now.DayOfYear > 59);
+            int doy = now.DayOfYear - Convert.ToInt32(DateTime.IsLeapYear(now.Year) && now.DayOfYear > 59);
 
-            if (doy < 80 || doy >= 355) return (byte)SeasonFlag.Winter;
+            if (doy < 80 || doy >= 355) return (byte) SeasonFlag.Winter;
 
-            if (doy >= 80 && doy < 172) return (byte)SeasonFlag.Spring;
+            if (doy >= 80 && doy < 172) return (byte) SeasonFlag.Spring;
 
-            if (doy >= 172 && doy < 266) return (byte)SeasonFlag.Summer;
+            if (doy >= 172 && doy < 266) return (byte) SeasonFlag.Summer;
 
-            return (byte)SeasonFlag.Fall;
+            return (byte) SeasonFlag.Fall;
         }
-
-        public ushort Features { get { return m_Features; } set { m_Features = value; } }
-        public int[] MapPatches { get { return m_MapPatches; } set { m_MapPatches = value; } }
-
-        private int m_LastSkill = -1;
-        public int LastSkill { get { return m_LastSkill; } set { m_LastSkill = value; } }
-
-        private Serial m_LastObj = Serial.Zero;
-        public Serial LastObject { get { return m_LastObj; } }
-
-        private int m_LastSpell = -1;
-        public int LastSpell { get { return m_LastSpell; } set { m_LastSpell = value; } }
 
         //private UOEntity m_LastCtxM = null;
         //public UOEntity LastContextMenu { get { return m_LastCtxM; } set { m_LastCtxM = value; } }
@@ -937,21 +782,24 @@ namespace Assistant
         public static bool DoubleClick(object clicked, bool silent)
         {
             Serial s;
+
             if (clicked is Mobile)
-                s = ((Mobile)clicked).Serial.Value;
+                s = ((Mobile) clicked).Serial.Value;
             else if (clicked is Item)
-                s = ((Item)clicked).Serial.Value;
+                s = ((Item) clicked).Serial.Value;
             else if (clicked is Serial)
-                s = ((Serial)clicked).Value;
+                s = ((Serial) clicked).Value;
             else
                 s = Serial.Zero;
 
             if (s != Serial.Zero)
             {
                 Item free = null, pack = World.Player.Backpack;
+
                 if (s.IsItem && pack != null && Config.GetBool("PotionEquip") && Windows.AllowBit(FeatureBit.AutoPotionEquip))
                 {
                     Item i = World.FindItem(s);
+
                     if (i != null && i.IsPotion && i.ItemID != 3853) // dont unequip for exploison potions
                     {
                         // dont worry about uneqipping RuneBooks or SpellBooks
@@ -979,10 +827,38 @@ namespace Assistant
                     DragDropManager.DragDrop(free, World.Player, free.Layer, true);
 
                 if (s.IsItem)
-                    World.Player.m_LastObj = s;
+                    World.Player.LastObject = s;
             }
 
             return false;
+        }
+
+        private class CriminalTimer : Timer
+        {
+            private PlayerData m_Player;
+
+            public CriminalTimer(PlayerData player) : base(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1))
+            {
+                m_Player = player;
+            }
+
+            protected override void OnTick()
+            {
+                Windows.RequestTitleBarUpdate();
+            }
+        }
+
+        private class SeasonTimer : Timer
+        {
+            public SeasonTimer() : base(TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(3))
+            {
+            }
+
+            protected override void OnTick()
+            {
+                ClientCommunication.SendToClient(new SeasonChange(World.Player.Season, true));
+                m_SeasonTimer.Stop();
+            }
         }
     }
 }

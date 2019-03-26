@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
+
 using Ultima;
 
 namespace Assistant.UI
@@ -40,13 +34,9 @@ namespace Assistant.UI
             overheadFormat.Text = Config.GetString("OverheadFormat");
 
             if (Config.GetInt("OverheadStyle") == 0)
-            {
                 asciiStyle.Checked = true;
-            }
             else
-            {
                 unicodeStyle.Checked = true;
-            }
         }
 
         private void cliLocSearch_Click(object sender, EventArgs e)
@@ -98,10 +88,7 @@ namespace Assistant.UI
 
         private void removeOverheadMessage_Click(object sender, EventArgs e)
         {
-            if (cliLocOverheadView.SelectedItems.Count > 0)
-            {
-                cliLocOverheadView.Items.Remove(cliLocOverheadView.SelectedItems[0]);
-            }
+            if (cliLocOverheadView.SelectedItems.Count > 0) cliLocOverheadView.Items.Remove(cliLocOverheadView.SelectedItems[0]);
         }
 
         private void saveOverheadMessages_Click(object sender, EventArgs e)
@@ -109,24 +96,17 @@ namespace Assistant.UI
             Core.OverheadMessages.ClearAll();
 
             // Keep it simple, reset to default if it isn't what we like
-            if (string.IsNullOrEmpty(overheadFormat.Text) || !overheadFormat.Text.Contains("{msg}"))
-            {
-                overheadFormat.Text = @"[{msg}]";
-            }
+            if (string.IsNullOrEmpty(overheadFormat.Text) || !overheadFormat.Text.Contains("{msg}")) overheadFormat.Text = @"[{msg}]";
 
             Config.SetProperty("OverheadFormat", overheadFormat.Text);
 
             if (asciiStyle.Checked)
-            {
                 Config.SetProperty("OverheadStyle", 0);
-            }
             else
-            {
                 Config.SetProperty("OverheadStyle", 1);
-            }
 
             foreach (ListViewItem item in cliLocOverheadView.Items)
-            {  
+            {
                 Core.OverheadMessages.OverheadMessage message = new Core.OverheadMessages.OverheadMessage
                 {
                     SearchMessage = item.SubItems[0].Text,
@@ -151,6 +131,5 @@ namespace Assistant.UI
         {
             Close();
         }
-
     }
 }

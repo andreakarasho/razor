@@ -5,53 +5,36 @@ namespace Assistant
 {
     public class GateTimer
     {
-        private static int m_Count;
-        private static Timer m_Timer;
+        private static readonly Timer m_Timer;
 
         private static readonly int[] m_ClilocsStop = {502632};
 
-        private static readonly int[] m_ClilocsRestart = { 501024 };
+        private static readonly int[] m_ClilocsRestart = {501024};
 
         static GateTimer()
         {
             m_Timer = new InternalTimer();
         }
 
-        public static int Count
-        {
-            get { return m_Count; }
-        }
+        public static int Count { get; private set; }
+
+        public static bool Running => m_Timer.Running;
 
         public static void OnAsciiMessage(string msg)
         {
             if (Running)
             {
+                if (m_ClilocsStop.Any(t => Language.GetCliloc(t) == msg)) Stop();
 
-                if (m_ClilocsStop.Any(t => Language.GetCliloc(t) == msg))
-                {
-                    Stop();
-                }
-
-                if (m_ClilocsRestart.Any(t => Language.GetCliloc(t) == msg))
-                {
-                    Start();
-                }
+                if (m_ClilocsRestart.Any(t => Language.GetCliloc(t) == msg)) Start();
             }
-        }
-
-        public static bool Running
-        {
-            get { return m_Timer.Running; }
         }
 
         public static void Start()
         {
-            m_Count = 0;
+            Count = 0;
 
-            if (m_Timer.Running)
-            {
-                m_Timer.Stop();
-            }
+            if (m_Timer.Running) m_Timer.Stop();
 
             m_Timer.Start();
             Windows.RequestTitleBarUpdate();
@@ -71,11 +54,8 @@ namespace Assistant
 
             protected override void OnTick()
             {
-                m_Count++;
-                if (m_Count > 30)
-                {
-                    Stop();
-                }
+                Count++;
+                if (Count > 30) Stop();
 
                 Windows.RequestTitleBarUpdate();
             }

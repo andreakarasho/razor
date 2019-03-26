@@ -1,18 +1,42 @@
 using System;
-using System.Drawing;
-using System.Collections;
 using System.ComponentModel;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace Assistant
 {
     /// <summary>
-    /// Summary description for NewProfile.
+    ///     Summary description for NewProfile.
     /// </summary>
-    public class InputDropdown : System.Windows.Forms.Form
+    public class InputDropdown : Form
     {
         private static InputDropdown m_Instance;
-        
+
+        private System.Windows.Forms.Timer _ShowTimer;
+        private Button cancel;
+
+        /// <summary>
+        ///     Required designer variable.
+        /// </summary>
+        private readonly Container components = null;
+        private ComboBox EntryCombo;
+
+        private string m_String;
+        private Button ok;
+        private Label Prompt;
+
+        private InputDropdown()
+        {
+            //
+            // Required for Windows Form Designer support
+            //
+            InitializeComponent();
+
+            //
+            // TODO: Add any constructor code after InitializeComponent call
+            //
+        }
+
 
         public static bool Show(Form parent, string prompt, string[] dropDownItems)
         {
@@ -21,7 +45,7 @@ namespace Assistant
 
         public static bool Show(Form parent, string prompt, string title)
         {
-            return Show(parent, prompt, new string[] {}, title);
+            return Show(parent, prompt, new string[] { }, title);
         }
 
         public static bool Show(Form parent, string prompt, string[] dropDownItems, string title)
@@ -38,8 +62,8 @@ namespace Assistant
 
             if (parent != null)
                 return m_Instance.ShowDialog() == DialogResult.OK;
-            else
-                return m_Instance.ShowDialog(parent) == DialogResult.OK;
+
+            return m_Instance.ShowDialog(parent) == DialogResult.OK;
         }
 
         public static string GetString()
@@ -53,6 +77,7 @@ namespace Assistant
             {
                 string conv = m_Instance.m_String;
                 int b = 10;
+
                 if (conv[0] == '0' && conv[1] == 'x')
                 {
                     b = 16;
@@ -77,41 +102,14 @@ namespace Assistant
             return GetInt(0);
         }
 
-        private string m_String;
-        private System.Windows.Forms.Button ok;
-        private System.Windows.Forms.Button cancel;
-        private System.Windows.Forms.Label Prompt;
-        private ComboBox EntryCombo;
-
         /// <summary>
-        /// Required designer variable.
-        /// </summary>
-        private Container components = null;
-
-        private InputDropdown()
-        {
-            //
-            // Required for Windows Form Designer support
-            //
-            InitializeComponent();
-
-            //
-            // TODO: Add any constructor code after InitializeComponent call
-            //
-        }
-
-        /// <summary>
-        /// Clean up any resources being used.
+        ///     Clean up any resources being used.
         /// </summary>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
-            {
                 if (components != null)
-                {
                     components.Dispose();
-                }
-            }
 
             base.Dispose(disposing);
         }
@@ -119,8 +117,8 @@ namespace Assistant
         #region Windows Form Designer generated code
 
         /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
+        ///     Required method for Designer support - do not modify
+        ///     the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent()
         {
@@ -176,7 +174,7 @@ namespace Assistant
             this.Controls.Add(this.cancel);
             this.Controls.Add(this.ok);
             this.Controls.Add(this.Prompt);
-            this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Name = "InputDropdown";
             this.ShowInTaskbar = false;
@@ -184,48 +182,45 @@ namespace Assistant
             this.Text = "Input";
             this.Load += new System.EventHandler(this.InputDropdown_Load);
             this.ResumeLayout(false);
-
         }
 
         #endregion
 
-        private void ok_Click(object sender, System.EventArgs e)
+        private void ok_Click(object sender, EventArgs e)
         {
             m_String = EntryCombo.Text.Trim();
-            this.DialogResult = DialogResult.OK;
-            this.Close();
+            DialogResult = DialogResult.OK;
+            Close();
         }
 
-        private void cancel_Click(object sender, System.EventArgs e)
+        private void cancel_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel;
-            this.Close();
+            DialogResult = DialogResult.Cancel;
+            Close();
         }
 
-        private void InputDropdown_Load(object sender, System.EventArgs e)
+        private void InputDropdown_Load(object sender, EventArgs e)
         {
             Language.LoadControlNames(this);
 
-            if (this.Location.X <= 0 || this.Location.Y <= 0)
-                this.Location = new System.Drawing.Point(Config.GetInt("WindowX"), Config.GetInt("WindowY"));
+            if (Location.X <= 0 || Location.Y <= 0)
+                Location = new Point(Config.GetInt("WindowX"), Config.GetInt("WindowY"));
 
-            this.WindowState = FormWindowState.Normal;
-            this.BringToFront();
-            this.TopMost = true;
+            WindowState = FormWindowState.Normal;
+            BringToFront();
+            TopMost = true;
 
             _ShowTimer = new System.Windows.Forms.Timer();
             _ShowTimer.Interval = 250;
             _ShowTimer.Enabled = true;
-            _ShowTimer.Tick += new EventHandler(timer_Tick);
+            _ShowTimer.Tick += timer_Tick;
         }
-
-        private System.Windows.Forms.Timer _ShowTimer;
 
         private void timer_Tick(object sender, EventArgs e)
         {
-            this.TopMost = false;
-            this.BringToFront();
-            this.Activate();
+            TopMost = false;
+            BringToFront();
+            Activate();
 
             EntryCombo.Focus();
 

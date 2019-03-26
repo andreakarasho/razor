@@ -1,10 +1,9 @@
 using System;
 using System.Collections;
-using System.Windows.Forms;
-using System.Reflection;
 using System.IO;
+using System.Reflection;
 using System.Text;
-using Assistant;
+using System.Windows.Forms;
 
 using Assistant.UI;
 
@@ -12,36 +11,36 @@ namespace Assistant.Macros
 {
     public class Macro
     {
-        private string m_Path;
-        private ArrayList m_Actions;
-        private bool m_Recording, m_Playing;
-        private MacroWaitAction m_Wait;
-        private int m_CurrentAction;
-        private bool m_Loop;
-        private bool m_Loaded;
+        private static readonly Type[] ctorArgs = new Type[1] {typeof(string[])};
+
+        private static readonly MacroWaitAction PauseB4Loop = new PauseAction(TimeSpan.FromSeconds(0.1));
+        private readonly Stack m_IfStatus;
         private ListBox m_ListBox;
-        private Stack m_IfStatus;
+        private bool m_Loaded;
+        private bool m_Loop;
+        private MacroWaitAction m_Wait;
 
         public Macro(string path)
         {
-            m_Actions = new ArrayList();
-            m_Path = path;
+            Actions = new ArrayList();
+            Filename = path;
             m_Loaded = false;
             m_IfStatus = new Stack();
         }
 
-        public string Filename { get { return m_Path; } set { m_Path = value; } }
-        public ArrayList Actions { get { return m_Actions; } }
-        public bool Recording { get { return m_Recording; } }
-        public bool Playing { get { return m_Playing; } }
+        public string Filename { get; set; }
+
+        public ArrayList Actions { get; }
+        public bool Recording { get; private set; }
+        public bool Playing { get; private set; }
         public bool StepThrough { get; set; }
-        public bool Waiting { get { return m_Wait != null; } }
-        public int CurrentAction { get { return m_CurrentAction; } }
+        public bool Waiting => m_Wait != null;
+        public int CurrentAction { get; private set; }
 
         public bool Loop
         {
-            get { return m_Loop && Windows.AllowBit(FeatureBit.LoopingMacros); }
-            set { m_Loop = value; }
+            get => m_Loop && Windows.AllowBit(FeatureBit.LoopingMacros);
+            set => m_Loop = value;
         }
 
         public void DisplayTo(ListBox list)
@@ -56,10 +55,12 @@ namespace Assistant.Macros
             m_ListBox.SafeAction(s =>
             {
                 s.BeginUpdate();
-                if (m_Actions.Count > 0)
-                    s.Items.AddRange((object[])m_Actions.ToArray(typeof(object)));
-                if (m_Playing && m_CurrentAction >= 0 && m_CurrentAction < m_Actions.Count)
-                    s.SelectedIndex = m_CurrentAction;
+
+                if (Actions.Count > 0)
+                    s.Items.AddRange((object[]) Actions.ToArray(typeof(object)));
+
+                if (Playing && CurrentAction >= 0 && CurrentAction < Actions.Count)
+                    s.SelectedIndex = CurrentAction;
                 else
                     s.SelectedIndex = -1;
                 s.EndUpdate();
@@ -69,23 +70,26 @@ namespace Assistant.Macros
         public override string ToString()
         {
             //return Path.GetFileNameWithoutExtension( m_Path );
-            StringBuilder sb = new StringBuilder(Path.GetFullPath(m_Path));
+            StringBuilder sb = new StringBuilder(Path.GetFullPath(Filename));
             sb.Remove(sb.Length - 6, 6);
             sb.Remove(0, Config.GetUserDirectory("Macros").Length + 1);
+
             return sb.ToString();
         }
 
         public void Insert(int idx, MacroAction a)
         {
             a.Parent = this;
-            if (idx < 0 || idx > m_Actions.Count)
-                idx = m_Actions.Count;
-            m_Actions.Insert(idx, a);
+
+            if (idx < 0 || idx > Actions.Count)
+                idx = Actions.Count;
+            Actions.Insert(idx, a);
         }
 
         public void Record()
         {
-            m_Actions.Clear();
+            Actions.Clear();
+
             if (m_ListBox != null)
                 m_ListBox.SafeAction(s => s.Items.Clear());
             RecordAt(0);
@@ -94,26 +98,29 @@ namespace Assistant.Macros
         public void RecordAt(int at)
         {
             Stop();
-            m_Recording = true;
+            Recording = true;
             m_Loaded = true;
-            m_CurrentAction = at;
-            if (m_CurrentAction > m_Actions.Count)
-                m_CurrentAction = m_Actions.Count;
+            CurrentAction = at;
+
+            if (CurrentAction > Actions.Count)
+                CurrentAction = Actions.Count;
         }
 
         public void Play()
         {
             Stop();
+
             if (!m_Loaded)
                 Load();
             else
                 Save();
 
-            if (m_Actions.Count > 0)
+            if (Actions.Count > 0)
             {
                 m_IfStatus.Clear();
-                m_Playing = true;
-                m_CurrentAction = -1;
+                Playing = true;
+                CurrentAction = -1;
+
                 if (m_ListBox != null)
                     m_ListBox.SafeAction(s => s.SelectedIndex = -1);
             }
@@ -122,63 +129,68 @@ namespace Assistant.Macros
         public void PlayAt(int at)
         {
             Stop();
+
             if (!m_Loaded)
                 Load();
             else
                 Save();
 
-            if (m_Actions.Count > 0)
+            if (Actions.Count > 0)
             {
                 m_IfStatus.Clear();
-                m_Playing = true;
-                m_CurrentAction = at - 1;
-                if (m_CurrentAction >= 0)
-                    m_CurrentAction--;
+                Playing = true;
+                CurrentAction = at - 1;
+
+                if (CurrentAction >= 0)
+                    CurrentAction--;
             }
         }
 
         public void Reset()
         {
-            if (m_Playing && World.Player != null && DragDropManager.Holding != null && DragDropManager.Holding == LiftAction.LastLift)
+            if (Playing && World.Player != null && DragDropManager.Holding != null && DragDropManager.Holding == LiftAction.LastLift)
                 ClientCommunication.SendToServer(new DropRequest(DragDropManager.Holding, World.Player.Serial));
 
             m_Wait = null;
 
             m_IfStatus.Clear();
 
-            foreach (MacroAction a in m_Actions)
+            foreach (MacroAction a in Actions)
             {
                 if (a is ForAction)
-                    ((ForAction)a).Count = 0;
+                    ((ForAction) a).Count = 0;
             }
         }
 
         public void Stop()
         {
-            if (m_Recording)
+            if (Recording)
                 Save();
 
-            m_Recording = m_Playing = false;
+            Recording = Playing = false;
             Reset();
         }
 
         // returns true if the were waiting for this action
         public bool Action(MacroAction action)
         {
-            if (m_Recording)
+            if (Recording)
             {
                 action.Parent = this;
-                m_Actions.Insert(m_CurrentAction, action);
+                Actions.Insert(CurrentAction, action);
+
                 if (m_ListBox != null)
-                    m_ListBox.SafeAction(s => s.Items.Insert(m_CurrentAction, action));
-                m_CurrentAction++;
+                    m_ListBox.SafeAction(s => s.Items.Insert(CurrentAction, action));
+                CurrentAction++;
 
                 return false;
             }
-            else if (m_Playing && m_Wait != null && m_Wait.CheckMatch(action))
+
+            if (Playing && m_Wait != null && m_Wait.CheckMatch(action))
             {
                 m_Wait = null;
                 ExecNext();
+
                 return true;
             }
 
@@ -187,17 +199,18 @@ namespace Assistant.Macros
 
         public void Save()
         {
-            if (m_Actions.Count == 0)
+            if (Actions.Count == 0)
                 return;
 
-            using (StreamWriter writer = new StreamWriter(m_Path))
+            using (StreamWriter writer = new StreamWriter(Filename))
             {
                 if (m_Loop)
                     writer.WriteLine("!Loop");
 
-                for (int i = 0; i < m_Actions.Count; i++)
+                for (int i = 0; i < Actions.Count; i++)
                 {
-                    MacroAction a = (MacroAction)m_Actions[i];
+                    MacroAction a = (MacroAction) Actions[i];
+
                     try
                     {
                         writer.WriteLine(a.Serialize());
@@ -209,18 +222,18 @@ namespace Assistant.Macros
             }
         }
 
-        private static Type[] ctorArgs = new Type[1] { typeof(string[]) };
         public void Load()
         {
-            m_Actions.Clear();
+            Actions.Clear();
             m_Loaded = false;
 
-            if (!File.Exists(m_Path))
+            if (!File.Exists(Filename))
                 return;
 
-            using (StreamReader reader = new StreamReader(m_Path))
+            using (StreamReader reader = new StreamReader(Filename))
             {
                 string line;
+
                 while ((line = reader.ReadLine()) != null)
                 {
                     if (line.Length <= 2)
@@ -229,27 +242,39 @@ namespace Assistant.Macros
                     if (line == "!Loop")
                     {
                         m_Loop = true;
+
                         continue;
                     }
 
                     if (line[0] == '#')
                     {
-                        m_Actions.Add(new MacroComment(line.Substring(1)));
+                        Actions.Add(new MacroComment(line.Substring(1)));
+
                         continue;
                     }
-                    else if (line[0] == '/' && line[1] == '/')
+
+                    if (line[0] == '/' && line[1] == '/')
                     {
                         MacroAction a = new MacroComment(line.Substring(2));
                         a.Parent = this;
-                        m_Actions.Add(a);
+                        Actions.Add(a);
+
                         continue;
                     }
 
                     string[] args = line.Split('|');
-                    object[] invokeArgs = new object[1] { args };
+                    object[] invokeArgs = new object[1] {args};
 
                     Type at = null;
-                    try { at = Type.GetType(args[0], false); } catch { }
+
+                    try
+                    {
+                        at = Type.GetType(args[0], false);
+                    }
+                    catch
+                    {
+                    }
+
                     if (at == null)
                         continue;
 
@@ -258,13 +283,13 @@ namespace Assistant.Macros
                         try
                         {
                             ConstructorInfo ctor = at.GetConstructor(ctorArgs);
+
                             if (ctor == null)
                                 continue;
 
-                            MacroAction a = (MacroAction)ctor.Invoke(invokeArgs);
+                            MacroAction a = (MacroAction) ctor.Invoke(invokeArgs);
                             a.Parent = this;
-                            m_Actions.Add(a);
-
+                            Actions.Add(a);
                         }
                         catch
                         {
@@ -275,13 +300,13 @@ namespace Assistant.Macros
                         try
                         {
                             ConstructorInfo ctor = at.GetConstructor(Type.EmptyTypes);
+
                             if (ctor == null)
                                 continue;
 
-                            MacroAction a = (MacroAction)ctor.Invoke(null);
+                            MacroAction a = (MacroAction) ctor.Invoke(null);
                             a.Parent = this;
-                            m_Actions.Add(a);
-
+                            Actions.Add(a);
                         }
                         catch
                         {
@@ -289,18 +314,20 @@ namespace Assistant.Macros
                     }
                 }
             }
+
             m_Loaded = true;
         }
 
         public void Convert(MacroAction old, MacroAction newAct)
         {
-            for (int i = 0; i < m_Actions.Count; i++)
+            for (int i = 0; i < Actions.Count; i++)
             {
-                if (m_Actions[i] == old)
+                if (Actions[i] == old)
                 {
-                    m_Actions[i] = newAct;
+                    Actions[i] = newAct;
                     newAct.Parent = this;
                     Update();
+
                     break;
                 }
             }
@@ -312,6 +339,7 @@ namespace Assistant.Macros
             {
                 int sel = m_ListBox.SelectedIndex;
                 DisplayTo(m_ListBox);
+
                 try
                 {
                     m_ListBox.SafeAction(s => s.SelectedIndex = sel);
@@ -324,157 +352,154 @@ namespace Assistant.Macros
 
         private bool NextIsInstantWait()
         {
-            int nextAct = m_CurrentAction + 1;
+            int nextAct = CurrentAction + 1;
 
-            if (nextAct >= 0 && nextAct < m_Actions.Count)
-                return m_Actions[nextAct] is WaitForTargetAction || m_Actions[nextAct] is WaitForGumpAction || m_Actions[nextAct] is WaitForMenuAction;//|| m_Actions[nextAct] is ElseAction || m_Actions[nextAct] is EndIfAction;
-            else
-                return false;
+            if (nextAct >= 0 && nextAct < Actions.Count)
+                return Actions[nextAct] is WaitForTargetAction || Actions[nextAct] is WaitForGumpAction || Actions[nextAct] is WaitForMenuAction; //|| m_Actions[nextAct] is ElseAction || m_Actions[nextAct] is EndIfAction;
+
+            return false;
         }
 
-        private static MacroWaitAction PauseB4Loop = new PauseAction(TimeSpan.FromSeconds(0.1));
         //return true to continue the macro, false to stop (macro's over)
         public bool ExecNext()
         {
             try
             {
-                if (!m_Playing)
+                if (!Playing)
                     return false;
 
                 if (m_Wait != null)
                 {
                     TimeSpan waitLen = DateTime.UtcNow - m_Wait.StartTime;
+
                     if (!(m_Wait is PauseAction) && waitLen >= m_Wait.Timeout)
                     {
                         if (Loop)
                         {
                             if (Engine.MainWindow.WaitDisplay != null)
                                 Engine.MainWindow.WaitDisplay.Text = "";
-                            m_CurrentAction = -1;
+                            CurrentAction = -1;
                             m_IfStatus.Clear();
                             PauseB4Loop.Perform();
                             PauseB4Loop.Parent = this;
                             m_Wait = PauseB4Loop;
+
                             return true;
                         }
-                        else
-                        {
-                            Stop();
-                            return false;
-                        }
+
+                        Stop();
+
+                        return false;
+                    }
+
+                    if (!m_Wait.PerformWait())
+                    {
+                        m_Wait = null; // done waiting
+
+                        if (Engine.MainWindow.WaitDisplay != null)
+                            Engine.MainWindow.WaitDisplay.Text = "";
                     }
                     else
                     {
-                        if (!m_Wait.PerformWait())
+                        if (waitLen >= TimeSpan.FromSeconds(4.0) && Engine.MainWindow.WaitDisplay != null)
                         {
-                            m_Wait = null; // done waiting
-                            if (Engine.MainWindow.WaitDisplay != null)
-                                Engine.MainWindow.WaitDisplay.Text = "";
-                        }
-                        else
-                        {
-                            if (waitLen >= TimeSpan.FromSeconds(4.0) && Engine.MainWindow.WaitDisplay != null)
+                            StringBuilder sb = new StringBuilder(Language.GetString(LocString.WaitingTimeout));
+                            int s = (int) (m_Wait.Timeout - waitLen).TotalSeconds;
+                            int m = 0;
+
+                            if (s > 60)
                             {
-                                StringBuilder sb = new StringBuilder(Language.GetString(LocString.WaitingTimeout));
-                                int s = (int)(m_Wait.Timeout - waitLen).TotalSeconds;
-                                int m = 0;
+                                m = s / 60;
+                                s %= 60;
 
-                                if (s > 60)
+                                if (m > 60)
                                 {
-                                    m = s / 60;
-                                    s %= 60;
-                                    if (m > 60)
-                                    {
-                                        sb.AppendFormat("{0}:", m / 60);
-                                        m %= 60;
-                                    }
+                                    sb.AppendFormat("{0}:", m / 60);
+                                    m %= 60;
                                 }
-
-                                sb.AppendFormat("{0:00}:{1:00}", m, s);
-                                Engine.MainWindow.WaitDisplay.Text = sb.ToString();
                             }
-                            return true; // keep waiting
+
+                            sb.AppendFormat("{0:00}:{1:00}", m, s);
+                            Engine.MainWindow.WaitDisplay.Text = sb.ToString();
                         }
+
+                        return true; // keep waiting
                     }
                 }
 
-                m_CurrentAction++;
+                CurrentAction++;
+
                 //MacroManager.ActionUpdate( this, m_CurrentAction );
                 if (m_ListBox != null)
                 {
-                    if (m_CurrentAction < m_ListBox.Items.Count)
-                        m_ListBox.SafeAction(s => s.SelectedIndex = m_CurrentAction);
+                    if (CurrentAction < m_ListBox.Items.Count)
+                        m_ListBox.SafeAction(s => s.SelectedIndex = CurrentAction);
                     else
                         m_ListBox.SafeAction(s => s.SelectedIndex = -1);
                 }
 
-                if (m_CurrentAction >= 0 && m_CurrentAction < m_Actions.Count)
+                if (CurrentAction >= 0 && CurrentAction < Actions.Count)
                 {
-                    MacroAction action = (MacroAction)m_Actions[m_CurrentAction];
+                    MacroAction action = (MacroAction) Actions[CurrentAction];
 
                     if (action is IfAction)
                     {
-                        bool val = ((IfAction)action).Evaluate();
+                        bool val = ((IfAction) action).Evaluate();
                         m_IfStatus.Push(val);
 
                         if (!val)
                         {
                             // false so skip to an else or an endif
                             int ifcount = 0;
-                            while (m_CurrentAction + 1 < m_Actions.Count)
+
+                            while (CurrentAction + 1 < Actions.Count)
                             {
-                                if (m_Actions[m_CurrentAction + 1] is IfAction)
-                                {
+                                if (Actions[CurrentAction + 1] is IfAction)
                                     ifcount++;
-                                }
-                                else if (m_Actions[m_CurrentAction + 1] is ElseAction && ifcount <= 0)
-                                {
+                                else if (Actions[CurrentAction + 1] is ElseAction && ifcount <= 0)
                                     break;
-                                }
-                                else if (m_Actions[m_CurrentAction + 1] is EndIfAction)
+                                else if (Actions[CurrentAction + 1] is EndIfAction)
                                 {
                                     if (ifcount <= 0)
                                         break;
-                                    else
-                                        ifcount--;
+
+                                    ifcount--;
                                 }
 
-                                m_CurrentAction++;
+                                CurrentAction++;
                             }
                         }
                     }
                     else if (action is ElseAction && m_IfStatus.Count > 0)
                     {
-                        bool val = (bool)m_IfStatus.Peek();
+                        bool val = (bool) m_IfStatus.Peek();
+
                         if (val)
                         {
                             // the if was true, so skip to an endif
                             int ifcount = 0;
-                            while (m_CurrentAction + 1 < m_Actions.Count)
+
+                            while (CurrentAction + 1 < Actions.Count)
                             {
-                                if (m_Actions[m_CurrentAction + 1] is IfAction)
-                                {
+                                if (Actions[CurrentAction + 1] is IfAction)
                                     ifcount++;
-                                }
-                                else if (m_Actions[m_CurrentAction + 1] is EndIfAction)
+                                else if (Actions[CurrentAction + 1] is EndIfAction)
                                 {
                                     if (ifcount <= 0)
                                         break;
-                                    else
-                                        ifcount--;
+
+                                    ifcount--;
                                 }
 
-                                m_CurrentAction++;
+                                CurrentAction++;
                             }
                         }
                     }
                     else if (action is EndIfAction && m_IfStatus.Count > 0)
-                    {
                         m_IfStatus.Pop();
-                    }
                     else if (action is ForAction)
                     {
-                        ForAction fa = (ForAction)action;
+                        ForAction fa = (ForAction) action;
                         fa.Count++;
 
                         if (fa.Count > fa.Max)
@@ -482,64 +507,59 @@ namespace Assistant.Macros
                             fa.Count = 0;
 
                             int forcount = 0;
-                            m_CurrentAction++;
-                            while (m_CurrentAction < m_Actions.Count)
+                            CurrentAction++;
+
+                            while (CurrentAction < Actions.Count)
                             {
-                                if (m_Actions[m_CurrentAction] is ForAction)
-                                {
+                                if (Actions[CurrentAction] is ForAction)
                                     forcount++;
-                                }
-                                else if (m_Actions[m_CurrentAction] is EndForAction)
+                                else if (Actions[CurrentAction] is EndForAction)
                                 {
                                     if (forcount <= 0)
                                         break;
-                                    else
-                                        forcount--;
+
+                                    forcount--;
                                 }
 
-                                m_CurrentAction++;
+                                CurrentAction++;
                             }
 
-                            if (m_CurrentAction < m_Actions.Count)
-                                action = (MacroAction)m_Actions[m_CurrentAction];
+                            if (CurrentAction < Actions.Count)
+                                action = (MacroAction) Actions[CurrentAction];
                         }
                     }
                     else if (action is EndForAction && Windows.AllowBit(FeatureBit.LoopingMacros))
                     {
-                        int ca = m_CurrentAction - 1;
+                        int ca = CurrentAction - 1;
                         int forcount = 0;
 
                         while (ca >= 0)
                         {
-                            if (m_Actions[ca] is EndForAction)
-                            {
+                            if (Actions[ca] is EndForAction)
                                 forcount--;
-                            }
-                            else if (m_Actions[ca] is ForAction)
+                            else if (Actions[ca] is ForAction)
                             {
                                 if (forcount >= 0)
                                     break;
-                                else
-                                    forcount++;
+
+                                forcount++;
                             }
 
                             ca--;
                         }
 
-                        if (ca >= 0 && m_Actions[ca] is ForAction)
-                            m_CurrentAction = ca - 1;
+                        if (ca >= 0 && Actions[ca] is ForAction)
+                            CurrentAction = ca - 1;
                     }
 
                     bool isWait = action is MacroWaitAction;
+
                     if (!action.Perform() && isWait)
                     {
-                        m_Wait = (MacroWaitAction)action;
+                        m_Wait = (MacroWaitAction) action;
                         m_Wait.StartTime = DateTime.UtcNow;
                     }
-                    else if (NextIsInstantWait() && !isWait)
-                    {
-                        return ExecNext();
-                    }
+                    else if (NextIsInstantWait() && !isWait) return ExecNext();
                 }
                 else
                 {
@@ -548,7 +568,7 @@ namespace Assistant.Macros
 
                     if (Loop)
                     {
-                        m_CurrentAction = -1;
+                        CurrentAction = -1;
 
                         Reset();
 
@@ -559,6 +579,7 @@ namespace Assistant.Macros
                     else
                     {
                         Stop();
+
                         return false;
                     }
                 }
@@ -566,10 +587,11 @@ namespace Assistant.Macros
             catch (Exception e)
             {
                 new MessageDialog("Macro Exception", true, e.ToString()).Show();
+
                 return false;
             }
+
             return true;
         }
     }
 }
-

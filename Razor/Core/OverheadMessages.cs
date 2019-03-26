@@ -1,19 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Xml;
 
 namespace Assistant.Core
 {
     public class OverheadMessages
     {
-        public class OverheadMessage
-        {
-            public string SearchMessage { get; set; }
-            public string MessageOverhead { get; set; }
-        }
-
         public static List<OverheadMessage> OverheadMessageList = new List<OverheadMessage>();
 
         public static void Save(XmlTextWriter xml)
@@ -22,7 +13,7 @@ namespace Assistant.Core
             {
                 xml.WriteStartElement("overheadmessage");
                 xml.WriteAttributeString("searchtext", message.SearchMessage);
-                xml.WriteAttributeString("message", (message.MessageOverhead));
+                xml.WriteAttributeString("message", message.MessageOverhead);
                 xml.WriteEndElement();
             }
         }
@@ -33,7 +24,6 @@ namespace Assistant.Core
 
             try
             {
-
                 foreach (XmlElement el in node.GetElementsByTagName("overheadmessage"))
                 {
                     OverheadMessage overheadMessage = new OverheadMessage
@@ -53,6 +43,12 @@ namespace Assistant.Core
         public static void ClearAll()
         {
             OverheadMessageList.Clear();
+        }
+
+        public class OverheadMessage
+        {
+            public string SearchMessage { get; set; }
+            public string MessageOverhead { get; set; }
         }
     }
 }

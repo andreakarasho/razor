@@ -1,30 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Windows.Forms;
 using System.Xml;
 
 namespace Assistant.Macros
 {
     public class AbsoluteTargets
     {
+        public static List<AbsoluteTarget> AbsoluteTargetList = new List<AbsoluteTarget>();
         public TargetInfo TargetInfo { get; set; }
         public string TargetVariableName { get; set; }
         public string TargetVariableProfile { get; set; }
-
-        public class AbsoluteTarget
-        {
-            public TargetInfo TargetInfo { get; set; }
-            public string TargetVariableName { get; set; }
-
-            public AbsoluteTarget(string targetVarName, TargetInfo t)
-            {
-                TargetInfo = t;
-                TargetVariableName = targetVarName;
-            }
-        }
-
-        public static List<AbsoluteTarget> AbsoluteTargetList = new List<AbsoluteTarget>();
 
         //public AbsoluteTarget(string name, string profile, TargetInfo info)
         //{
@@ -72,7 +57,6 @@ namespace Assistant.Macros
 
             try
             {
-
                 foreach (XmlElement el in node.GetElementsByTagName("absolutetarget"))
                 {
                     TargetInfo target = new TargetInfo
@@ -98,6 +82,18 @@ namespace Assistant.Macros
         public static void ClearAll()
         {
             AbsoluteTargetList.Clear();
+        }
+
+        public class AbsoluteTarget
+        {
+            public AbsoluteTarget(string targetVarName, TargetInfo t)
+            {
+                TargetInfo = t;
+                TargetVariableName = targetVarName;
+            }
+
+            public TargetInfo TargetInfo { get; set; }
+            public string TargetVariableName { get; set; }
         }
     }
 }

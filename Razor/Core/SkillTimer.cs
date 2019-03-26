@@ -4,32 +4,22 @@ namespace Assistant
 {
     public class SkillTimer
     {
-        private static int m_Count;
-        private static Timer m_Timer;
+        private static readonly Timer m_Timer;
 
         static SkillTimer()
         {
             m_Timer = new InternalTimer();
         }
 
-        public static int Count
-        {
-            get { return m_Count; }
-        }
+        public static int Count { get; private set; }
 
-        public static bool Running
-        {
-            get { return m_Timer.Running; }
-        }
+        public static bool Running => m_Timer.Running;
 
         public static void Start()
         {
-            m_Count = 0;
+            Count = 0;
 
-            if (m_Timer.Running)
-            {
-                m_Timer.Stop();
-            }
+            if (m_Timer.Running) m_Timer.Stop();
 
             m_Timer.Start();
             Windows.RequestTitleBarUpdate();
@@ -49,11 +39,8 @@ namespace Assistant
 
             protected override void OnTick()
             {
-                m_Count++;
-                if (m_Count > 10)
-                {
-                    Stop();
-                }
+                Count++;
+                if (Count > 10) Stop();
 
                 Windows.RequestTitleBarUpdate();
             }

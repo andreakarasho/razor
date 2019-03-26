@@ -1,22 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Xml;
 
 namespace Assistant.Core
 {
     public class ContainerLabels
     {
-        public class ContainerLabel
-        {
-            public string Id { get; set; }
-            public string Type { get; set; }
-            public string Label { get; set; }
-            public int Hue { get; set; }
-            public string Alias { get; set; }
-        }
-
         public static Serial LastContainerLabelDisplayed;
 
         public static List<ContainerLabel> ContainerLabelList = new List<ContainerLabel>();
@@ -41,7 +30,6 @@ namespace Assistant.Core
 
             try
             {
-
                 foreach (XmlElement el in node.GetElementsByTagName("containerlabel"))
                 {
                     ContainerLabel label = new ContainerLabel
@@ -64,6 +52,15 @@ namespace Assistant.Core
         public static void ClearAll()
         {
             ContainerLabelList.Clear();
+        }
+
+        public class ContainerLabel
+        {
+            public string Id { get; set; }
+            public string Type { get; set; }
+            public string Label { get; set; }
+            public int Hue { get; set; }
+            public string Alias { get; set; }
         }
     }
 }

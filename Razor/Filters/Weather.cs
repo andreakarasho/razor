@@ -1,28 +1,24 @@
-using System;
-using Assistant;
-
 namespace Assistant.Filters
 {
-	public class WeatherFilter : Filter
-	{
-		public static void Initialize()
-		{
-			Filter.Register( new WeatherFilter() );
-		}
+    public class WeatherFilter : Filter
+    {
+        private WeatherFilter()
+        {
+        }
 
-		private WeatherFilter()
-		{
-		}
+        public override byte[] PacketIDs => new byte[] {0x65};
 
-		public override byte[] PacketIDs{ get{ return new byte[]{ 0x65 }; } }
+        public override LocString Name => LocString.Weather;
 
-		public override LocString Name{ get{ return LocString.Weather; } }
+        public static void Initialize()
+        {
+            Register(new WeatherFilter());
+        }
 
-		public override void OnFilter( PacketReader p, PacketHandlerEventArgs args )
-		{
-			if ( Windows.AllowBit( FeatureBit.WeatherFilter ) )
-				args.Block = true;
-		}
-	}
+        public override void OnFilter(PacketReader p, PacketHandlerEventArgs args)
+        {
+            if (Windows.AllowBit(FeatureBit.WeatherFilter))
+                args.Block = true;
+        }
+    }
 }
-
