@@ -2901,8 +2901,8 @@ namespace Assistant
 			this.MaximizeBox = false;
 			this.Name = "MainForm";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
-			this.Text = "Razor v{0}";
-			this.Activated += new System.EventHandler(this.MainForm_Activated);
+            this.Text = "Razor v{0} - ClassicUO version";
+            this.Activated += new System.EventHandler(this.MainForm_Activated);
 			this.Deactivate += new System.EventHandler(this.MainForm_Deactivate);
 			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_Closing);
 			this.Load += new System.EventHandler(this.MainForm_Load);
@@ -6167,7 +6167,7 @@ namespace Assistant
             string str = Language.GetControlText(this.Name);
             if (string.IsNullOrEmpty(str))
             {
-                str = "Razor v{0}";
+                str = "Razor v{0} - ClassicUO version";
             }
 
 
@@ -6182,6 +6182,8 @@ namespace Assistant
             {
                 Text = str;
             }
+
+            Text += " ClassicUO version";
 
             aboutVer.Text = str;
 
